@@ -33,4 +33,5 @@ jobs:
           LINE_CHANNEL_TOKEN:  ${{ secrets.LINE_CHANNEL_TOKEN }}
           LINE_GROUP_ID:       ${{ secrets.LINE_GROUP_ID }}
           DATE_OVERRIDE:       ${{ github.event.inputs.date_override }}
+          FILTER_KEYWORD:      "| JDK"
         run: node scripts/daily-reminder.js

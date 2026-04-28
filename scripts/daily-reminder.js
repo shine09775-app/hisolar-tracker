@@ -15,6 +15,7 @@ const ICAL_URL          = process.env.ICAL_URL;
 const LINE_TOKEN        = process.env.LINE_CHANNEL_TOKEN;
 const LINE_GROUP_ID     = process.env.LINE_GROUP_ID;
 const DATE_OVERRIDE     = process.env.DATE_OVERRIDE || '';  // YYYY-MM-DD
+const FILTER_KEYWORD    = process.env.FILTER_KEYWORD || '';  // กรองเฉพาะ event ที่ชื่อมีคำนี้ เช่น "| JDK"
 
 const LINE_API          = 'https://api.line.me/v2/bot/message/push';
 
@@ -153,7 +154,10 @@ function filterTodayEvents(events, targetDate) {
       if (ev.status === 'CANCELLED') return false;
       const start = toLocalDate(ev.dtstart);
       if (!start) return false;
-      return isSameDay(start, targetDate);
+      if (!isSameDay(start, targetDate)) return false;
+      // กรองด้วย FILTER_KEYWORD ถ้าตั้งไว้
+      if (FILTER_KEYWORD && !(ev.summary || '').includes(FILTER_KEYWORD)) return false;
+      return true;
     })
     .map(ev => ({
       ...ev,
