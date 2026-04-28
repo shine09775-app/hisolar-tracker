@@ -1,0 +1,40 @@
+name: Hi Solar — Daily LINE Reminder
+
+on:
+  schedule:
+    # 07:00 Asia/Bangkok = 00:00 UTC
+    - cron: '0 0 * * *'
+  # รัน manual ได้จาก GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      date_override:
+        description: 'วันที่ต้องการดึง (YYYY-MM-DD) — เว้นว่างเพื่อใช้วันนี้'
+        required: false
+        default: ''
+
+jobs:
+  send-reminder:
+    name: Fetch Calendar & Notify LINE
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run daily reminder
+        env:
+          ICAL_URL:            ${{ secrets.ICAL_URL }}
+          LINE_CHANNEL_TOKEN:  ${{ secrets.LINE_CHANNEL_TOKEN }}
+          LINE_GROUP_ID:       ${{ secrets.LINE_GROUP_ID }}
+          DATE_OVERRIDE:       ${{ github.event.inputs.date_override }}
+        run: node scripts/daily-reminder.js
