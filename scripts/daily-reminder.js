@@ -76,11 +76,13 @@ function toLocalDate(dtString) {
 
 function formatTime(date) {
   if (!date) return '';
-  // แปลงเป็น Bangkok time ก่อน (GitHub Actions รันบน UTC)
-  const bkk = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
-  const h = String(bkk.getHours()).padStart(2,'0');
-  const m = String(bkk.getMinutes()).padStart(2,'0');
-  return `${h}:${m}`;
+  // ใช้ Intl โดยตรง — ไม่ต้องแปลง Date object
+  return date.toLocaleTimeString('en-GB', {
+    timeZone: 'Asia/Bangkok',
+    hour:     '2-digit',
+    minute:   '2-digit',
+    hour12:   false,
+  });
 }
 
 function isSameDay(a, b) {
