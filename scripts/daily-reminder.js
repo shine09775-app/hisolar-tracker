@@ -75,8 +75,10 @@ function toLocalDate(dtString) {
 
 function formatTime(date) {
   if (!date) return '';
-  const h = String(date.getHours()).padStart(2,'0');
-  const m = String(date.getMinutes()).padStart(2,'0');
+  // แปลงเป็น Bangkok time ก่อน (GitHub Actions รันบน UTC)
+  const bkk = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+  const h = String(bkk.getHours()).padStart(2,'0');
+  const m = String(bkk.getMinutes()).padStart(2,'0');
   return `${h}:${m}`;
 }
 
