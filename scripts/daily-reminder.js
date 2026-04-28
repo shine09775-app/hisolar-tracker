@@ -76,13 +76,11 @@ function toLocalDate(dtString) {
 
 function formatTime(date) {
   if (!date) return '';
-  // ใช้ Intl โดยตรง — ไม่ต้องแปลง Date object
-  return date.toLocaleTimeString('en-GB', {
-    timeZone: 'Asia/Bangkok',
-    hour:     '2-digit',
-    minute:   '2-digit',
-    hour12:   false,
-  });
+  // Bangkok = UTC+7 — บวก offset ตรง ๆ แล้วใช้ getUTCHours
+  const bkk = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  const h = String(bkk.getUTCHours()).padStart(2, '0');
+  const m = String(bkk.getUTCMinutes()).padStart(2, '0');
+  return `${h}:${m}`;
 }
 
 function isSameDay(a, b) {
