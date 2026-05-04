@@ -2,8 +2,8 @@ name: Hi Solar — Daily LINE Reminder (Hi Solar)
 
 on:
   schedule:
-    # 07:00 Asia/Bangkok = 00:00 UTC
-    - cron: '0 0 * * *'
+    # 06:00 Asia/Bangkok = 23:00 UTC (previous day)
+    - cron: '0 23 * * *'
   workflow_dispatch:
     inputs:
       date_override:
