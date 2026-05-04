@@ -28,9 +28,9 @@ jobs:
 
       - name: Run daily reminder
         env:
-          ICAL_URL:            ${{ secrets.ICAL_URL }}
+          SUPABASE_URL:        ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY:   ${{ secrets.SUPABASE_ANON_KEY }}
           LINE_CHANNEL_TOKEN:  ${{ secrets.LINE_CHANNEL_TOKEN }}
           LINE_GROUP_ID:       ${{ secrets.LINE_GROUP_ID_HISOLAR }}
           DATE_OVERRIDE:       ${{ github.event.inputs.date_override }}
-          FILTER_KEYWORD:      "| Hi Solar"
         run: node scripts/daily-reminder.js
