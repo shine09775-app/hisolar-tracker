@@ -1,9 +1,9 @@
 name: Hi Solar — Daily LINE Reminder
 
 on:
-  schedule:
-    # 06:00 Asia/Bangkok = 23:00 UTC (previous day)
-    - cron: '0 23 * * *'
+  # schedule ปิดไว้ — ใช้ Hi Solar workflow แทน (ประหยัด LINE quota)
+  # schedule:
+  #   - cron: '0 23 * * *'
   # รัน manual ได้จาก GitHub Actions tab
   workflow_dispatch:
     inputs:
