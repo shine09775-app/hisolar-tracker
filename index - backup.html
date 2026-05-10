@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Hi Solar">
+  <title>Hi Solar — Job Tracker</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+  <style>
+    :root {
+      --hs-primary:   #16a34a;
+      --hs-primary-d: #15803d;
+      --hs-primary-l: #dcfce7;
+      --hs-amber:     #f59e0b;
+      --hs-amber-l:   #fef3c7;
+      --hs-blue:      #3b82f6;
+      --hs-blue-l:    #dbeafe;
+      --hs-red:       #ef4444;
+      --hs-red-l:     #fee2e2;
+      --nav-h:        62px;
+      --bs-primary:        #16a34a;
+      --bs-primary-rgb:    22,163,74;
+    }
+    * { font-family: 'Kanit', system-ui, sans-serif; }
+    body { background: #f1f5f9; }
+
+    .btn-primary { background-color: var(--hs-primary); border-color: var(--hs-primary); }
+    .btn-primary:hover { background-color: var(--hs-primary-d); border-color: var(--hs-primary-d); }
+    .text-primary { color: var(--hs-primary) !important; }
+
+    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #f1f5f9; }
+    @media (min-width: 576px) { #app { box-shadow: 0 0 40px rgba(0,0,0,.15); } }
+
+    /* Navbar */
+    .hs-navbar {
+      background: var(--hs-primary); padding: 12px 16px;
+      position: sticky; top: 0; z-index: 90;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .hs-navbar .brand { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 17px; font-weight: 700; }
+    .hs-navbar .brand i { color: #fbbf24; font-size: 20px; }
+    .hs-navbar .user-chip {
+      background: rgba(255,255,255,.2); color: #fff; border: none;
+      border-radius: 20px; padding: 4px 12px; font-size: 12px; cursor: pointer;
+    }
+    .hs-navbar .rt-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #86efac; display: inline-block; margin-right: 4px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* Stats */
+    .stats-strip { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 10px 0 8px; }
+    .stat-item { text-align: center; }
+    .stat-item .num { font-size: 21px; font-weight: 700; color: var(--hs-primary); line-height: 1; }
+    .stat-item .lbl { font-size: 10px; color: #64748b; margin-top: 2px; }
+
+    /* Section */
+    .section-title { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
+    .accent-bar { width: 36px; height: 3px; background: var(--hs-primary); border-radius: 2px; margin-bottom: 12px; }
+
+    /* Content */
+    .main-content { padding: 14px 14px calc(var(--nav-h) + 16px); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Filter chips */
+    .filter-scroll { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 2px; }
+    .filter-scroll::-webkit-scrollbar { display: none; }
+    .filter-chip { flex-shrink: 0; border-radius: 20px !important; font-size: 12px; padding: 4px 14px; white-space: nowrap; }
+    .filter-chip.active { background-color: var(--hs-primary) !important; border-color: var(--hs-primary) !important; color: #fff !important; }
+
+    /* Cards */
+    .job-card { border: none !important; border-left: 4px solid var(--hs-primary) !important; border-radius: 12px !important; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08) !important; }
+    .job-card.status-waiting  { border-left-color: var(--hs-amber) !important; }
+    .job-card.status-progress { border-left-color: var(--hs-blue) !important; }
+    .job-card.status-done     { border-left-color: #94a3b8 !important; opacity: .78; }
+    .job-card.status-cancel   { border-left-color: var(--hs-red) !important; opacity: .65; }
+    .job-card .card-body { padding: 12px 14px; }
+    .card-customer { font-size: 15px; font-weight: 600; line-height: 1.3; }
+    .card-date { font-size: 11px; color: #94a3b8; flex-shrink: 0; }
+    .card-detail { font-size: 13px; color: #475569; margin: 4px 0; line-height: 1.4; }
+    .card-meta { font-size: 12px; color: #64748b; margin-bottom: 6px; }
+
+    /* Status badges */
+    .status-badge { border: none; border-radius: 20px; padding: 4px 13px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .status-badge.waiting  { background: var(--hs-amber-l); color: #92400e; }
+    .status-badge.progress { background: var(--hs-blue-l);  color: #1e40af; }
+    .status-badge.done     { background: var(--hs-primary-l); color: var(--hs-primary-d); }
+    .status-badge.cancel   { background: var(--hs-red-l);   color: #b91c1c; }
+    .amount-badge { display: inline-block; background: var(--hs-primary-l); color: var(--hs-primary-d); border-radius: 6px; padding: 2px 10px; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+    .btn-map, .btn-comment { border-radius: 20px !important; font-size: 12px; padding: 4px 12px; color: #475569; border-color: #cbd5e1; }
+    .btn-edit-date { border-radius: 20px !important; font-size: 12px; padding: 4px 12px; margin-bottom: 6px; }
+    .comment-preview { background: #f8fafc; border-radius: 8px; padding: 6px 8px; margin-top: 7px; color: #64748b; font-size: 12px; line-height: 1.35; }
+    .comment-log { max-height: 42vh; overflow-y: auto; margin-bottom: 12px; padding-right: 2px; }
+    .comment-bubble { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 9px 10px; margin-bottom: 8px; }
+    .comment-meta { color: #64748b; font-size: 11px; margin-bottom: 3px; font-weight: 500; }
+    .comment-text { color: #1e293b; font-size: 13px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .comment-input { border-radius: 8px; min-height: 88px; font-size: 13px; }
+    .comment-box { display: flex; flex-direction: column; max-height: min(82vh, 640px); }
+    .comment-box .sheet-title, .comment-box .comment-input, .comment-actions { flex-shrink: 0; }
+    .comment-box .comment-log { flex: 1; min-height: 120px; max-height: none; }
+    .comment-actions { display: flex; gap: 8px; }
+    .add-panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+    .add-toggle { width: 100%; border: none; background: #fff; color: #1e293b; display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; font-size: 15px; font-weight: 600; }
+    .add-toggle i:last-child { transition: transform .2s; }
+    .add-panel.open .add-toggle i:last-child { transform: rotate(180deg); }
+    .add-body { display: none; padding: 0 14px 14px; border-top: 1px solid #e2e8f0; }
+    .add-panel.open .add-body { display: block; }
+    .add-grid { display: grid; gap: 10px; margin-top: 12px; }
+    .bulk-link { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 12px; padding: 10px 12px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; color: #166534; text-decoration: none; font-size: 13px; }
+    .bulk-link:hover { background: #f8fafc; color: #166534; }
+    .form-note { font-size: 11px; color: #64748b; margin-top: 4px; }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px; height: var(--nav-h);
+      background: #fff; border-top: 1px solid #e2e8f0;
+      display: flex; z-index: 90; box-shadow: 0 -2px 10px rgba(0,0,0,.07);
+    }
+    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: none; background: none; color: #94a3b8; font-size: 10px; font-weight: 500; cursor: pointer; position: relative; padding: 0; }
+    .nav-btn i { font-size: 21px; }
+    .nav-btn.active { color: var(--hs-primary); }
+    .nav-badge { position: absolute; top: 5px; right: calc(50% - 18px); background: var(--hs-amber); color: #fff; font-size: 9px; font-weight: 700; border-radius: 8px; padding: 1px 4px; min-width: 14px; text-align: center; }
+
+    /* Bottom Sheet */
+    .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: flex-end; justify-content: center; z-index: 200; }
+    .sheet-overlay.show { display: flex; }
+    .sheet-box { background: #fff; border-radius: 20px 20px 0 0; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); width: 100%; max-width: 480px; max-height: min(82vh, 640px); overflow-y: auto; }
+    .sheet-title { text-align: center; font-size: 14px; color: #64748b; margin-bottom: 14px; font-weight: 500; }
+    .sheet-opt { display: block; width: 100%; border: none; border-radius: 10px; padding: 12px 16px; font-size: 15px; font-weight: 500; cursor: pointer; text-align: left; margin-bottom: 8px; }
+    .sheet-opt.waiting  { background: var(--hs-amber-l); color: #92400e; }
+    .sheet-opt.progress { background: var(--hs-blue-l);  color: #1e40af; }
+    .sheet-opt.done     { background: var(--hs-primary-l); color: var(--hs-primary-d); }
+    .sheet-opt.cancel   { background: var(--hs-red-l);   color: #b91c1c; }
+
+    /* Name Modal */
+    .name-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 20px; }
+    .name-box { background: #fff; border-radius: 16px; padding: 28px 24px; width: 100%; max-width: 340px; }
+
+    /* Loading */
+    #loading { position: fixed; inset: 0; background: rgba(255,255,255,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 400; gap: 14px; }
+
+    /* Empty */
+    .empty-state { text-align: center; padding: 48px 16px; color: #94a3b8; }
+    .empty-state i { font-size: 2.5rem; }
+
+    /* Config Banner */
+    .config-banner { background: #7c3aed; color: #fff; text-align: center; padding: 6px 12px; font-size: 12px; }
+    .rt-banner { background: #0f172a; color: #86efac; text-align: center; padding: 4px 12px; font-size: 11px; display: none; }
+
+    /* ── Calendar View ──────────────────────────────── */
+    .cal-toggle-row { display: flex; gap: 5px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0; }
+    .cal-view-btn { flex: 1; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #475569; border-radius: 10px; padding: 6px 4px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .cal-view-btn i { font-size: 13px; }
+    .cal-view-btn.active { background: var(--hs-primary); border-color: var(--hs-primary); color: #fff; }
+    .cal-view-btn:hover:not(.active) { background: #f1f5f9; border-color: #cbd5e1; }
+
+    /* Calendar Panel */
+    #calendarPanel { padding: 12px 14px calc(var(--nav-h) + 16px); }
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .cal-nav-title { font-size: 15px; font-weight: 600; color: #1e293b; }
+    .cal-nav-btn { border: none; background: #fff; border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.1); font-size: 16px; }
+    .cal-nav-btn:active { background: #f1f5f9; }
+
+    /* Month Grid */
+    .cal-month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 12px; }
+    .cal-dow { text-align: center; font-size: 10px; color: #94a3b8; padding: 4px 0; font-weight: 500; }
+    .cal-day { border-radius: 8px; padding: 3px 2px; min-height: 46px; cursor: pointer; transition: background .1s; }
+    .cal-day:hover { background: #f1f5f9; }
+    .cal-day.today .cal-day-num { background: var(--hs-primary); color: #fff; }
+    .cal-day.selected { background: #e0f2fe; }
+    .cal-day.other-month .cal-day-num { color: #d1d5db; }
+    .cal-day-num { font-size: 11px; font-weight: 500; color: #374151; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto 2px; }
+    .cal-dots { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
+    .cal-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .cal-dot.waiting  { background: var(--hs-amber); }
+    .cal-dot.progress { background: var(--hs-blue); }
+    .cal-dot.done     { background: #94a3b8; }
+    .cal-dot.cancel   { background: var(--hs-red); }
+
+    /* Day Events */
+    .cal-events { }
+    .cal-day-header { font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; }
+    .cal-event-card { background: #fff; border-radius: 10px; border-left: 3px solid var(--hs-primary); padding: 8px 10px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.07); cursor: pointer; }
+    .cal-event-card.waiting  { border-left-color: var(--hs-amber); }
+    .cal-event-card.progress { border-left-color: var(--hs-blue); }
+    .cal-event-card.done     { border-left-color: #94a3b8; opacity: .75; }
+    .cal-event-card.cancel   { border-left-color: var(--hs-red); opacity: .65; }
+    .cal-event-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .cal-event-tab { background: var(--hs-primary-l); color: var(--hs-primary-d); border-radius: 4px; padding: 1px 7px; font-size: 10px; font-weight: 600; }
+    .cal-event-tab.duNgan    { background: #dbeafe; color: #1e40af; }
+    .cal-event-tab.langPaeng { background: #d1fae5; color: #065f46; }
+    .cal-event-tab.som       { background: #fef3c7; color: #92400e; }
+    .cal-event-title { font-size: 13px; font-weight: 600; color: #1e293b; }
+    .cal-event-meta  { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+    /* Event Slider */
+    .cal-slider-wrap { position: relative; }
+    .cal-slider-count { font-size: 11px; color: #94a3b8; text-align: right; margin-bottom: 6px; }
+    .cal-slider { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 10px; scroll-padding-left: 0; }
+    .cal-slider::-webkit-scrollbar { height: 3px; }
+    .cal-slider::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .cal-slider .cal-event-card { flex: 0 0 87%; scroll-snap-align: start; margin-bottom: 0; }
+    .cal-slider-dots { display: flex; justify-content: center; gap: 5px; margin-top: 2px; }
+    .cal-slider-dot { width: 6px; height: 6px; border-radius: 50%; background: #e2e8f0; transition: background .15s; }
+    .cal-slider-dot.active { background: var(--hs-primary); }
+    /* Single job — no slider wrapper */
+    .cal-events-single .cal-event-card { margin-bottom: 8px; }
+
+    /* Vertical scrollable list for multiple jobs */
+    .cal-events-list { max-height: 45vh; overflow-y: auto; padding-right: 2px; }
+    .cal-events-list::-webkit-scrollbar { width: 3px; }
+    .cal-events-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .cal-events-list .cal-event-card { margin-bottom: 8px; }
+
+    /* Week Grid */
+    .cal-week-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -2px; padding: 0 2px; }
+    .cal-week-grid { display: grid; grid-template-columns: repeat(7, minmax(52px,1fr)); gap: 4px; min-width: 364px; }
+    .cal-week-col { }
+    .cal-week-dow { text-align: center; font-size: 10px; color: #94a3b8; margin-bottom: 4px; }
+    .cal-week-date { text-align: center; font-size: 14px; font-weight: 600; color: #374151; width: 28px; height: 28px; border-radius: 50%; line-height: 28px; margin: 0 auto 6px; }
+    .cal-week-date.today { background: var(--hs-primary); color: #fff; }
+    .cal-week-event { border-radius: 5px; padding: 3px 5px; font-size: 10px; font-weight: 500; margin-bottom: 3px; line-height: 1.3; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cal-week-event.waiting  { background: var(--hs-amber-l); color: #92400e; }
+    .cal-week-event.progress { background: var(--hs-blue-l); color: #1e40af; }
+    .cal-week-event.done     { background: #f1f5f9; color: #64748b; }
+    .cal-week-event.cancel   { background: var(--hs-red-l); color: #b91c1c; }
+
+    /* Permit */
+    .job-card.permit-card   { border-left-color: #6366f1 !important; }
+    .permit-phase-btn       { display:inline-flex;align-items:center;gap:5px;border:none;border-radius:20px;padding:4px 13px;font-size:12px;font-weight:600;cursor:pointer;background:#e0e7ff;color:#3730a3; }
+    .permit-phase-btn .phase-step { background:#6366f1;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .permit-status-badge.waiting    { background:var(--hs-amber-l);color:#92400e; }
+    .permit-status-badge.progress   { background:var(--hs-blue-l);color:#1e40af; }
+    .permit-status-badge.done       { background:var(--hs-primary-l);color:var(--hs-primary-d); }
+    .permit-status-badge.waiting.need-fix { background:#fef3c7;color:#92400e; }
+    .permit-status-badge.cancel     { background:var(--hs-red-l);color:#b91c1c; }
+    .sheet-opt.phase        { background:#e0e7ff;color:#3730a3; }
+    .sheet-opt.phase.active { background:#6366f1;color:#fff; }
+    .sheet-opt.phase.ph-done{ background:#d1fae5;color:#065f46; }
+    .permit-info-row        { font-size:12px;color:#64748b;margin:3px 0; }
+    .permit-util-badge      { font-size:11px;font-weight:600;background:#dbeafe;color:#1e40af;border-radius:4px;padding:1px 7px; }
+    .permit-meter-badge     { font-size:11px;font-weight:600;background:#fef3c7;color:#92400e;border-radius:4px;padding:1px 7px; }
+    .log-bubble.log-phase   { border-left:3px solid #6366f1; }
+    .log-bubble.log-status  { border-left:3px solid var(--hs-amber); }
+    .log-bubble.log-comment { border-left:3px solid #94a3b8; }
+
+    /* Assigned (purple) */
+    .job-card.status-assigned  { border-left-color: #7c3aed !important; }
+    .status-badge.assigned     { background: #ede9fe; color: #4c1d95; }
+    .sheet-opt.assigned        { background: #ede9fe; color: #4c1d95; }
+    .cal-dot.assigned          { background: #7c3aed; }
+    .cal-week-event.assigned   { background: #ede9fe; color: #4c1d95; }
+    .assigned-range            { display:inline-flex; align-items:center; gap:4px; background:#ede9fe; color:#4c1d95; border-radius:6px; padding:2px 10px; font-size:12px; font-weight:600; margin-bottom:6px; }
+  </style>
+  <link rel="stylesheet" href="./hi-solar-theme-reference.css">
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="spinner-border text-success" style="width:2.5rem;height:2.5rem;" role="status"></div>
+  <div style="font-size:14px;color:#475569;">กำลังเชื่อม Supabase...</div>
+</div>
+
+<!-- Name Modal -->
+<div class="name-overlay" id="nameModal">
+  <div class="name-box">
+    <div class="text-center mb-3">
+      <i class="bi bi-sun-fill text-warning" style="font-size:2.8rem;"></i>
+      <h2 class="section-title mt-2 mb-0">Hi Solar Tracker</h2>
+      <div class="accent-bar mx-auto mt-2"></div>
+    </div>
+    <p class="text-muted small mb-3">ระบุชื่อของคุณ เพื่อบันทึกการอัปเดตงาน</p>
+    <select id="nameInput" class="form-select mb-3" onkeydown="if(event.key==='Enter')saveName()">
+      <option value="">-- เลือกทีมงาน --</option>
+    </select>
+    <button class="btn btn-primary w-100 fw-semibold" onclick="saveName()">
+      <i class="bi bi-box-arrow-in-right me-1"></i> เข้าใช้งาน
+    </button>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app">
+
+  <!-- Navbar -->
+  <div class="hs-navbar">
+    <div class="brand">
+      <i class="bi bi-sun-fill"></i>
+      <span class="brand-mark">Hi</span>
+      <span class="brand-name">Solar</span>
+      <span class="brand-sub">Job Tracker</span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span id="rtIndicator" style="display:none;">
+        <span class="rt-dot"></span>
+        <span style="color:rgba(255,255,255,.7);font-size:11px;">Live</span>
+      </span>
+      <button class="user-chip" id="userChip" onclick="changeName()">—</button>
+    </div>
+  </div>
+
+  <!-- Config Banner (แสดงถ้ายังไม่ได้ตั้งค่า) -->
+  <div class="config-banner" id="configBanner" style="display:none">
+    ⚙️ ยังไม่ได้ตั้งค่า Supabase — แก้ SUPABASE_URL และ SUPABASE_ANON_KEY ใน index.html
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-strip">
+    <div class="row g-0 text-center">
+      <div class="col stat-item"><div class="num" id="s-ngan">—</div><div class="lbl">งานค้าง</div></div>
+      <div class="col stat-item"><div class="num" id="s-duNgan">—</div><div class="lbl">ดูงานวันนี้</div></div>
+      <div class="col stat-item"><div class="num" id="s-langPaeng">—</div><div class="lbl">ล้างแผง</div></div>
+      <div class="col stat-item"><div class="num" id="s-som">—</div><div class="lbl">ซ่อม</div></div>
+      <div class="col stat-item"><div class="num" id="s-bil">—</div><div class="lbl">รอบิล</div></div>
+      <div class="col stat-item"><div class="num" id="s-permit">—</div><div class="lbl">ขออนุญาติ</div></div>
+    </div>
+  </div>
+
+  <section class="upload-toolbar" aria-label="Workbook Upload">
+    <div class="upload-toolbar__body">
+      <div class="upload-toolbar__copy">
+        <div class="upload-toolbar__title">อัปโหลดข้อมูลจาก Excel</div>
+        <div class="upload-toolbar__text">ใช้รูปแบบเดียวกับไฟล์ Hisolar-tracker.xlsx แล้ว sync เข้า Supabase แบบ upsert</div>
+      </div>
+      <div class="upload-toolbar__actions">
+        <a class="btn btn-light btn-sm" href="./Hisolar-tracker.xlsx" download>
+          <i class="bi bi-file-earmark-arrow-down me-1"></i>เทมเพลต
+        </a>
+        <button class="btn btn-primary btn-sm" type="button" id="xlsxUploadTrigger" onclick="openWorkbookPicker()">
+          <i class="bi bi-upload me-1"></i>Upload XLSX
+        </button>
+      </div>
+    </div>
+    <div class="upload-toolbar__status" id="xlsxUploadStatus">รองรับชีต งาน, ดูงาน, ล้างแผง, ซ่อม, บิล และจะไม่แตะชีต Log</div>
+    <!-- View Toggle -->
+    <div class="cal-toggle-row">
+      <button class="cal-view-btn active" id="calBtn-list" onclick="setCalView('list')">
+        <i class="bi bi-list-ul"></i>รายการ
+      </button>
+      <button class="cal-view-btn" id="calBtn-day" onclick="setCalView('day')">
+        <i class="bi bi-calendar3-event"></i>วัน
+      </button>
+      <button class="cal-view-btn" id="calBtn-week" onclick="setCalView('week')">
+        <i class="bi bi-calendar3-week"></i>อาทิตย์
+      </button>
+      <button class="cal-view-btn" id="calBtn-month" onclick="setCalView('month')">
+        <i class="bi bi-calendar3"></i>เดือน
+      </button>
+    </div>
+    <input id="xlsxUploadInput" type="file" accept=".xlsx,.xls,.xlsm" hidden onchange="handleWorkbookFile(event)">
+  </section>
+
+  <!-- Calendar Panel -->
+  <div id="calendarPanel" style="display:none">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="calNavPrev()"><i class="bi bi-chevron-left"></i></button>
+      <div class="cal-nav-title" id="calNavTitle">—</div>
+      <button class="cal-nav-btn" onclick="calNavNext()"><i class="bi bi-chevron-right"></i></button>
+    </div>
+    <div id="calContent"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="main-content" id="mainContent">
+
+    <!-- งาน -->
+    <div class="tab-panel active" id="panel-ngan">
+      <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
+        <h2 class="section-title mb-0"><i class="bi bi-tools me-2 text-primary"></i>งาน</h2>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <div class="accent-bar"></div>
+      <div id="addHost-ngan"></div>
+      <div class="filter-scroll">
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('ngan','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('ngan','Waiting',this)">🟡 Waiting</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('ngan','Assigned',this)">🟣 Assigned</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('ngan','In Progress',this)">🔵 In Progress</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('ngan','Done',this)">🟢 Done</button>
+      </div>
+      <div id="list-ngan"></div>
+    </div>
+
+    <!-- ดูงาน -->
+    <div class="tab-panel" id="panel-duNgan">
+      <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
+        <h2 class="section-title mb-0"><i class="bi bi-geo-alt me-2 text-primary"></i>ดูงาน</h2>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <div class="accent-bar"></div>
+      <div id="addHost-duNgan"></div>
+      <div class="filter-scroll">
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('duNgan','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('duNgan','รอดูงาน',this)">🟡 รอดูงาน</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('duNgan','รอนัดหมาย',this)">🔵 รอนัดหมาย</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('duNgan','ดูงานแล้ว',this)">🟢 ดูงานแล้ว</button>
+      </div>
+      <div id="list-duNgan"></div>
+    </div>
+
+    <!-- ล้างแผง -->
+    <div class="tab-panel" id="panel-langPaeng">
+      <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
+        <h2 class="section-title mb-0"><i class="bi bi-droplet me-2 text-primary"></i>ล้างแผง</h2>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <div class="accent-bar"></div>
+      <div id="addHost-langPaeng"></div>
+      <div class="filter-scroll">
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('langPaeng','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('langPaeng','รอนัด',this)">🟡 รอนัด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('langPaeng','นัดแล้ว',this)">🔵 นัดแล้ว</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('langPaeng','เสร็จแล้ว',this)">🟢 เสร็จแล้ว</button>
+      </div>
+      <div id="list-langPaeng"></div>
+    </div>
+
+    <!-- ซ่อม -->
+    <div class="tab-panel" id="panel-som">
+      <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
+        <h2 class="section-title mb-0"><i class="bi bi-wrench-adjustable me-2 text-primary"></i>ซ่อม</h2>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <div class="accent-bar"></div>
+      <div id="addHost-som"></div>
+      <div class="filter-scroll">
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('som','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','รอส่ง',this)">🟡 รอส่ง</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','ส่งซ่อมแล้ว',this)">🔵 ส่งซ่อมแล้ว</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','รับคืนแล้ว',this)">🟢 รับคืนแล้ว</button>
+      </div>
+      <div id="list-som"></div>
+    </div>
+
+    <!-- บิล -->
+    <div class="tab-panel" id="panel-bil">
+      <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
+        <h2 class="section-title mb-0"><i class="bi bi-receipt me-2 text-primary"></i>บิล VAT</h2>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <div class="accent-bar"></div>
+      <div id="addHost-bil"></div>
+      <div class="filter-scroll">
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('bil','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('bil','รอออกบิล',this)">🟡 รอออกบิล</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('bil','ออกบิลแล้ว',this)">🔵 ออกบิลแล้ว</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('bil','รับชำระแล้ว',this)">🟢 รับชำระแล้ว</button>
+      </div>
+      <div id="list-bil"></div>
+    </div>
+
+    <!-- ขออนุญาติ -->
+    <div class="tab-panel" id="panel-permit">
+      <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
+        <h2 class="section-title mb-0"><i class="bi bi-file-earmark-check me-2 text-primary"></i>ขออนุญาติ</h2>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <div class="accent-bar"></div>
+      <div id="addHost-permit"></div>
+      <div class="filter-scroll">
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('permit','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('permit','Waiting',this)">🟡 Waiting</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('permit','In Progress',this)">🔵 In Progress</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('permit','Need Fix',this)">🟠 Need Fix</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('permit','Done',this)">🟢 Done</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('permit','Reject',this)">🔴 Reject</button>
+      </div>
+      <div id="list-permit"></div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="ngan" onclick="switchTab('ngan')">
+      <span class="nav-badge" id="b-ngan" style="display:none"></span>
+      <i class="bi bi-tools"></i>งาน
+    </button>
+    <button class="nav-btn" data-tab="duNgan" onclick="switchTab('duNgan')">
+      <span class="nav-badge" id="b-duNgan" style="display:none"></span>
+      <i class="bi bi-geo-alt"></i>ดูงาน
+    </button>
+    <button class="nav-btn" data-tab="langPaeng" onclick="switchTab('langPaeng')">
+      <span class="nav-badge" id="b-langPaeng" style="display:none"></span>
+      <i class="bi bi-droplet"></i>ล้างแผง
+    </button>
+    <button class="nav-btn" data-tab="som" onclick="switchTab('som')">
+      <span class="nav-badge" id="b-som" style="display:none"></span>
+      <i class="bi bi-wrench-adjustable"></i>ซ่อม
+    </button>
+    <button class="nav-btn" data-tab="bil" onclick="switchTab('bil')">
+      <span class="nav-badge" id="b-bil" style="display:none"></span>
+      <i class="bi bi-receipt"></i>บิล
+    </button>
+    <button class="nav-btn" data-tab="permit" onclick="switchTab('permit')">
+      <span class="nav-badge" id="b-permit" style="display:none"></span>
+      <i class="bi bi-file-earmark-check"></i>ขออนุญาติ
+    </button>
+  </nav>
+
+</div>
+
+<!-- Status Bottom Sheet -->
+<div class="sheet-overlay" id="statusModal" onclick="if(event.target===this)closeStatusModal()">
+  <div class="sheet-box">
+    <div class="sheet-title" id="statusModalTitle">เปลี่ยนสถานะ</div>
+    <div id="statusOptions"></div>
+    <button class="btn btn-light w-100 mt-1" onclick="closeStatusModal()">
+      <i class="bi bi-x me-1"></i> ปิด
+    </button>
+  </div>
+</div>
+
+<!-- Comment Bottom Sheet -->
+<div class="sheet-overlay" id="commentModal" onclick="if(event.target===this)closeCommentModal()">
+  <div class="sheet-box comment-box">
+    <div class="sheet-title" id="commentModalTitle">Comments</div>
+    <div class="comment-log" id="commentLog"></div>
+    <textarea class="form-control comment-input mb-2" id="commentInput" placeholder="พิมพ์ข้อความประสานงาน..."></textarea>
+    <div class="comment-actions">
+      <button class="btn btn-primary flex-fill fw-semibold" id="commentSubmitBtn" onclick="submitComment()">
+        <i class="bi bi-send me-1"></i> ส่ง
+      </button>
+      <button class="btn btn-light flex-fill fw-normal" onclick="closeCommentModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Date/Time Bottom Sheet -->
+<div class="sheet-overlay" id="editDateModal" onclick="if(event.target===this)closeEditDateModal()">
+  <div class="sheet-box">
+    <div class="sheet-title">📅 แก้ไขวันเวลานัดหมาย</div>
+    <div class="mb-3">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่นัดหมาย</label>
+      <input class="form-control" type="date" id="editDateInput">
+    </div>
+    <div class="mb-3">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เวลา</label>
+      <input class="form-control" type="time" id="editTimeInput">
+    </div>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-primary flex-fill fw-semibold" id="editDateSubmitBtn" onclick="submitEditDate()">
+        <i class="bi bi-check2-circle me-1"></i> บันทึก
+      </button>
+      <button class="btn btn-light flex-fill" onclick="closeEditDateModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Phase Bottom Sheet -->
+<div class="sheet-overlay" id="phaseModal" onclick="if(event.target===this)closePhaseModal()">
+  <div class="sheet-box">
+    <div class="sheet-title" id="phaseModalTitle">เปลี่ยน Phase</div>
+    <div id="phaseOptions"></div>
+    <button class="btn btn-light w-100 mt-1" onclick="closePhaseModal()"><i class="bi bi-x me-1"></i>ปิด</button>
+  </div>
+</div>
+
+<!-- Edit Ngan Bottom Sheet -->
+<div class="sheet-overlay" id="editNganModal" onclick="if(event.target===this)closeEditNganModal()">
+  <div class="sheet-box">
+    <div class="sheet-title">✏️ แก้ไขงาน</div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">Maps URL</label>
+      <input class="form-control" type="url" id="editNganMapsUrl" placeholder="https://maps.google.com/...">
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่นัด</label>
+        <input class="form-control" type="date" id="editNganDate">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เวลา</label>
+        <input class="form-control" type="time" id="editNganTime">
+      </div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ช่าง</label>
+      <select class="form-select" id="editNganTechnician"></select>
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ประเภท</label>
+        <input class="form-control" type="text" id="editNganType">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ราคา</label>
+        <input class="form-control" type="number" id="editNganPrice">
+      </div>
+    </div>
+    <div class="d-flex gap-2 mt-3">
+      <button class="btn btn-primary flex-fill fw-semibold" id="editNganSubmitBtn" onclick="submitEditNgan()">
+        <i class="bi bi-check2-circle me-1"></i> บันทึก
+      </button>
+      <button class="btn btn-light flex-fill" onclick="closeEditNganModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assigned Schedule Bottom Sheet -->
+<div class="sheet-overlay" id="assignedModal" onclick="if(event.target===this)closeAssignedModal()">
+  <div class="sheet-box">
+    <div class="sheet-title">📅 กำหนดคิวงาน — Assigned</div>
+    <div class="row g-2 mb-3">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่เริ่มงาน *</label>
+        <input class="form-control" type="date" id="assignedStart">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่สิ้นสุด</label>
+        <input class="form-control" type="date" id="assignedEnd">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ช่าง</label>
+      <select class="form-select" id="assignedTechnician"></select>
+    </div>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-primary flex-fill fw-semibold" id="assignedSubmitBtn" onclick="submitAssigned()">
+        <i class="bi bi-check2-circle me-1"></i> บันทึก Assigned
+      </button>
+      <button class="btn btn-light flex-fill" onclick="closeAssignedModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Supabase JS (UMD) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// ╔══════════════════════════════════════════════════════╗
+// ║  ⚙️  SUPABASE CONFIG                                 ║
+// ║  1. ไปที่ supabase.com → Project → Settings → API   ║
+// ║  2. Copy Project URL และ anon public key              ║
+// ╚══════════════════════════════════════════════════════╝
+const SUPABASE_URL      = 'https://hlswbazcojsnfibirkzl.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_Kxzef_y7E3VAmhYvH4eS3g_o3fG7JLn';
+const GOOGLE_SHEET_URL  = '';
+const TEAM_MEMBERS = ['Shine', 'Wassan', 'Wave', 'OT', 'Lui', 'Aoom'];
+
+// ── Permit constants ──────────────────────────────────
+const PERMIT_PHASES = [
+  { key:'PRECHECK',   label:'เตรียมเอกสาร' },
+  { key:'DOCS',       label:'ส่งเอกสาร' },
+  { key:'COMMENT',    label:'รับคำแนะนำ/แก้ไข' },
+  { key:'APPROVED',   label:'อนุมัติ' },
+  { key:'CONTRACT',   label:'ชำระเงิน' },
+  { key:'SUBMITTED',  label:'ยื่นเอกสาร' },
+  { key:'INSPECTION', label:'นัดตรวจ' },
+  { key:'CLOSED',     label:'ออกเอกสารขนานไฟฟ้า' },
+];
+const PERMIT_PHASE_MAP   = Object.fromEntries(PERMIT_PHASES.map(p => [p.label, p.key]));
+const PERMIT_PHASE_LABEL = Object.fromEntries(PERMIT_PHASES.map(p => [p.key, p.label]));
+
+const PERMIT_STATUSES = [
+  { key:'WAITING',     label:'Waiting' },
+  { key:'IN_PROGRESS', label:'In Progress' },
+  { key:'NEED_FIX',    label:'Need Fix' },
+  { key:'DONE',        label:'Done' },
+  { key:'REJECTED',    label:'Reject' },
+];
+const PERMIT_STATUS_MAP   = Object.fromEntries(PERMIT_STATUSES.map(s => [s.label, s.key]));
+const PERMIT_STATUS_LABEL = Object.fromEntries(PERMIT_STATUSES.map(s => [s.key, s.label]));
+
+// ── Init Supabase client ──────────────────────────────
+const { createClient } = window.supabase;
+let sb = null;
+let realtimeReloadTimer = null;
+
+// ── Table map ─────────────────────────────────────────
+const TAB_KEYS = ['ngan', 'duNgan', 'langPaeng', 'som', 'bil', 'permit'];
+
+const TAB_NAMES = { ngan:'งาน', duNgan:'ดูงาน', langPaeng:'ล้างแผง', som:'ซ่อม', bil:'บิล VAT', permit:'ขออนุญาติ' };
+
+const STATUS_CONFIG = {
+  ngan:      ['Waiting', 'Assigned', 'In Progress', 'Done'],
+  duNgan:    ['รอดูงาน', 'รอนัดหมาย', 'ดูงานแล้ว'],
+  langPaeng: ['รอนัด', 'นัดแล้ว', 'เสร็จแล้ว'],
+  som:       ['รอส่ง', 'ส่งซ่อมแล้ว', 'รับคืนแล้ว'],
+  bil:       ['รอออกบิล', 'ออกบิลแล้ว', 'รับชำระแล้ว'],
+  permit:    ['Waiting', 'In Progress', 'Need Fix', 'Done', 'Reject'],
+};
+
+const ADD_FORM_CONFIG = {
+  ngan: [
+    { name:'customer', label:'ลูกค้า', required:true },
+    { name:'phone', label:'เบอร์โทร', type:'tel' },
+    { name:'detail', label:'รายละเอียด', type:'textarea', required:true },
+    { name:'maps_url', label:'Maps', type:'url' },
+    { name:'date', label:'วันที่นัด', type:'date' },
+    { name:'time', label:'เวลานัด', type:'time' },
+    { name:'type', label:'ประเภท' },
+    { name:'technician', label:'ช่าง', type:'team' },
+    { name:'price', label:'ราคา', type:'number' },
+    { name:'status', label:'สถานะ', type:'status', value:'Waiting' },
+    { name:'note', label:'หมายเหตุ', type:'textarea' },
+  ],
+  duNgan: [
+    { name:'date', label:'วันที่', type:'date', required:true },
+    { name:'time', label:'เวลา', type:'time' },
+    { name:'customer', label:'ลูกค้า', required:true },
+    { name:'phone', label:'เบอร์โทร', type:'tel' },
+    { name:'maps_url', label:'Maps', type:'url' },
+    { name:'note', label:'หมายเหตุ', type:'textarea' },
+    { name:'follow_up_date', label:'Follow up', type:'date' },
+    { name:'status', label:'สถานะ', type:'status', value:'รอดูงาน' },
+  ],
+  langPaeng: [
+    { name:'customer', label:'ลูกค้า', required:true },
+    { name:'phone', label:'เบอร์โทร', type:'tel' },
+    { name:'maps_url', label:'Maps', type:'url' },
+    { name:'report_date', label:'วันที่ลูกค้าแจ้ง', type:'date' },
+    { name:'appointment_date', label:'วันที่ดำเนินการ', type:'date' },
+    { name:'technician', label:'ช่าง', type:'team' },
+    { name:'status', label:'สถานะ', type:'status', value:'รอนัด' },
+    { name:'note', label:'หมายเหตุ', type:'textarea' },
+  ],
+  som: [
+    { name:'item', label:'รายการ', required:true },
+    { name:'customer', label:'ลูกค้า' },
+    { name:'phone', label:'เบอร์โทร', type:'tel' },
+    { name:'report_date', label:'วันที่ได้รับแจ้ง', type:'date' },
+    { name:'site_date', label:'วันที่เข้าไปหน้างาน', type:'date' },
+    { name:'return_date', label:'วันที่ส่งคืนลูกค้า', type:'date' },
+    { name:'status', label:'สถานะ', type:'status', value:'รอส่ง' },
+    { name:'note', label:'หมายเหตุ', type:'textarea' },
+  ],
+  bil: [
+    { name:'customer', label:'ลูกค้า', required:true },
+    { name:'amount', label:'ยอด', type:'number' },
+    { name:'date', label:'วันที่', type:'date' },
+    { name:'status', label:'สถานะ', type:'status', value:'รอออกบิล' },
+    { name:'note', label:'หมายเหตุ', type:'textarea' },
+  ],
+  permit: [
+    { name:'customer',       label:'ชื่อลูกค้า',      required:true },
+    { name:'phone',          label:'เบอร์โทร',          type:'tel' },
+    { name:'site_name',      label:'ชื่อสถานที่',      required:true },
+    { name:'address',        label:'ที่อยู่ติดตั้ง',   type:'textarea' },
+    { name:'utility',        label:'การไฟฟ้า',          type:'select', options:['PEA','MEA'], value:'PEA' },
+    { name:'meter_type',     label:'Meter',             type:'select', options:['1P','3P'],   value:'1P' },
+    { name:'ca_no',          label:'CA No.' },
+    { name:'pv_kwp',         label:'PV kWp',            type:'number' },
+    { name:'inverter_brand', label:'ยี่ห้อ Inverter' },
+    { name:'request_no',     label:'เลขคำขอ' },
+  ],
+};
+
+// ── State ─────────────────────────────────────────────
+let allData       = { ngan:[], duNgan:[], langPaeng:[], som:[], bil:[], permit:[] };
+let filters       = { ngan:'all', duNgan:'all', langPaeng:'all', som:'all', bil:'all', permit:'all' };
+let pendingUpdate = null;
+let pendingComment = null;
+
+// ── Helpers ───────────────────────────────────────────
+function statusClass(tabKey, status) {
+  if (status === 'ยกเลิก' || status === 'Reject') return 'cancel';
+  if (status === 'Assigned') return 'assigned';
+  if (status === 'Need Fix') return 'waiting';
+  if (status === 'Done')     return 'done';
+  const opts = STATUS_CONFIG[tabKey] || [];
+  const idx  = opts.indexOf(status);
+  if (idx === 0) return 'waiting';
+  if (idx === opts.length - 1) return 'done';
+  return 'progress';
+}
+
+function fmtAmount(v) {
+  const n = parseFloat(String(v || '').replace(/,/g, ''));
+  return (v !== null && v !== '' && !isNaN(n)) ? n.toLocaleString('th-TH') + ' ฿' : '';
+}
+
+function todayStr() {
+  const d = new Date();
+  return [String(d.getDate()).padStart(2,'0'), String(d.getMonth()+1).padStart(2,'0'), d.getFullYear()].join('/');
+}
+
+function escapeHtml(v) {
+  return String(v || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function teamOptionsHtml(selected = '') {
+  return [
+    '<option value="">-- เลือกทีมงาน --</option>',
+    ...TEAM_MEMBERS.map(name => `<option value="${name}"${name === selected ? ' selected' : ''}>${name}</option>`)
+  ].join('');
+}
+
+function renderTeamOptions(selected = '') {
+  const el = document.getElementById('nameInput');
+  if (!el) return;
+  el.innerHTML = teamOptionsHtml(selected);
+}
+
+function formatCommentDateTime(value) {
+  const d = value ? new Date(value) : new Date();
+  if (isNaN(d)) return '';
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Bangkok',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(d).reduce((acc, part) => {
+    acc[part.type] = part.value;
+    return acc;
+  }, {});
+  return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
+}
+
+function parseCommentLog(note) {
+  return String(note || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean).map(line => {
+    const match = line.match(/^\[(.+?)\]\s*([^:]+):\s*(.*)$/);
+    if (match) return { dateTime: match[1], author: match[2], text: match[3] };
+    return { dateTime: '', author: 'บันทึกเดิม', text: line };
+  });
+}
+
+function commentCount(note) {
+  return parseCommentLog(note).length;
+}
+
+function commentSummaryHtml(note) {
+  const comments = parseCommentLog(note);
+  if (!comments.length) return '';
+  const last = comments[comments.length - 1];
+  const meta = [last.dateTime, last.author].filter(Boolean).join(' · ');
+  return `
+    <div class="comment-preview">
+      <i class="bi bi-chat-text me-1"></i>${meta ? `<strong>${escapeHtml(meta)}:</strong> ` : ''}${escapeHtml(last.text)}
+    </div>
+  `;
+}
+
+function renderCommentLog(note) {
+  const comments = parseCommentLog(note);
+  const el = document.getElementById('commentLog');
+  if (!el) return;
+  if (!comments.length) {
+    el.innerHTML = '<div class="empty-state py-4"><div class="small">ยังไม่มี comment</div></div>';
+    return;
+  }
+  el.innerHTML = comments.map(c => `
+    <div class="comment-bubble">
+      <div class="comment-meta">${escapeHtml([c.dateTime, c.author].filter(Boolean).join(' · '))}</div>
+      <div class="comment-text">${escapeHtml(c.text)}</div>
+    </div>
+  `).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+// ── Name ─────────────────────────────────────────────
+function formatDateDisplay(value) {
+  if (!value) return '';
+  const s = String(value);
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+  return s;
+}
+
+function formatTimeDisplay(value) {
+  if (!value) return '';
+  const s = String(value);
+  const m = s.match(/^(\d{1,2}):(\d{2})/);
+  if (m) return `${String(m[1]).padStart(2, '0')}:${m[2]}`;
+  return s;
+}
+
+function pickRaw(raw, key, fallback = '') {
+  const value = raw && raw[key];
+  return value !== undefined && value !== null && String(value).trim() !== '' ? value : fallback;
+}
+
+function combineNoteAndComments(note, comments) {
+  const lines = [];
+  const noteText = String(note || '').trim();
+  if (noteText) lines.push(noteText);
+  (comments || []).forEach(comment => {
+    const entry = `[${formatCommentDateTime(comment.commented_at || comment.created_at)}] ${comment.author || 'ไม่ระบุ'}: ${comment.message || ''}`;
+    lines.push(entry);
+  });
+  return lines.join('\n');
+}
+
+function mapPermitRow(p, logs) {
+  return {
+    id:             p.id,
+    _isPermit:      true,
+    customer:       p.customer_name || '',
+    phone:          p.phone || '',
+    site_name:      p.site_name || '',
+    address:        p.site_address || '',
+    utility:        p.utility_provider || 'PEA',
+    meter_type:     p.meter_phase || '',
+    ca_no:          p.ca_no || '',
+    pv_kwp:         p.pv_kwp ?? '',
+    inverter_brand: p.inverter_brand || '',
+    request_no:     p.application_no || '',
+    phase:          PERMIT_PHASE_LABEL[p.phase] || p.phase || 'เตรียมเอกสาร',
+    _phaseKey:      p.phase || 'PRECHECK',
+    status:         PERMIT_STATUS_LABEL[p.status] || p.status || 'Waiting',
+    _statusKey:     p.status || 'WAITING',
+    remark:         p.remark || '',
+    _logs:          logs || [],
+    updated_at:     p.updated_at || '',
+    created_at:     p.created_at || '',
+  };
+}
+
+function mapJobRow(job, comments) {
+  const raw = job.raw_data || {};
+  return {
+    id: job.id,
+    sheet_key: job.sheet_key,
+    status: job.status || '',
+    customer: pickRaw(raw, 'ลูกค้า', job.customer_name || job.title || ''),
+    item: pickRaw(raw, 'รายการ', job.title || ''),
+    detail: pickRaw(raw, 'รายละเอียด', job.detail || ''),
+    phone: pickRaw(raw, 'เบอร์โทร', job.phone || ''),
+    date: pickRaw(raw, 'วันที่', formatDateDisplay(job.job_date)),
+    time: pickRaw(raw, 'เวลา', formatTimeDisplay(job.job_time)),
+    created_date: pickRaw(raw, 'วันที่สร้าง', formatDateDisplay(job.created_date)),
+    appointment_date: pickRaw(raw, 'วันที่ดำเนินการ', pickRaw(raw, 'วันที่นัด', formatDateDisplay(job.appointment_date))),
+    follow_up_date: pickRaw(raw, 'วันที่ Follow up', ''),
+    report_date: pickRaw(raw, 'วันที่แจ้ง', ''),
+    site_date: pickRaw(raw, 'วันที่เข้างาน', formatDateDisplay(job.sent_date)),
+    return_date: pickRaw(raw, 'วันที่ส่งคืน', formatDateDisplay(job.received_date)),
+    sent_date: pickRaw(raw, 'วันที่ส่ง', formatDateDisplay(job.sent_date)),
+    received_date: pickRaw(raw, 'วันที่รับ', formatDateDisplay(job.received_date)),
+    technician: pickRaw(raw, 'ช่าง', job.technician || ''),
+    type: pickRaw(raw, 'ประเภท', job.job_type || ''),
+    price: pickRaw(raw, 'ราคา', job.price ?? ''),
+    amount: pickRaw(raw, 'ยอด', job.amount ?? ''),
+    maps_url: pickRaw(raw, 'Maps', pickRaw(raw, 'Maps Link', job.maps_url || '')),
+    assigned_start: pickRaw(raw, 'วันที่เริ่มงาน', ''),
+    assigned_end:   pickRaw(raw, 'วันที่สิ้นสุดงาน', ''),
+    _noteBase: job.note || '',
+    note: combineNoteAndComments(job.note || '', comments || []),
+    updated_at: job.updated_at || '',
+    _comments: comments || [],
+    _rawData: raw,
+  };
+}
+
+function defaultStatusForTab(tabKey) {
+  const fields = ADD_FORM_CONFIG[tabKey] || [];
+  return fields.find(field => field.name === 'status')?.value || STATUS_CONFIG[tabKey]?.[0] || '';
+}
+
+function normalizeFormValue(el) {
+  const value = String(el.value || '').trim();
+  if (!value) return '';
+  if (el.dataset.type === 'number') return Number(String(value).replace(/,/g, '')) || 0;
+  return value;
+}
+
+function addFieldHtml(tabKey, field) {
+  const id = `add-${tabKey}-${field.name}`;
+  const value = field.value || '';
+  if (field.type === 'textarea') {
+    return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><textarea class="form-control" id="${id}" data-field="${field.name}" rows="3"${field.required ? ' required' : ''}></textarea></div>`;
+  }
+  if (field.type === 'status') {
+    return `<div><label class="form-label mb-1" for="${id}">${field.label}</label><select class="form-select" id="${id}" data-field="${field.name}">${(STATUS_CONFIG[tabKey] || []).map(status => `<option value="${status}"${status === value ? ' selected' : ''}>${status}</option>`).join('')}</select></div>`;
+  }
+  if (field.type === 'select') {
+    const opts = (field.options || []).map(o => `<option value="${o}"${o === value ? ' selected' : ''}>${o}</option>`).join('');
+    return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><select class="form-select" id="${id}" data-field="${field.name}">${opts}</select></div>`;
+  }
+  if (field.type === 'team') {
+    return `<div><label class="form-label mb-1" for="${id}">${field.label}</label><select class="form-select" id="${id}" data-field="${field.name}">${teamOptionsHtml(localStorage.getItem('hiSolarUser') || '')}</select></div>`;
+  }
+  return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><input class="form-control" id="${id}" data-field="${field.name}" data-type="${field.type || 'text'}" type="${field.type || 'text'}" value="${escapeHtml(value)}"${field.required ? ' required' : ''}></div>`;
+}
+
+function googleSheetLinkHtml() {
+  const helper = `<div class="form-note">Bulk sync ผ่าน Google Sheet: ไปที่เมนู Hi Solar &gt; Sync ทั้งหมดเข้า Supabase</div>`;
+  if (!GOOGLE_SHEET_URL) return helper;
+  return `<a class="bulk-link" href="${GOOGLE_SHEET_URL}" target="_blank" rel="noopener"><i class="bi bi-table"></i><span>เพิ่มหลายรายการผ่าน Google Sheet</span></a>${helper}`;
+}
+
+function renderAddForms() {
+  TAB_KEYS.forEach(tabKey => {
+    const host = document.getElementById(`addHost-${tabKey}`);
+    if (!host) return;
+    host.innerHTML = `
+      <div class="add-panel" id="addPanel-${tabKey}">
+        <button class="add-toggle" type="button" onclick="toggleAddForm('${tabKey}')">
+          <span><i class="bi bi-plus-circle me-2 text-primary"></i>เพิ่ม${TAB_NAMES[tabKey] || 'รายการ'}</span>
+          <i class="bi bi-chevron-down text-primary"></i>
+        </button>
+        <div class="add-body">
+          ${googleSheetLinkHtml()}
+          <form onsubmit="submitAddForm(event,'${tabKey}')">
+            <div class="add-grid">
+              ${(ADD_FORM_CONFIG[tabKey] || []).map(field => addFieldHtml(tabKey, field)).join('')}
+            </div>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-primary flex-fill" type="submit"><i class="bi bi-check2-circle me-1"></i>บันทึก</button>
+              <button class="btn btn-light flex-fill" type="button" onclick="resetAddForm('${tabKey}')">ล้างฟอร์ม</button>
+            </div>
+            ${GOOGLE_SHEET_URL ? '<div class="form-note">เพิ่มหลายรายการพร้อมกัน แนะนำให้ใช้ Google Sheet แล้ว sync เข้า Supabase</div>' : ''}
+          </form>
+        </div>
+      </div>
+    `;
+    resetAddForm(tabKey);
+  });
+}
+
+function toggleAddForm(tabKey) {
+  document.getElementById(`addPanel-${tabKey}`)?.classList.toggle('open');
+}
+
+function resetAddForm(tabKey) {
+  const form = document.querySelector(`#addPanel-${tabKey} form`);
+  form?.reset();
+  (ADD_FORM_CONFIG[tabKey] || []).forEach(field => {
+    if (field.type === 'status' && field.value) {
+      const el = form?.querySelector(`[data-field="${field.name}"]`);
+      if (el) el.value = field.value;
+    }
+    if (field.type === 'team') {
+      const el = form?.querySelector(`[data-field="${field.name}"]`);
+      if (el) el.value = localStorage.getItem('hiSolarUser') || '';
+    }
+  });
+}
+
+function buildInsertPayload(tabKey, data) {
+  const user = localStorage.getItem('hiSolarUser') || 'ไม่ระบุ';
+  const now = new Date().toISOString();
+  const raw = {};
+
+  if (tabKey === 'ngan') {
+    raw['ลูกค้า'] = data.customer || '';
+    raw['เบอร์โทร'] = data.phone || '';
+    raw['รายละเอียด'] = data.detail || '';
+    raw['Maps'] = data.maps_url || '';
+    raw['วันที่'] = data.date || '';
+    raw['เวลา'] = data.time || '';
+    raw['ประเภท'] = data.type || '';
+    raw['ช่าง'] = data.technician || '';
+    raw['ราคา'] = data.price || '';
+    raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
+    raw['หมายเหตุ'] = data.note || '';
+    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', detail: data.detail || '', phone: data.phone || '', maps_url: data.maps_url || '', job_date: data.date || null, job_time: data.time ? `${data.time}:00` : null, job_type: data.type || '', technician: data.technician || '', price: data.price || null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', created_date: now.slice(0,10), raw_data: raw, synced_at: now, created_at: now, updated_at: now };
+  }
+  if (tabKey === 'duNgan') {
+    raw['วันที่'] = data.date || '';
+    raw['เวลา'] = data.time || '';
+    raw['ลูกค้า'] = data.customer || '';
+    raw['เบอร์โทร'] = data.phone || '';
+    raw['Maps'] = data.maps_url || '';
+    raw['หมายเหตุ'] = data.note || '';
+    raw['วันที่ Follow up'] = data.follow_up_date || '';
+    raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
+    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', phone: data.phone || '', job_date: data.date || null, job_time: data.time ? `${data.time}:00` : null, appointment_date: data.follow_up_date || null, maps_url: data.maps_url || '', status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
+  }
+  if (tabKey === 'langPaeng') {
+    raw['ลูกค้า'] = data.customer || '';
+    raw['เบอร์โทร'] = data.phone || '';
+    raw['Maps'] = data.maps_url || '';
+    raw['วันที่แจ้ง'] = data.report_date || '';
+    raw['วันที่ดำเนินการ'] = data.appointment_date || '';
+    raw['ช่าง'] = data.technician || '';
+    raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
+    raw['หมายเหตุ'] = data.note || '';
+    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', phone: data.phone || '', maps_url: data.maps_url || '', job_date: data.report_date || null, appointment_date: data.appointment_date || null, technician: data.technician || '', status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
+  }
+  if (tabKey === 'som') {
+    raw['รายการ'] = data.item || '';
+    raw['ลูกค้า'] = data.customer || '';
+    raw['เบอร์โทร'] = data.phone || '';
+    raw['วันที่แจ้ง'] = data.report_date || '';
+    raw['วันที่เข้างาน'] = data.site_date || '';
+    raw['วันที่ส่งคืน'] = data.return_date || '';
+    raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
+    raw['หมายเหตุ'] = data.note || '';
+    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], title: data.item || '', customer_name: data.customer || '', phone: data.phone || '', job_date: data.report_date || null, sent_date: data.site_date || null, received_date: data.return_date || null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
+  }
+  if (tabKey === 'permit') {
+    return {
+      customer_name:    data.customer || '',
+      phone:            data.phone || '',
+      site_name:        data.site_name || '',
+      site_address:     data.address || '',
+      utility_provider: data.utility || 'PEA',
+      meter_phase:      data.meter_type || '1P',
+      ca_no:            data.ca_no || null,
+      pv_kwp:           data.pv_kwp ? parseFloat(data.pv_kwp) : null,
+      inverter_brand:   data.inverter_brand || null,
+      application_no:   data.request_no || null,
+      phase:            'PRECHECK',
+      status:           'WAITING',
+      raw_data:         {},
+      created_at:       now,
+      updated_at:       now,
+    };
+  }
+  raw['ลูกค้า'] = data.customer || '';
+  raw['ยอด'] = data.amount || '';
+  raw['วันที่'] = data.date || '';
+  raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
+  raw['หมายเหตุ'] = data.note || '';
+  return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', amount: data.amount || null, job_date: data.date || null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
+}
+
+function formatSupabaseError(error, actionText = 'ทำรายการ') {
+  const code = String(error?.code || '').trim();
+  const message = String(error?.message || error || '').trim();
+  const details = String(error?.details || '').trim();
+  const hint = String(error?.hint || '').trim();
+  const text = [message, details, hint].filter(Boolean).join(' | ');
+
+  if (code === '42501' || /row-level security|permission denied/i.test(text)) {
+    return `${actionText}ไม่ได้: Supabase ยังไม่เปิดสิทธิ์ให้หน้าเว็บนี้เขียนข้อมูล กรุณารันไฟล์ supabase/schema.sql ใน Supabase SQL Editor และใช้ไฟล์นี้แทน supabase-setup.sql`;
+  }
+  if (code === '42P01' || /relation .* does not exist|table .* does not exist/i.test(text)) {
+    return `${actionText}ไม่ได้: ยังไม่พบตาราง hi_solar_jobs หรือ hi_solar_job_comments ใน Supabase กรุณารันไฟล์ supabase/schema.sql ก่อน`;
+  }
+  if (code === '22P02' || /invalid input syntax|date\/time field value out of range|invalid input/i.test(text)) {
+    return `${actionText}ไม่ได้: รูปแบบข้อมูลไม่ถูกต้อง ตรวจวันที่ เวลา และตัวเลขอีกครั้ง`;
+  }
+  if (/networkerror|failed to fetch|fetch failed|load failed|network request failed/i.test(text)) {
+    return `${actionText}ไม่ได้: เชื่อมต่อ Supabase ไม่สำเร็จ`;
+  }
+  if (message) return `${actionText}ไม่ได้: ${message}`;
+  return `${actionText}ไม่ได้`;
+}
+
+async function submitAddForm(event, tabKey) {
+  event.preventDefault();
+  if (!sb) {
+    showToast('ยังไม่ได้เชื่อม Supabase', 'danger');
+    return;
+  }
+  const form = event.target;
+  if (!form.reportValidity()) return;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
+
+  try {
+    const data = {};
+    form.querySelectorAll('[data-field]').forEach(el => {
+      data[el.dataset.field] = normalizeFormValue(el);
+    });
+    const payload = buildInsertPayload(tabKey, data);
+    const tableName = tabKey === 'permit' ? 'hi_solar_permits' : 'hi_solar_jobs';
+    const { error } = await sb.from(tableName).insert(payload);
+    if (error) throw error;
+    resetAddForm(tabKey);
+    document.getElementById(`addPanel-${tabKey}`)?.classList.remove('open');
+    await loadData();
+    showToast('เพิ่มรายการแล้ว', 'success');
+  } catch (e) {
+    console.error('submitAddForm failed', e);
+    showToast(formatSupabaseError(e, 'บันทึกข้อมูล'), 'danger');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
+  }
+}
+
+function saveName() {
+  const v = document.getElementById('nameInput').value.trim();
+  if (!TEAM_MEMBERS.includes(v)) return alert('กรุณาเลือกทีมงาน');
+  localStorage.setItem('hiSolarUser', v);
+  document.getElementById('nameModal').style.display = 'none';
+  document.getElementById('userChip').textContent = '👤 ' + v;
+  document.querySelectorAll('[data-field="technician"]').forEach(el => { el.value = v; });
+  if (sb) loadData();
+}
+
+function changeName() {
+  const current = localStorage.getItem('hiSolarUser') || '';
+  renderTeamOptions(current);
+  document.getElementById('nameModal').style.display = 'flex';
+}
+
+// ── Data — Load all tables ────────────────────────────
+async function loadData() {
+  document.getElementById('loading').style.display = 'flex';
+  try {
+    const [jobsRes, commentsRes] = await Promise.all([
+      sb.from('hi_solar_jobs').select('*').order('sheet_row'),
+      sb.from('hi_solar_job_comments').select('*').order('commented_at'),
+    ]);
+    if (jobsRes.error) throw jobsRes.error;
+    if (commentsRes.error) throw commentsRes.error;
+    const commentsByJob = (commentsRes.data || []).reduce((acc, comment) => {
+      (acc[comment.job_id] ||= []).push(comment);
+      return acc;
+    }, {});
+    allData = { ngan:[], duNgan:[], langPaeng:[], som:[], bil:[], permit:[] };
+    (jobsRes.data || []).forEach(job => {
+      if (!allData[job.sheet_key]) return;
+      allData[job.sheet_key].push(mapJobRow(job, commentsByJob[job.id] || []));
+    });
+    // Load permits (graceful — table may not exist yet)
+    try {
+      const [permitsRes, permitLogsRes] = await Promise.all([
+        sb.from('hi_solar_permits').select('*').order('created_at', { ascending: false }),
+        sb.from('hi_solar_permit_logs').select('*').order('created_at'),
+      ]);
+      if (!permitsRes.error) {
+        const logsByPermit = (permitLogsRes.data || []).reduce((acc, log) => {
+          (acc[log.permit_id] ||= []).push(log);
+          return acc;
+        }, {});
+        allData.permit = (permitsRes.data || []).map(p => mapPermitRow(p, logsByPermit[p.id] || []));
+      }
+    } catch (e) { console.warn('permit tables not ready:', e.message); }
+  } catch (e) {
+    console.error('loadData failed', e);
+    showToast(formatSupabaseError(e, 'โหลดข้อมูล'), 'danger');
+  }
+  renderAll();
+  updateStats();
+  updateBadges();
+  document.getElementById('loading').style.display = 'none';
+}
+
+// ── Real-time subscriptions ───────────────────────────
+function setupRealtime() {
+  ['hi_solar_jobs', 'hi_solar_job_comments', 'hi_solar_permits', 'hi_solar_permit_logs'].forEach(tableName => {
+    sb.channel(`rt_${tableName}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: tableName }, () => {
+        clearTimeout(realtimeReloadTimer);
+        realtimeReloadTimer = setTimeout(() => loadData(), 300);
+      })
+      .subscribe(status => {
+        document.getElementById('rtIndicator').style.display = status === 'SUBSCRIBED' ? 'flex' : 'none';
+      });
+  });
+}
+
+async function callAddComment(tabKey, id, comment) {
+  const user = localStorage.getItem('hiSolarUser') || 'ไม่ระบุ';
+  const item = allData[tabKey].find(r => r.id === id);
+  if (!item) throw new Error('ไม่พบรายการนี้');
+
+  const commentedAt = new Date().toISOString();
+  const { data, error } = await sb.from('hi_solar_job_comments').insert({
+    job_id: id,
+    author: user,
+    message: comment,
+    source: 'app',
+    commented_at: commentedAt,
+  }).select('*').single();
+
+  if (error) throw error;
+  item._comments = [...(item._comments || []), data];
+  item.note = combineNoteAndComments(item._noteBase || '', item._comments);
+  return {
+    success: true,
+    note: item.note,
+    comment: `[${formatCommentDateTime(commentedAt)}] ${user}: ${comment}`
+  };
+}
+
+function renderPermitLogs(logs) {
+  const el = document.getElementById('commentLog');
+  if (!el) return;
+  if (!logs.length) { el.innerHTML = '<div class="empty-state py-4"><div class="small">ยังไม่มีประวัติ</div></div>'; return; }
+  el.innerHTML = logs.map(log => {
+    const dt = formatCommentDateTime(log.created_at);
+    let text = '', icon = 'chat-text', cls = 'log-comment';
+    if (log.action === 'PHASE_CHANGE') {
+      icon = 'arrow-right-circle-fill'; cls = 'log-phase';
+      text = `Phase: ${PERMIT_PHASE_LABEL[log.from_phase] || log.from_phase} → ${PERMIT_PHASE_LABEL[log.to_phase] || log.to_phase}`;
+    } else if (log.action === 'STATUS_CHANGE') {
+      icon = 'flag-fill'; cls = 'log-status';
+      text = `Status: ${PERMIT_STATUS_LABEL[log.from_status] || log.from_status} → ${PERMIT_STATUS_LABEL[log.to_status] || log.to_status}`;
+    } else {
+      text = log.metadata?.message || log.metadata?.text || '';
+    }
+    return `<div class="comment-bubble ${cls}"><div class="comment-meta"><i class="bi bi-${icon} me-1"></i>${escapeHtml(dt)} · ${escapeHtml(log.actor)}</div><div class="comment-text">${escapeHtml(text)}</div></div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function openCommentModal(tabKey, id) {
+  const item = allData[tabKey].find(r => r.id === id);
+  if (!item) return;
+  pendingComment = { tabKey, id, _isPermit: tabKey === 'permit' };
+  document.getElementById('commentModalTitle').textContent = `${TAB_NAMES[tabKey] || tabKey} — ${item.customer || item.item || 'รายการ'}`;
+  document.getElementById('commentInput').value = '';
+  if (tabKey === 'permit') {
+    renderPermitLogs(item._logs || []);
+  } else {
+    renderCommentLog(item.note || '');
+  }
+  document.getElementById('commentModal').classList.add('show');
+  setTimeout(() => document.getElementById('commentInput')?.focus(), 50);
+}
+
+function closeCommentModal() {
+  document.getElementById('commentModal').classList.remove('show');
+  pendingComment = null;
+}
+
+// ── Render ────────────────────────────────────────────
+async function callUpdate(tabKey, id, newStatus) {
+  const { error } = await sb.from('hi_solar_jobs').update({
+    status: newStatus,
+    updated_at: new Date().toISOString(),
+  }).eq('id', id);
+
+  if (error) {
+    console.error('callUpdate failed', error);
+    showToast(formatSupabaseError(error, 'อัปเดตสถานะ'), 'danger');
+    return;
+  }
+
+  const item = allData[tabKey].find(r => r.id === id);
+  if (item) item.status = newStatus;
+  renderTab(tabKey);
+  updateStats();
+  updateBadges();
+  showToast(`อัปเดตสถานะ: ${newStatus}`, 'success');
+}
+
+async function submitComment() {
+  if (!pendingComment) return;
+  if (pendingComment._isPermit) { await submitPermitComment(); return; }
+  const input = document.getElementById('commentInput');
+  const comment = input.value.trim();
+  if (!comment) return alert('กรุณาพิมพ์ comment');
+
+  const btn = document.getElementById('commentSubmitBtn');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังส่ง';
+
+  try {
+    const { tabKey, id } = pendingComment;
+    const json = await callAddComment(tabKey, id, comment);
+    const item = allData[tabKey].find(r => r.id === id);
+    if (item) {
+      item.note = json.note;
+      renderCommentLog(item.note);
+    }
+    input.value = '';
+    renderTab(tabKey);
+    updateStats();
+    updateBadges();
+    showToast('เพิ่ม comment แล้ว', 'success');
+  } catch (e) {
+    console.error('submitComment failed', e);
+    showToast(formatSupabaseError(e, 'เพิ่มคอมเมนต์'), 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+}
+
+async function submitPermitComment() {
+  const input = document.getElementById('commentInput');
+  const text  = input.value.trim();
+  if (!text) return alert('กรุณาพิมพ์ข้อความ');
+  const btn = document.getElementById('commentSubmitBtn');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังส่ง';
+  try {
+    const { id } = pendingComment;
+    const user = localStorage.getItem('hiSolarUser') || 'ไม่ระบุ';
+    const now  = new Date().toISOString();
+    const { data, error } = await sb.from('hi_solar_permit_logs').insert({
+      permit_id: id, action: 'COMMENT', actor: user,
+      metadata: { message: text }, created_at: now,
+    }).select('*').single();
+    if (error) throw error;
+    const item = allData.permit.find(r => r.id === id);
+    if (item) { item._logs = [...(item._logs || []), data]; renderPermitLogs(item._logs); renderTab('permit'); }
+    input.value = '';
+    showToast('บันทึกแล้ว', 'success');
+  } catch (e) {
+    showToast(formatSupabaseError(e, 'บันทึก'), 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
+// ── Calendar ──────────────────────────────────────────
+const DOW_TH   = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+const MONTH_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const MONTH_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
+                     'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+let calView         = 'list';
+let calDate         = new Date();
+let calSelectedDate = null;   // 'YYYY-MM-DD'
+
+function dateKey(d) {
+  if (!d || isNaN(d)) return '';
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function todayKey() { return dateKey(new Date()); }
+
+function parseDisplayDate(str) {
+  if (!str) return null;
+  const m = String(str).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!m) return null;
+  const d = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+  return isNaN(d) ? null : d;
+}
+
+function getAllJobsWithDates() {
+  const result = [];
+  const dateField = {
+    ngan:      j => j.status === 'Assigned' && j.assigned_start ? formatDateDisplay(j.assigned_start) : j.date,
+    duNgan:    j => j.date,
+    langPaeng: j => j.appointment_date || j.report_date,
+    som:       j => j.report_date || j.site_date,
+  };
+  Object.keys(allData).forEach(tabKey => {
+    const fn = dateField[tabKey];
+    if (!fn) return;
+    allData[tabKey].forEach(job => {
+      const d = parseDisplayDate(fn(job));
+      if (!d) return;
+      result.push({ tabKey, job, date: d, dk: dateKey(d) });
+    });
+  });
+  return result;
+}
+
+function setCalView(view) {
+  calView = view;
+  const panel = document.getElementById('calendarPanel');
+  const main  = document.getElementById('mainContent');
+  if (view === 'list') {
+    panel.style.display = 'none';
+    main.style.display  = '';
+  } else {
+    panel.style.display = '';
+    main.style.display  = 'none';
+    if (!calSelectedDate) calSelectedDate = todayKey();
+    renderCalendar();
+  }
+  ['list','day','week','month'].forEach(v => {
+    document.getElementById(`calBtn-${v}`)?.classList.toggle('active', v === view);
+  });
+}
+
+function calNavPrev() {
+  if (calView === 'month') calDate = new Date(calDate.getFullYear(), calDate.getMonth()-1, 1);
+  else if (calView === 'week') calDate = new Date(calDate.getTime() - 7*86400000);
+  else if (calView === 'day')  calDate = new Date(calDate.getTime() - 86400000);
+  renderCalendar();
+}
+function calNavNext() {
+  if (calView === 'month') calDate = new Date(calDate.getFullYear(), calDate.getMonth()+1, 1);
+  else if (calView === 'week') calDate = new Date(calDate.getTime() + 7*86400000);
+  else if (calView === 'day')  calDate = new Date(calDate.getTime() + 86400000);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  if (calView === 'month')     renderMonthView();
+  else if (calView === 'week') renderWeekView();
+  else if (calView === 'day')  renderDayView();
+}
+
+function formatCalShort(dk) {
+  const m = String(dk).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return dk;
+  return `${parseInt(m[3])} ${MONTH_SHORT[parseInt(m[2])-1]}`;
+}
+function formatCalFull(dk) {
+  const m = String(dk).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return dk;
+  const d = new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+  return `${DOW_TH[d.getDay()]}ที่ ${parseInt(m[3])} ${MONTH_TH[parseInt(m[2])-1]} ${parseInt(m[1])+543}`;
+}
+
+function buildCalEventCard(j) {
+  const key = j.tabKey;
+  const r   = j.job;
+  const sc  = statusClass(key, r.status);
+
+  // Reuse same layout logic as buildCard
+  let name='', detail='', meta='', extra='', cardDate='';
+  if (key === 'ngan') {
+    name     = r.customer || '—';
+    detail   = r.detail   || '';
+    cardDate = r.date || r.created_date || '';
+    const mp = [];
+    if (r.date) mp.push(`<i class="bi bi-calendar3 me-1"></i>${escapeHtml(r.date)}${r.time ? ` ${escapeHtml(r.time)} น.` : ''}`);
+    if (r.technician) mp.push(`<i class="bi bi-person-fill me-1"></i>${escapeHtml(r.technician)}`);
+    if (r.type)       mp.push(`<i class="bi bi-lightning-charge me-1"></i>${escapeHtml(r.type)}`);
+    meta  = mp.join('<span class="mx-2">·</span>');
+    extra = r.price ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.price)}</span>` : '';
+    if (r.status === 'Assigned' && r.assigned_start) {
+      const endPart = r.assigned_end ? ` – ${escapeHtml(formatDateDisplay(r.assigned_end))}` : '';
+      extra += `<div><span class="assigned-range"><i class="bi bi-calendar-range me-1"></i>${escapeHtml(formatDateDisplay(r.assigned_start))}${endPart}</span></div>`;
+    }
+  } else if (key === 'duNgan') {
+    name     = r.customer || '—';
+    cardDate = r.date     || '';
+    const dp = [];
+    if (r.date) dp.push(`<i class="bi bi-calendar3 me-1"></i>${escapeHtml(r.date)}`);
+    if (r.time) dp.push(`<i class="bi bi-clock me-1"></i>${escapeHtml(r.time)} น.`);
+    detail = dp.join('&nbsp;&nbsp;');
+    const dm = [];
+    if (r.phone) dm.push(`<i class="bi bi-telephone-fill me-1"></i><a href="tel:${escapeHtml(r.phone)}" onclick="event.stopPropagation()" class="text-decoration-none" style="color:inherit">${escapeHtml(r.phone)}</a>`);
+    if (r.follow_up_date) dm.push(`<i class="bi bi-calendar-check me-1"></i>Follow up ${escapeHtml(r.follow_up_date)}`);
+    meta = dm.join('<span class="mx-2">·</span>');
+  } else if (key === 'langPaeng') {
+    name   = r.customer || '—';
+    const lp = [];
+    if (r.report_date)      lp.push(`<i class="bi bi-calendar-plus me-1"></i>แจ้ง ${escapeHtml(r.report_date)}`);
+    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${escapeHtml(r.appointment_date)}`);
+    detail = lp.join('&nbsp;&nbsp;');
+    cardDate = r.appointment_date || r.report_date || '';
+    meta   = r.technician ? `<i class="bi bi-person-fill me-1"></i>${escapeHtml(r.technician)}` : '';
+  } else if (key === 'som') {
+    name   = r.item     || '—';
+    detail = r.customer ? `<i class="bi bi-person-fill me-1"></i>${escapeHtml(r.customer)}` : '';
+    const sp = [];
+    if (r.report_date)  sp.push(`<i class="bi bi-bell me-1"></i>แจ้ง ${escapeHtml(r.report_date)}`);
+    if (r.site_date)    sp.push(`<i class="bi bi-tools me-1"></i>เข้างาน ${escapeHtml(r.site_date)}`);
+    if (r.return_date)  sp.push(`<i class="bi bi-check2-circle me-1"></i>ส่งคืน ${escapeHtml(r.return_date)}`);
+    meta = sp.join('&nbsp;&nbsp;');
+    cardDate = r.report_date || '';
+  } else if (key === 'bil') {
+    name   = r.customer || '—';
+    detail = r.date ? `<i class="bi bi-calendar3 me-1"></i>${escapeHtml(r.date)}` : '';
+    extra  = r.amount ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.amount)}</span>` : '';
+  }
+  extra += commentSummaryHtml(r.note || '');
+
+  const statusBtn   = `<button class="status-badge ${sc}" onclick="event.stopPropagation();openStatusModal('${key}','${r.id}')">${escapeHtml(r.status)}</button>`;
+  const commentBtn  = `<button class="btn btn-sm btn-outline-secondary btn-comment" onclick="event.stopPropagation();openCommentModal('${key}','${r.id}')"><i class="bi bi-chat-dots me-1"></i>Comment</button>`;
+  const mapsBtn     = r.maps_url ? `<a href="${escapeHtml(r.maps_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="btn btn-sm btn-outline-secondary btn-map"><i class="bi bi-geo-alt-fill me-1"></i>แผนที่</a>` : '';
+  const editCalBtn  = key === 'ngan' ? `<button class="btn btn-sm btn-outline-secondary btn-map" onclick="event.stopPropagation();openEditNganModal('${r.id}')"><i class="bi bi-pencil me-1"></i>แก้ไข</button>` : '';
+  const tabChip     = `<span class="cal-event-tab ${key}" style="font-size:10px;padding:1px 7px;border-radius:4px;">${TAB_NAMES[key]}</span>`;
+
+  return `
+  <article class="card job-card status-${sc}" onclick="openCommentModal('${key}','${r.id}')">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start mb-1">
+        <div class="card-customer">${escapeHtml(name)}</div>
+        <div class="d-flex align-items-center gap-1">${tabChip}<span class="card-date">${escapeHtml(cardDate)}</span></div>
+      </div>
+      ${detail ? `<div class="card-detail">${detail}</div>` : ''}
+      ${meta   ? `<div class="card-meta">${meta}</div>` : ''}
+      ${extra}
+      <div class="d-flex gap-2 flex-wrap mt-2 align-items-center">
+        ${statusBtn}${commentBtn}${mapsBtn}${editCalBtn}
+      </div>
+    </div>
+  </article>`;
+}
+
+// Show all event cards as a vertical scrollable list
+function buildCalEventsBlock(jobs) {
+  if (!jobs.length) return `<div class="empty-state py-3"><div class="small">ไม่มีงาน</div></div>`;
+  const cards = jobs.map(j => buildCalEventCard(j)).join('');
+  return `<div class="cal-events-list">${cards}</div>`;
+}
+
+function renderMonthView() {
+  const year  = calDate.getFullYear();
+  const month = calDate.getMonth();
+  document.getElementById('calNavTitle').textContent = `${MONTH_TH[month]} ${year+543}`;
+
+  const jobs      = getAllJobsWithDates();
+  const byDay     = {};
+  jobs.forEach(j => { (byDay[j.dk] ||= []).push(j); });
+
+  const firstDow   = new Date(year, month, 1).getDay();
+  const daysInMon  = new Date(year, month+1, 0).getDate();
+  const today      = todayKey();
+  const selDk      = calSelectedDate;
+
+  let html = '<div class="cal-month-grid">';
+  DOW_TH.forEach(d => { html += `<div class="cal-dow">${d}</div>`; });
+  for (let i = 0; i < firstDow; i++) html += '<div class="cal-day other-month"></div>';
+  for (let d = 1; d <= daysInMon; d++) {
+    const dk       = dateKey(new Date(year, month, d));
+    const isToday  = dk === today;
+    const isSel    = dk === selDk;
+    const dayJobs  = byDay[dk] || [];
+    const dots     = dayJobs.slice(0,5).map(j =>
+      `<div class="cal-dot ${statusClass(j.tabKey, j.job.status)}"></div>`).join('');
+    html += `
+    <div class="cal-day${isToday?' today':''}${isSel?' selected':''}" onclick="calDayClick('${dk}')">
+      <div class="cal-day-num">${d}</div>
+      ${dots ? `<div class="cal-dots">${dots}</div>` : ''}
+    </div>`;
+  }
+  html += '</div>';
+
+  // Selected day events
+  const selJobs = byDay[selDk] || [];
+  if (selDk) {
+    const label = selDk === today ? 'วันนี้' : formatCalShort(selDk);
+    html += `<div class="cal-day-header"><i class="bi bi-calendar-event me-1 text-primary"></i>${label}`;
+    html += selJobs.length ? ` — ${selJobs.length} งาน` : ' — ไม่มีงาน';
+    html += '</div>';
+    html += buildCalEventsBlock(selJobs);
+  }
+
+  document.getElementById('calContent').innerHTML = html;
+}
+
+function renderWeekView() {
+  const dow  = calDate.getDay();
+  const sun  = new Date(calDate); sun.setDate(calDate.getDate() - dow);
+  const days = Array.from({length:7}, (_, i) => { const d = new Date(sun); d.setDate(sun.getDate()+i); return d; });
+
+  document.getElementById('calNavTitle').textContent =
+    `${formatCalShort(dateKey(days[0]))} – ${formatCalShort(dateKey(days[6]))}`;
+
+  const jobs  = getAllJobsWithDates();
+  const byDay = {};
+  jobs.forEach(j => { (byDay[j.dk] ||= []).push(j); });
+  const today = todayKey();
+
+  let html = '<div class="cal-week-scroll"><div class="cal-week-grid">';
+  days.forEach(d => {
+    const dk      = dateKey(d);
+    const isToday = dk === today;
+    const dayJobs = byDay[dk] || [];
+    html += `<div class="cal-week-col">
+      <div class="cal-week-dow">${DOW_TH[d.getDay()]}</div>
+      <div class="cal-week-date${isToday?' today':''}">${d.getDate()}</div>
+      ${dayJobs.map(j => {
+        const sc   = statusClass(j.tabKey, j.job.status);
+        const name = (j.job.customer || j.job.item || '—').slice(0, 10);
+        return `<div class="cal-week-event ${sc}" onclick="openCommentModal('${j.tabKey}','${j.job.id}')" title="${escapeHtml(j.job.customer||j.job.item||'')}">
+          ${escapeHtml(name)}
+        </div>`;
+      }).join('')}
+    </div>`;
+  });
+  html += '</div></div>';
+  document.getElementById('calContent').innerHTML = html;
+}
+
+function renderDayView() {
+  const dk    = dateKey(calDate);
+  const today = todayKey();
+  document.getElementById('calNavTitle').textContent = formatCalFull(dk);
+
+  const jobs    = getAllJobsWithDates();
+  const dayJobs = jobs.filter(j => j.dk === dk);
+
+  let html = '';
+  if (!dayJobs.length) {
+    html = '<div class="empty-state py-4"><i class="bi bi-calendar-x"></i><div class="mt-2 small">ไม่มีงานวันนี้</div></div>';
+  } else {
+    html = `<div class="cal-day-header"><i class="bi bi-calendar-check me-1 text-primary"></i>${dk===today?'วันนี้':formatCalShort(dk)} — ${dayJobs.length} งาน</div>`;
+    html += buildCalEventsBlock(dayJobs);
+  }
+  document.getElementById('calContent').innerHTML = html;
+}
+
+function updateSliderDots(sliderEl) {
+  const wrap  = sliderEl.closest('.cal-slider-wrap');
+  if (!wrap) return;
+  const dots  = wrap.querySelectorAll('.cal-slider-dot');
+  const cards = sliderEl.querySelectorAll('.cal-event-card');
+  if (!dots.length || !cards.length) return;
+  const scrollLeft = sliderEl.scrollLeft;
+  const cardWidth  = sliderEl.offsetWidth;
+  const idx = Math.round(scrollLeft / (cardWidth * 0.87));
+  dots.forEach((d, i) => d.classList.toggle('active', i === Math.min(idx, dots.length-1)));
+}
+
+function calDayClick(dk) {
+  calSelectedDate = dk;
+  // Switch calDate to that day so day-view nav works from here
+  const m = dk.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) calDate = new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+  renderMonthView();
+}
+
+// ── renderAll ─────────────────────────────────────────
+function renderAll() { Object.keys(STATUS_CONFIG).forEach(renderTab); if (calView !== 'list') renderCalendar(); }
+
+function renderTab(key) {
+  const el   = document.getElementById('list-' + key);
+  const rows = allData[key].filter(r => filters[key] === 'all' || r.status === filters[key]);
+  if (!rows.length) {
+    el.innerHTML = `<div class="empty-state"><i class="bi bi-check2-circle text-success"></i><div class="mt-2 small">ไม่มีรายการ</div></div>`;
+    return;
+  }
+  el.innerHTML = rows.map(r => buildCard(key, r)).join('');
+}
+
+function buildCard(key, r) {
+  const status  = r.status || STATUS_CONFIG[key][0];
+  const sc      = statusClass(key, status);
+  const mapsUrl = r.maps_url || '';
+  const mapsBtn = mapsUrl
+    ? `<a class="btn btn-sm btn-outline-secondary btn-map" href="${mapsUrl}" target="_blank" rel="noopener"><i class="bi bi-geo-alt-fill me-1"></i>แผนที่</a>`
+    : '';
+  const editNganBtn = key === 'ngan'
+    ? `<button class="btn btn-sm btn-outline-secondary btn-map" onclick="openEditNganModal('${r.id}')"><i class="bi bi-pencil me-1"></i>แก้ไข</button>`
+    : '';
+  const statusBtn = `<button class="status-badge ${sc}" onclick="openStatusModal('${key}','${r.id}')">${status}</button>`;
+  const comments = commentCount(r.note || '');
+  const commentBtn = `<button class="btn btn-sm btn-outline-secondary btn-comment" onclick="openCommentModal('${key}','${r.id}')"><i class="bi bi-chat-dots me-1"></i>Comment${comments ? ` ${comments}` : ''}</button>`;
+
+  let name='', detail='', meta='', extra='', cardDate='';
+
+  if (key === 'ngan') {
+    name     = r.customer || '—';
+    detail   = r.detail   || '';
+    cardDate = r.date || r.created_date || '';
+    const mp = [];
+    if (r.date) mp.push(`<i class="bi bi-calendar3 me-1"></i>${r.date}${r.time ? ` ${r.time} น.` : ''}`);
+    if (r.technician) mp.push(`<i class="bi bi-person-fill me-1"></i>${r.technician}`);
+    if (r.type)       mp.push(`<i class="bi bi-lightning-charge me-1"></i>${r.type}`);
+    meta  = mp.join('<span class="mx-2">·</span>');
+    extra = r.price ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.price)}</span>` : '';
+    if (r.status === 'Assigned' && r.assigned_start) {
+      const endPart = r.assigned_end ? ` – ${escapeHtml(formatDateDisplay(r.assigned_end))}` : '';
+      extra += `<div><span class="assigned-range"><i class="bi bi-calendar-range me-1"></i>${escapeHtml(formatDateDisplay(r.assigned_start))}${endPart}</span></div>`;
+    }
+
+  } else if (key === 'duNgan') {
+    name     = r.customer || '—';
+    cardDate = r.date     || '';
+    const dp = [];
+    if (r.date) dp.push(`<i class="bi bi-calendar3 me-1"></i>${r.date}`);
+    if (r.time) dp.push(`<i class="bi bi-clock me-1"></i>${r.time} น.`);
+    detail = dp.join('&nbsp;&nbsp;');
+    const dm = [];
+    if (r.phone) dm.push(`<i class="bi bi-telephone-fill me-1"></i>${r.phone}`);
+    if (r.follow_up_date) dm.push(`<i class="bi bi-calendar-check me-1"></i>Follow up ${r.follow_up_date}`);
+    meta  = dm.join('<span class="mx-2">·</span>');
+    extra = `<button class="btn btn-sm btn-outline-primary btn-edit-date" onclick="openEditDateModal('${r.id}')"><i class="bi bi-calendar2-week me-1"></i>นัดหมาย</button>`;
+
+  } else if (key === 'langPaeng') {
+    name   = r.customer || '—';
+    const lp = [];
+    if (r.report_date)      lp.push(`<i class="bi bi-calendar-plus me-1"></i>แจ้ง ${r.report_date}`);
+    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${r.appointment_date}`);
+    detail = lp.join('&nbsp;&nbsp;');
+    meta   = r.technician ? `<i class="bi bi-person-fill me-1"></i>${r.technician}` : '';
+    cardDate = r.appointment_date || r.report_date || '';
+    extra  = '';
+
+  } else if (key === 'som') {
+    name   = r.item     || '—';
+    detail = r.customer ? `<i class="bi bi-person-fill me-1"></i>${r.customer}` : '';
+    const sp = [];
+    if (r.report_date)  sp.push(`<i class="bi bi-bell me-1"></i>แจ้ง ${r.report_date}`);
+    if (r.site_date)    sp.push(`<i class="bi bi-tools me-1"></i>เข้างาน ${r.site_date}`);
+    if (r.return_date)  sp.push(`<i class="bi bi-check2-circle me-1"></i>ส่งคืน ${r.return_date}`);
+    meta  = sp.join('&nbsp;&nbsp;');
+    cardDate = r.report_date || '';
+    extra = '';
+
+  } else if (key === 'bil') {
+    name   = r.customer || '—';
+    detail = r.date ? `<i class="bi bi-calendar3 me-1"></i>${r.date}` : '';
+    meta   = '';
+    extra  = r.amount ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.amount)}</span>` : '';
+  } else if (key === 'permit') {
+    name   = r.customer || '—';
+    detail = r.site_name ? `<i class="bi bi-building me-1"></i>${escapeHtml(r.site_name)}` : '';
+    cardDate = r.created_at ? formatDateDisplay(String(r.created_at).slice(0,10)) : '';
+    const infoParts = [];
+    if (r.utility)    infoParts.push(`<span class="permit-util-badge">${escapeHtml(r.utility)}</span>`);
+    if (r.meter_type) infoParts.push(`<span class="permit-meter-badge">${escapeHtml(r.meter_type)}</span>`);
+    if (r.pv_kwp)     infoParts.push(`<span class="permit-meter-badge">${escapeHtml(String(r.pv_kwp))} kWp</span>`);
+    meta = infoParts.join(' ');
+    const refParts = [];
+    if (r.ca_no)      refParts.push(`CA: ${escapeHtml(r.ca_no)}`);
+    if (r.request_no) refParts.push(`คำขอ: ${escapeHtml(r.request_no)}`);
+    if (refParts.length) extra += `<div class="permit-info-row"><i class="bi bi-hash me-1"></i>${refParts.join('  ·  ')}</div>`;
+    const phaseStep = PERMIT_PHASES.findIndex(p => p.label === r.phase) + 1;
+    const phaseBtn = `<button class="permit-phase-btn" onclick="openPhaseModal('${r.id}')"><span class="phase-step">${phaseStep}</span><i class="bi bi-chevron-right" style="font-size:9px;"></i>${escapeHtml(r.phase)}</button>`;
+    extra += `<div class="mt-1 mb-1">${phaseBtn}</div>`;
+    const commentCount2 = (r._logs || []).filter(l => l.action === 'COMMENT').length;
+    const commentBtn2 = `<button class="btn btn-sm btn-outline-secondary btn-comment" onclick="openCommentModal('${key}','${r.id}')"><i class="bi bi-chat-dots me-1"></i>Log${commentCount2 ? ` ${commentCount2}` : ''}</button>`;
+    const sc2 = statusClass(key, r.status);
+    const statusBtn2 = `<button class="status-badge ${sc2}" onclick="openStatusModal('${key}','${r.id}')">${escapeHtml(r.status)}</button>`;
+    return `
+    <article class="card job-card permit-card status-${sc2}">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <div class="card-customer">${escapeHtml(name)}</div>
+          <div class="card-date">${escapeHtml(cardDate)}</div>
+        </div>
+        ${detail ? `<div class="card-detail">${detail}</div>` : ''}
+        ${meta   ? `<div class="card-meta d-flex gap-1 flex-wrap">${meta}</div>` : ''}
+        ${extra}
+        <div class="d-flex gap-2 flex-wrap mt-2 align-items-center">
+          ${statusBtn2}${commentBtn2}
+        </div>
+      </div>
+    </article>`;
+  }
+  extra += commentSummaryHtml(r.note || '');
+
+  const updatedBy = '';
+
+  return `
+  <article class="card job-card status-${sc}">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start mb-1">
+        <div class="card-customer">${name}</div>
+        <div class="card-date">${cardDate}</div>
+      </div>
+      ${detail ? `<div class="card-detail">${detail}</div>` : ''}
+      ${meta   ? `<div class="card-meta">${meta}</div>` : ''}
+      ${extra}
+      <div class="d-flex gap-2 flex-wrap mt-2 align-items-center">
+        ${statusBtn}${commentBtn}${mapsBtn}${editNganBtn}
+        <div class="ms-auto">${updatedBy}</div>
+      </div>
+    </div>
+  </article>`;
+}
+
+// ── Stats & Badges ────────────────────────────────────
+function updateStats() {
+  const pend = (k, ss) => allData[k].filter(r => ss.includes(r.status)).length;
+  const td   = todayStr();
+  document.getElementById('s-ngan').textContent      = pend('ngan', ['Waiting','Assigned','In Progress']);
+  document.getElementById('s-langPaeng').textContent  = pend('langPaeng', ['รอนัด','นัดแล้ว']);
+  document.getElementById('s-som').textContent        = pend('som', ['รอส่ง','ส่งซ่อมแล้ว']);
+  document.getElementById('s-bil').textContent        = pend('bil', ['รอออกบิล','ออกบิลแล้ว']);
+  document.getElementById('s-duNgan').textContent     = allData['duNgan'].filter(r => r.date === td && r.status !== 'ดูงานแล้ว').length;
+  document.getElementById('s-permit').textContent     = pend('permit', ['Waiting','In Progress','Need Fix']);
+}
+
+function updateBadges() {
+  const pend = (k, ss) => allData[k].filter(r => ss.includes(r.status)).length;
+  const set  = (id, n) => { const el=document.getElementById(id); el.textContent=n>0?n:''; el.style.display=n>0?'inline':'none'; };
+  set('b-ngan',      pend('ngan',['Waiting','Assigned','In Progress']));
+  set('b-duNgan',    pend('duNgan',['รอดูงาน','รอนัดหมาย']));
+  set('b-langPaeng', pend('langPaeng',['รอนัด','นัดแล้ว']));
+  set('b-som',       pend('som',['รอส่ง','ส่งซ่อมแล้ว']));
+  set('b-bil',       pend('bil',['รอออกบิล','ออกบิลแล้ว']));
+  set('b-permit',    pend('permit',['Waiting','In Progress','Need Fix']));
+}
+
+// ── Tab Switch ────────────────────────────────────────
+function switchTab(key) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-'+key).classList.add('active');
+  document.querySelector(`.nav-btn[data-tab="${key}"]`).classList.add('active');
+}
+
+// ── Filter ────────────────────────────────────────────
+function setFilter(key, val, el) {
+  filters[key] = val;
+  el.closest('.filter-scroll').querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderTab(key);
+}
+
+// ── Status Modal ──────────────────────────────────────
+function openStatusModal(tabKey, id) {
+  pendingUpdate = { tabKey, id };
+  const opts    = STATUS_CONFIG[tabKey] || [];
+  const current = allData[tabKey].find(r => r.id === id)?.status || '';
+  document.getElementById('statusModalTitle').textContent = 'เปลี่ยนสถานะ — ' + (TAB_NAMES[tabKey]||tabKey);
+  document.getElementById('statusOptions').innerHTML = [
+    ...opts.map((s,i) => {
+      const cls = s === 'ยกเลิก' ? 'cancel' : (i===0 ? 'waiting' : i===opts.length-1 ? 'done' : 'progress');
+      return `<button class="sheet-opt ${cls}" onclick="pickStatus('${s}')">${s}${s===current?' ✓':''}</button>`;
+    }),
+    tabKey !== 'bil' && !opts.includes('ยกเลิก')
+      ? `<button class="sheet-opt cancel" onclick="pickStatus('ยกเลิก')">ยกเลิก${current==='ยกเลิก'?' ✓':''}</button>`
+      : ''
+  ].join('');
+  document.getElementById('statusModal').classList.add('show');
+}
+
+function closeStatusModal() {
+  document.getElementById('statusModal').classList.remove('show');
+  pendingUpdate = null;
+}
+
+function pickStatus(status) {
+  if (!pendingUpdate) return;
+  const { tabKey, id } = pendingUpdate;
+  closeStatusModal();
+  if (status === 'Assigned' && tabKey === 'ngan') {
+    openAssignedModal(tabKey, id);
+  } else if (tabKey === 'permit') {
+    callUpdatePermitStatus(id, status);
+  } else {
+    callUpdate(tabKey, id, status);
+  }
+}
+
+// ── Edit Date/Time Modal (duNgan) ─────────────────────
+let pendingEditDate = null;
+
+function displayDateToInputDate(s) {
+  if (!s) return '';
+  const m = String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
+  const m2 = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m2) return s.slice(0,10);
+  return '';
+}
+
+function openEditDateModal(id) {
+  const record = allData['duNgan'].find(r => r.id === id);
+  if (!record) return;
+  pendingEditDate = { id };
+  document.getElementById('editDateInput').value = displayDateToInputDate(record.date);
+  document.getElementById('editTimeInput').value = record.time || '';
+  document.getElementById('editDateModal').classList.add('show');
+}
+
+function closeEditDateModal() {
+  document.getElementById('editDateModal').classList.remove('show');
+  pendingEditDate = null;
+}
+
+async function submitEditDate() {
+  if (!pendingEditDate) return;
+  const { id } = pendingEditDate;
+  const dateVal = document.getElementById('editDateInput').value;
+  const timeVal = document.getElementById('editTimeInput').value;
+
+  if (!dateVal) { showToast('กรุณาเลือกวันที่', 'danger'); return; }
+
+  const btn = document.getElementById('editDateSubmitBtn');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
+
+  try {
+    const record = allData['duNgan'].find(r => r.id === id);
+    const newStatus = record?.status === 'รอดูงาน' ? 'รอนัดหมาย' : record?.status;
+    const updatePayload = {
+      job_date: dateVal,
+      job_time: timeVal ? `${timeVal}:00` : null,
+      status: newStatus,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('hi_solar_jobs').update(updatePayload).eq('id', id);
+    if (error) throw error;
+
+    if (record) {
+      record.date   = formatDateDisplay(dateVal);
+      record.time   = timeVal;
+      record.status = newStatus;
+    }
+    closeEditDateModal();
+    renderTab('duNgan');
+    updateStats();
+    updateBadges();
+    showToast('บันทึกวันเวลานัดหมายแล้ว', 'success');
+  } catch (e) {
+    console.error('submitEditDate failed', e);
+    showToast(formatSupabaseError(e, 'บันทึกวันเวลา'), 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+}
+
+// ── Permit update helpers ─────────────────────────────
+async function callUpdatePermitStatus(id, displayLabel) {
+  const dbKey = PERMIT_STATUS_MAP[displayLabel];
+  if (!dbKey) return;
+  const user    = localStorage.getItem('hiSolarUser') || 'ไม่ระบุ';
+  const record  = allData.permit.find(r => r.id === id);
+  const fromKey = record?._statusKey || '';
+
+  const { error } = await sb.from('hi_solar_permits')
+    .update({ status: dbKey, updated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) { showToast(formatSupabaseError(error, 'อัปเดตสถานะ'), 'danger'); return; }
+
+  const now = new Date().toISOString();
+  await sb.from('hi_solar_permit_logs').insert({
+    permit_id: id, action: 'STATUS_CHANGE', actor: user,
+    from_status: fromKey, to_status: dbKey,
+    metadata: {}, created_at: now,
+  });
+  if (record) {
+    record.status    = displayLabel;
+    record._statusKey = dbKey;
+    const logEntry = { id: now, permit_id: id, action: 'STATUS_CHANGE', actor: user, from_status: fromKey, to_status: dbKey, metadata: {}, created_at: now };
+    record._logs = [...(record._logs || []), logEntry];
+  }
+  renderTab('permit');
+  updateStats();
+  updateBadges();
+  showToast(`สถานะ: ${displayLabel}`, 'success');
+}
+
+async function callUpdatePermitPhase(id, displayLabel) {
+  const dbKey = PERMIT_PHASE_MAP[displayLabel];
+  if (!dbKey) return;
+  const user    = localStorage.getItem('hiSolarUser') || 'ไม่ระบุ';
+  const record  = allData.permit.find(r => r.id === id);
+  const fromKey = record?._phaseKey || '';
+
+  const { error } = await sb.from('hi_solar_permits')
+    .update({ phase: dbKey, updated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) { showToast(formatSupabaseError(error, 'อัปเดต Phase'), 'danger'); return; }
+
+  const now = new Date().toISOString();
+  await sb.from('hi_solar_permit_logs').insert({
+    permit_id: id, action: 'PHASE_CHANGE', actor: user,
+    from_phase: fromKey, to_phase: dbKey,
+    metadata: {}, created_at: now,
+  });
+  if (record) {
+    record.phase    = displayLabel;
+    record._phaseKey = dbKey;
+    const logEntry = { id: now, permit_id: id, action: 'PHASE_CHANGE', actor: user, from_phase: fromKey, to_phase: dbKey, metadata: {}, created_at: now };
+    record._logs = [...(record._logs || []), logEntry];
+  }
+  renderTab('permit');
+  showToast(`Phase: ${displayLabel}`, 'success');
+}
+
+// ── Phase Modal ───────────────────────────────────────
+let pendingPhase = null;
+
+function openPhaseModal(id) {
+  const record = allData.permit.find(r => r.id === id);
+  if (!record) return;
+  pendingPhase = { id };
+  document.getElementById('phaseModalTitle').textContent = `${escapeHtml(record.customer || record.site_name || 'งาน')} — เปลี่ยน Phase`;
+  const current = record.phase;
+  document.getElementById('phaseOptions').innerHTML = PERMIT_PHASES.map((p, i) => {
+    const isCurrent = p.label === current;
+    const isBefore  = PERMIT_PHASES.findIndex(x => x.label === current) > i;
+    const cls       = isBefore ? 'ph-done' : '';
+    return `<button class="sheet-opt phase ${cls}${isCurrent ? ' active' : ''}" onclick="pickPhase('${escapeHtml(p.label)}')">
+      <span style="font-size:11px;font-weight:700;color:inherit;opacity:.6;">${i+1}.</span>
+      ${escapeHtml(p.label)}${isCurrent ? ' ✓' : ''}
+    </button>`;
+  }).join('');
+  document.getElementById('phaseModal').classList.add('show');
+}
+
+function closePhaseModal() {
+  document.getElementById('phaseModal').classList.remove('show');
+  pendingPhase = null;
+}
+
+function pickPhase(label) {
+  if (!pendingPhase) return;
+  const { id } = pendingPhase;
+  closePhaseModal();
+  callUpdatePermitPhase(id, label);
+}
+
+// ── Edit Ngan ─────────────────────────────────────────
+let pendingEditNgan = null;
+
+function openEditNganModal(id) {
+  const record = allData['ngan'].find(r => r.id === id);
+  if (!record) return;
+  pendingEditNgan = { id };
+  document.getElementById('editNganMapsUrl').value = record.maps_url || '';
+  document.getElementById('editNganDate').value     = displayDateToInputDate(record.date);
+  document.getElementById('editNganTime').value     = record.time || '';
+  document.getElementById('editNganType').value     = record.type || '';
+  document.getElementById('editNganPrice').value    = record.price || '';
+  const techEl = document.getElementById('editNganTechnician');
+  techEl.innerHTML = teamOptionsHtml(record.technician || '');
+  document.getElementById('editNganModal').classList.add('show');
+}
+
+function closeEditNganModal() {
+  document.getElementById('editNganModal').classList.remove('show');
+  pendingEditNgan = null;
+}
+
+async function submitEditNgan() {
+  if (!pendingEditNgan) return;
+  const { id } = pendingEditNgan;
+  const mapsUrl   = document.getElementById('editNganMapsUrl').value.trim();
+  const dateVal   = document.getElementById('editNganDate').value;
+  const timeVal   = document.getElementById('editNganTime').value;
+  const techVal   = document.getElementById('editNganTechnician').value;
+  const typeVal   = document.getElementById('editNganType').value.trim();
+  const priceVal  = document.getElementById('editNganPrice').value;
+
+  const btn = document.getElementById('editNganSubmitBtn');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
+
+  try {
+    const record = allData['ngan'].find(r => r.id === id);
+    const newRaw = { ...(record?._rawData || {}) };
+    newRaw['Maps']      = mapsUrl;
+    newRaw['วันที่']    = dateVal ? formatDateDisplay(dateVal) : (newRaw['วันที่'] || '');
+    newRaw['เวลา']      = timeVal;
+    newRaw['ช่าง']      = techVal;
+    newRaw['ประเภท']    = typeVal;
+    newRaw['ราคา']      = priceVal;
+
+    const updatePayload = {
+      maps_url:   mapsUrl,
+      job_date:   dateVal || null,
+      job_time:   timeVal ? `${timeVal}:00` : null,
+      technician: techVal,
+      job_type:   typeVal,
+      price:      priceVal ? Number(priceVal) : null,
+      raw_data:   newRaw,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('hi_solar_jobs').update(updatePayload).eq('id', id);
+    if (error) throw error;
+
+    if (record) {
+      record.maps_url   = mapsUrl;
+      record.date       = dateVal ? formatDateDisplay(dateVal) : record.date;
+      record.time       = timeVal;
+      record.technician = techVal;
+      record.type       = typeVal;
+      record.price      = priceVal;
+      record._rawData   = newRaw;
+    }
+    closeEditNganModal();
+    renderTab('ngan');
+    showToast('บันทึกข้อมูลงานแล้ว', 'success');
+  } catch (e) {
+    console.error('submitEditNgan failed', e);
+    showToast(formatSupabaseError(e, 'แก้ไขงาน'), 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+}
+
+// ── Assigned Schedule ─────────────────────────────────
+let pendingAssigned = null;
+
+function openAssignedModal(tabKey, id) {
+  const record = allData[tabKey]?.find(r => r.id === id);
+  if (!record) return;
+  pendingAssigned = { tabKey, id };
+  document.getElementById('assignedStart').value = record.assigned_start || '';
+  document.getElementById('assignedEnd').value   = record.assigned_end   || '';
+  const techEl = document.getElementById('assignedTechnician');
+  techEl.innerHTML = teamOptionsHtml(record.technician || localStorage.getItem('hiSolarUser') || '');
+  document.getElementById('assignedModal').classList.add('show');
+}
+
+function closeAssignedModal() {
+  document.getElementById('assignedModal').classList.remove('show');
+  pendingAssigned = null;
+}
+
+async function submitAssigned() {
+  if (!pendingAssigned) return;
+  const { tabKey, id } = pendingAssigned;
+  const startVal = document.getElementById('assignedStart').value;
+  const endVal   = document.getElementById('assignedEnd').value;
+  const techVal  = document.getElementById('assignedTechnician').value;
+
+  if (!startVal) { showToast('กรุณาเลือกวันที่เริ่มงาน', 'danger'); return; }
+
+  const btn = document.getElementById('assignedSubmitBtn');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
+
+  try {
+    const record = allData[tabKey]?.find(r => r.id === id);
+    const newRaw = { ...(record?._rawData || {}) };
+    newRaw['วันที่เริ่มงาน']    = startVal;
+    newRaw['วันที่สิ้นสุดงาน'] = endVal;
+    if (techVal) newRaw['ช่าง'] = techVal;
+
+    const updatePayload = {
+      status:     'Assigned',
+      raw_data:   newRaw,
+      updated_at: new Date().toISOString(),
+    };
+    if (techVal) updatePayload.technician = techVal;
+    const { error } = await sb.from('hi_solar_jobs').update(updatePayload).eq('id', id);
+    if (error) throw error;
+
+    if (record) {
+      record.status         = 'Assigned';
+      record.assigned_start = startVal;
+      record.assigned_end   = endVal;
+      if (techVal) record.technician = techVal;
+      record._rawData = newRaw;
+    }
+    closeAssignedModal();
+    renderTab(tabKey);
+    updateStats();
+    updateBadges();
+    showToast('อัปเดตสถานะ: Assigned', 'success');
+  } catch (e) {
+    console.error('submitAssigned failed', e);
+    showToast(formatSupabaseError(e, 'บันทึก Assigned'), 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────
+function showToast(msg, type='success') {
+  const colors = { success:'#16a34a', danger:'#ef4444', info:'#3b82f6' };
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:500;
+    background:${colors[type]||'#1e293b'};color:#fff;padding:8px 18px;border-radius:20px;
+    font-size:13px;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,.15);white-space:normal;max-width:min(92vw,440px);text-align:center;`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function initCommentInput() {
+  const input = document.getElementById('commentInput');
+  if (!input) return;
+  input.addEventListener('keydown', event => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+      event.preventDefault();
+      submitComment();
+    }
+  });
+}
+
+// ── Init ──────────────────────────────────────────────
+(function init() {
+  const hasSupabaseUrl = /^https:\/\/[a-z0-9]+\.supabase\.co$/i.test(SUPABASE_URL);
+  const hasAnonKey = /^(eyJ|sb_publishable_)/.test(SUPABASE_ANON_KEY);
+  renderTeamOptions(localStorage.getItem('hiSolarUser') || '');
+  renderAddForms();
+  initCommentInput();
+  if (!hasSupabaseUrl || !hasAnonKey) {
+    document.getElementById('configBanner').style.display = 'block';
+    document.getElementById('loading').style.display = 'none';
+    // Show empty state
+    renderAll(); updateStats(); updateBadges();
+    const name = localStorage.getItem('hiSolarUser');
+    if (!name) return;
+    document.getElementById('nameModal').style.display = 'none';
+    document.getElementById('userChip').textContent = '👤 ' + name;
+    return;
+  }
+
+  sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const name = localStorage.getItem('hiSolarUser');
+  if (name) {
+    document.getElementById('nameModal').style.display = 'none';
+    document.getElementById('userChip').textContent = '👤 ' + name;
+    loadData();
+  } else {
+    document.getElementById('loading').style.display = 'none';
+  }
+})();
+</script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="./hi-solar-importer.js"></script>
+</body>
+</html>
+

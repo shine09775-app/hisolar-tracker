@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="JDK Viewer">
+  <title>JDK Viewer</title>
+
+  <link rel="icon" type="image/png" href="icon_hisolar.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+  <style>
+    :root {
+      --hs-primary: #0f766e;
+      --hs-primary-dark: #115e59;
+      --hs-primary-soft: #ccfbf1;
+      --hs-amber: #f59e0b;
+      --hs-amber-soft: #fef3c7;
+      --hs-blue: #2563eb;
+      --hs-blue-soft: #dbeafe;
+      --hs-red: #dc2626;
+      --hs-red-soft: #fee2e2;
+      --hs-gray-soft: #e2e8f0;
+      --nav-h: 64px;
+    }
+
+    * { font-family: 'Kanit', system-ui, sans-serif; }
+    body { margin: 0; background: #e2e8f0; color: #0f172a; }
+
+    #app {
+      max-width: 480px;
+      min-height: 100vh;
+      margin: 0 auto;
+      background:
+        radial-gradient(circle at top right, rgba(20, 184, 166, 0.18), transparent 30%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+      position: relative;
+    }
+
+    @media (min-width: 576px) {
+      #app { box-shadow: 0 0 40px rgba(15, 23, 42, 0.18); }
+    }
+
+    .btn-primary {
+      background: var(--hs-primary);
+      border-color: var(--hs-primary);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+      background: var(--hs-primary-dark);
+      border-color: var(--hs-primary-dark);
+    }
+
+    .viewer-navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 14px 16px;
+      background: rgba(15, 118, 110, 0.94);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 8px 24px rgba(15, 118, 110, 0.18);
+    }
+
+    .brand-wrap { display: flex; align-items: center; gap: 10px; }
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.18);
+      color: #fef3c7;
+      font-size: 18px;
+    }
+    .brand-title { font-size: 17px; font-weight: 700; line-height: 1.1; }
+    .brand-sub { font-size: 11px; color: rgba(255, 255, 255, 0.8); }
+
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .live-chip,
+    .user-chip {
+      border: none;
+      border-radius: 999px;
+      font-size: 12px;
+      padding: 6px 12px;
+    }
+    .live-chip {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.14);
+      color: #ecfeff;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #86efac;
+      animation: pulse 1.6s infinite;
+    }
+    .user-chip {
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.88); }
+    }
+
+    .viewer-banner {
+      margin: 12px 14px 0;
+      border-radius: 16px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.1), rgba(37, 99, 235, 0.08));
+      border: 1px solid rgba(15, 118, 110, 0.12);
+      color: #0f172a;
+    }
+    .viewer-banner__title { font-size: 14px; font-weight: 700; }
+    .viewer-banner__text { font-size: 12px; color: #475569; margin-top: 2px; }
+
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 12px 14px 0;
+    }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 16px;
+      padding: 12px 10px;
+      text-align: center;
+      box-shadow: 0 10px 26px rgba(148, 163, 184, 0.12);
+    }
+    .stat-num { font-size: 22px; font-weight: 700; color: var(--hs-primary); line-height: 1; }
+    .stat-lbl { margin-top: 4px; font-size: 11px; color: #64748b; }
+
+    .main-content {
+      padding: 14px 14px calc(var(--nav-h) + 18px);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-note {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 12px;
+    }
+    .refresh-btn {
+      border-radius: 999px;
+      border: 1px solid #cbd5e1;
+      background: rgba(255, 255, 255, 0.8);
+      color: #334155;
+      width: 38px;
+      height: 38px;
+    }
+
+    .cal-toggle-row {
+      display: flex;
+      gap: 6px;
+      padding: 12px 14px 0;
+    }
+    .cal-view-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      border: 1px solid #d6dee8;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.86);
+      color: #475569;
+      padding: 10px 4px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 8px 18px rgba(148, 163, 184, 0.08);
+    }
+    .cal-view-btn i { font-size: 13px; }
+    .cal-view-btn.active {
+      background: #123f75;
+      border-color: #123f75;
+      color: #fff;
+    }
+    .cal-view-btn:hover:not(.active) {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    #calendarPanel {
+      display: none;
+      padding: 14px 14px calc(var(--nav-h) + env(safe-area-inset-bottom) + 24px);
+    }
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .cal-nav-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .cal-nav-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #475569;
+      box-shadow: 0 8px 18px rgba(148, 163, 184, 0.12);
+    }
+
+    .cal-month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      margin-bottom: 12px;
+    }
+    .cal-dow {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: #94a3b8;
+      padding: 4px 0;
+    }
+    .cal-day {
+      min-height: 50px;
+      border-radius: 10px;
+      padding: 4px 2px;
+      cursor: pointer;
+      transition: background .12s ease;
+    }
+    .cal-day:hover { background: rgba(226, 232, 240, 0.72); }
+    .cal-day.selected { background: #dbeafe; }
+    .cal-day.today .cal-day-num {
+      background: var(--hs-primary);
+      color: #fff;
+    }
+    .cal-day-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 3px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #334155;
+    }
+    .cal-dots {
+      display: flex;
+      justify-content: center;
+      gap: 2px;
+      flex-wrap: wrap;
+    }
+    .cal-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .cal-dot.waiting { background: var(--hs-amber); }
+    .cal-dot.progress { background: var(--hs-blue); }
+    .cal-dot.done { background: #94a3b8; }
+    .cal-dot.cancel { background: var(--hs-red); }
+    .cal-dot.assigned { background: #7c3aed; }
+
+    .cal-day-header {
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #dbe3ec;
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+    }
+    .cal-events-list {
+      max-height: 54vh;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+    .cal-event-card {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 14px;
+      border-left: 4px solid var(--hs-primary);
+      padding: 10px 12px;
+      margin-bottom: 9px;
+      box-shadow: 0 10px 20px rgba(148, 163, 184, 0.1);
+      cursor: pointer;
+    }
+    .cal-event-card.waiting { border-left-color: var(--hs-amber); }
+    .cal-event-card.progress { border-left-color: var(--hs-blue); }
+    .cal-event-card.done { border-left-color: #94a3b8; opacity: 0.82; }
+    .cal-event-card.cancel { border-left-color: var(--hs-red); opacity: 0.74; }
+    .cal-event-card.assigned { border-left-color: #7c3aed; }
+    .cal-event-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .cal-event-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .cal-event-meta {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.45;
+    }
+    .cal-event-tab {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--hs-primary-soft);
+      color: var(--hs-primary-dark);
+    }
+    .cal-event-tab.langPaeng {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .cal-event-tab.som {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .cal-week-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 0 -2px;
+      padding: 0 2px;
+    }
+    .cal-week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(54px, 1fr));
+      gap: 4px;
+      min-width: 378px;
+    }
+    .cal-week-dow {
+      text-align: center;
+      font-size: 10px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .cal-week-date {
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      margin: 0 auto 6px;
+      border-radius: 50%;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #334155;
+    }
+    .cal-week-date.today {
+      background: var(--hs-primary);
+      color: #fff;
+    }
+    .cal-week-event {
+      border-radius: 8px;
+      padding: 4px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 4px;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .cal-week-event.waiting { background: var(--hs-amber-soft); color: #92400e; }
+    .cal-week-event.progress { background: var(--hs-blue-soft); color: #1d4ed8; }
+    .cal-week-event.done { background: #e2e8f0; color: #475569; }
+    .cal-week-event.cancel { background: var(--hs-red-soft); color: #b91c1c; }
+    .cal-week-event.assigned { background: #ede9fe; color: #5b21b6; }
+
+    .filter-scroll {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .filter-scroll::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      flex-shrink: 0;
+      border-radius: 999px !important;
+      font-size: 12px;
+      padding: 6px 14px;
+      border-color: #cbd5e1 !important;
+      color: #475569 !important;
+      background: rgba(255, 255, 255, 0.85) !important;
+    }
+    .filter-chip.active {
+      background: var(--hs-primary) !important;
+      border-color: var(--hs-primary) !important;
+      color: #fff !important;
+    }
+
+    .job-card {
+      border: none;
+      border-radius: 18px;
+      margin-bottom: 12px;
+      box-shadow: 0 12px 28px rgba(148, 163, 184, 0.14);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.92);
+      border-left: 5px solid var(--hs-primary);
+    }
+    .job-card.status-waiting { border-left-color: var(--hs-amber); }
+    .job-card.status-progress { border-left-color: var(--hs-blue); }
+    .job-card.status-done { border-left-color: #94a3b8; opacity: 0.82; }
+    .job-card.status-cancel { border-left-color: var(--hs-red); opacity: 0.72; }
+    .job-card.status-assigned { border-left-color: #7c3aed; }
+
+    .job-card .card-body { padding: 14px; }
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: #0f172a;
+    }
+    .card-date {
+      flex-shrink: 0;
+      font-size: 11px;
+      color: #94a3b8;
+      text-align: right;
+    }
+    .card-detail {
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.45;
+      margin-bottom: 6px;
+      white-space: pre-wrap;
+    }
+    .card-meta {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+    .card-meta a { color: inherit; text-decoration: none; }
+
+    .status-badge,
+    .info-badge,
+    .assigned-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    .status-badge.waiting { background: var(--hs-amber-soft); color: #92400e; }
+    .status-badge.progress { background: var(--hs-blue-soft); color: #1d4ed8; }
+    .status-badge.done { background: #e2e8f0; color: #475569; }
+    .status-badge.cancel { background: var(--hs-red-soft); color: #b91c1c; }
+    .status-badge.assigned { background: #ede9fe; color: #5b21b6; }
+    .info-badge {
+      background: var(--hs-primary-soft);
+      color: var(--hs-primary-dark);
+    }
+    .assigned-badge {
+      background: #ede9fe;
+      color: #5b21b6;
+    }
+
+    .comment-preview {
+      margin-top: 8px;
+      border-radius: 12px;
+      padding: 8px 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.45;
+    }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-comment,
+    .btn-map {
+      border-radius: 999px !important;
+      font-size: 12px;
+      padding: 5px 12px;
+      border-color: #cbd5e1 !important;
+      color: #334155 !important;
+      background: rgba(255, 255, 255, 0.84) !important;
+    }
+
+    .empty-state {
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px dashed #cbd5e1;
+      border-radius: 18px;
+      text-align: center;
+      padding: 40px 16px;
+      color: #94a3b8;
+    }
+    .empty-state i { font-size: 34px; }
+    .empty-state .small { font-size: 12px; }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: var(--nav-h);
+      display: flex;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(148, 163, 184, 0.26);
+      z-index: 60;
+    }
+    .nav-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 0;
+    }
+    .nav-btn i { font-size: 20px; }
+    .nav-btn.active { color: var(--hs-primary); }
+
+    .sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.52);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 120;
+    }
+    .sheet-overlay.show { display: flex; }
+    .sheet-box {
+      width: 100%;
+      max-width: 480px;
+      max-height: min(84vh, 700px);
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
+      overflow: auto;
+    }
+    .sheet-title {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 12px;
+    }
+    .comment-box {
+      display: flex;
+      flex-direction: column;
+    }
+    .comment-log {
+      max-height: 44vh;
+      overflow-y: auto;
+      padding-right: 2px;
+      margin-bottom: 12px;
+    }
+    .comment-bubble {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 11px;
+      margin-bottom: 8px;
+    }
+    .comment-meta {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .comment-text {
+      font-size: 13px;
+      color: #0f172a;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .comment-input {
+      border-radius: 12px;
+      min-height: 96px;
+      font-size: 13px;
+      resize: vertical;
+    }
+    .comment-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .name-overlay,
+    #loading {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .name-overlay { background: rgba(15, 23, 42, 0.6); }
+    #loading {
+      background: rgba(255, 255, 255, 0.92);
+      flex-direction: column;
+      gap: 12px;
+    }
+    .name-box {
+      width: 100%;
+      max-width: 340px;
+      background: #fff;
+      border-radius: 22px;
+      padding: 26px 22px;
+      box-shadow: 0 24px 50px rgba(15, 23, 42, 0.22);
+    }
+    .name-box__icon {
+      width: 62px;
+      height: 62px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 12px;
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(37, 99, 235, 0.12));
+      color: var(--hs-primary);
+      font-size: 28px;
+    }
+    .name-box__title {
+      text-align: center;
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .name-box__text {
+      text-align: center;
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 16px;
+    }
+
+    .config-banner {
+      display: none;
+      margin: 12px 14px 0;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #7c3aed;
+      color: #fff;
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner-border text-success" style="width:2.4rem;height:2.4rem;" role="status"></div>
+  <div style="font-size:14px;color:#475569;">กำลังเชื่อมต่อข้อมูล...</div>
+</div>
+
+<div class="name-overlay" id="nameModal">
+  <div class="name-box">
+    <div class="name-box__icon"><i class="bi bi-people-fill"></i></div>
+    <div class="name-box__title">JDK Viewer</div>
+    <div class="name-box__text">เลือกชื่อผู้ใช้งานสำหรับเข้าดูข้อมูลและเพิ่ม comment</div>
+    <select id="nameInput" class="form-select mb-3" onkeydown="if(event.key==='Enter')saveName()">
+      <option value="">-- เลือกผู้ใช้งาน --</option>
+    </select>
+    <button class="btn btn-primary w-100 fw-semibold" onclick="saveName()">
+      <i class="bi bi-box-arrow-in-right me-1"></i>เข้าใช้งาน
+    </button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="viewer-navbar">
+    <div class="brand-wrap">
+      <div class="brand-icon"><i class="bi bi-binoculars-fill"></i></div>
+      <div>
+        <div class="brand-title">JDK Viewer</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="live-chip" id="rtIndicator">
+        <span class="live-dot"></span>
+        <span>Live</span>
+      </div>
+      <button class="user-chip" id="userChip" onclick="changeName()">—</button>
+    </div>
+  </div>
+
+  <div class="config-banner" id="configBanner">
+    ยังไม่ได้ตั้งค่า Supabase ให้ถูกต้องในไฟล์นี้
+  </div>
+
+  <div class="viewer-banner">
+    <div class="viewer-banner__title">Vendor Viewer</div>
+    <div class="viewer-banner__text">กรณีทีมไหนรับงานให้แจ้งใน Comment</div>
+  </div>
+
+  <div class="stats-strip">
+    <div class="stat-card">
+      <div class="stat-num" id="s-ngan">—</div>
+      <div class="stat-lbl">งาน</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="s-langPaeng">—</div>
+      <div class="stat-lbl">ล้างแผง</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="s-som">—</div>
+      <div class="stat-lbl">ซ่อม</div>
+    </div>
+  </div>
+
+  <div class="cal-toggle-row">
+    <button class="cal-view-btn active" id="calBtn-list" type="button" onclick="setCalView('list')">
+      <i class="bi bi-list-ul"></i>รายการ
+    </button>
+    <button class="cal-view-btn" id="calBtn-day" type="button" onclick="setCalView('day')">
+      <i class="bi bi-calendar3-event"></i>วัน
+    </button>
+    <button class="cal-view-btn" id="calBtn-week" type="button" onclick="setCalView('week')">
+      <i class="bi bi-calendar3-week"></i>อาทิตย์
+    </button>
+    <button class="cal-view-btn" id="calBtn-month" type="button" onclick="setCalView('month')">
+      <i class="bi bi-calendar3"></i>เดือน
+    </button>
+  </div>
+
+  <div id="calendarPanel">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" type="button" onclick="calNavPrev()"><i class="bi bi-chevron-left"></i></button>
+      <div class="cal-nav-title" id="calNavTitle">—</div>
+      <button class="cal-nav-btn" type="button" onclick="calNavNext()"><i class="bi bi-chevron-right"></i></button>
+    </div>
+    <div id="calContent"></div>
+  </div>
+
+  <div class="main-content" id="mainContent">
+    <div class="tab-panel active" id="panel-ngan">
+      <div class="section-head">
+        <h2 class="section-title"><i class="bi bi-tools text-success"></i>งาน</h2>
+        <button class="refresh-btn" type="button" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <div class="section-note">ดูรายการติดตั้ง, สถานะ, ทีมงาน, วันที่นัด และ comment ล่าสุด</div>
+      <div class="filter-scroll">
+        <button class="btn btn-sm btn-outline-secondary filter-chip" data-filter-all onclick="setFilter('ngan','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('ngan','Assigned',this)">Assigned</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('ngan','In Progress',this)">In Progress</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('ngan','Waiting',this)">Waiting</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('ngan','Done',this)">Done</button>
+      </div>
+      <div id="list-ngan"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-langPaeng">
+      <div class="section-head">
+        <h2 class="section-title"><i class="bi bi-droplet text-success"></i>ล้างแผง</h2>
+        <button class="refresh-btn" type="button" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <div class="section-note">ดูวันที่แจ้ง, วันที่ดำเนินการ, ช่าง และบันทึกงาน</div>
+      <div class="filter-scroll">
+        <button class="btn btn-sm btn-outline-secondary filter-chip" data-filter-all onclick="setFilter('langPaeng','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('langPaeng','รอนัด',this)">รอนัด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('langPaeng','นัดแล้ว',this)">นัดแล้ว</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('langPaeng','เสร็จแล้ว',this)">เสร็จแล้ว</button>
+      </div>
+      <div id="list-langPaeng"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-som">
+      <div class="section-head">
+        <h2 class="section-title"><i class="bi bi-wrench-adjustable text-success"></i>ซ่อม</h2>
+        <button class="refresh-btn" type="button" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+      <div class="section-note">ดูรายการซ่อม, วันที่เกี่ยวข้อง และเพิ่ม comment สำหรับประสานงาน</div>
+      <div class="filter-scroll">
+        <button class="btn btn-sm btn-outline-secondary filter-chip" data-filter-all onclick="setFilter('som','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('som','รอซ่อม',this)">รอซ่อม</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('som','ส่งซ่อมแล้ว',this)">ส่งซ่อมแล้ว</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','รับคืนแล้ว',this)">รับคืนแล้ว</button>
+      </div>
+      <div id="list-som"></div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="ngan" onclick="switchTab('ngan')">
+      <i class="bi bi-tools"></i>
+      <span>งาน</span>
+    </button>
+    <button class="nav-btn" data-tab="langPaeng" onclick="switchTab('langPaeng')">
+      <i class="bi bi-droplet"></i>
+      <span>ล้างแผง</span>
+    </button>
+    <button class="nav-btn" data-tab="som" onclick="switchTab('som')">
+      <i class="bi bi-wrench-adjustable"></i>
+      <span>ซ่อม</span>
+    </button>
+  </nav>
+</div>
+
+<div class="sheet-overlay" id="commentModal" onclick="if (event.target === this) closeCommentModal()">
+  <div class="sheet-box comment-box">
+    <div class="sheet-title" id="commentModalTitle">Comment</div>
+    <div class="comment-log" id="commentLog"></div>
+    <textarea class="form-control comment-input" id="commentInput" placeholder="พิมพ์ comment เพิ่มเติม..."></textarea>
+    <div class="comment-actions">
+      <button class="btn btn-primary flex-fill fw-semibold" id="commentSubmitBtn" onclick="submitComment()">
+        <i class="bi bi-send me-1"></i>บันทึก comment
+      </button>
+      <button class="btn btn-light flex-fill fw-semibold" onclick="closeCommentModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const SUPABASE_URL = 'https://hlswbazcojsnfibirkzl.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_Kxzef_y7E3VAmhYvH4eS3g_o3fG7JLn';
+const VIEWER_USERS = ['Yam', 'Mike', 'Team1', 'Team2', 'Team3', 'Team4'];
+
+const { createClient } = window.supabase;
+
+const TAB_KEYS = ['ngan', 'langPaeng', 'som'];
+const TAB_NAMES = {
+  ngan: 'งาน',
+  langPaeng: 'ล้างแผง',
+  som: 'ซ่อม',
+};
+
+const STATUS_CONFIG = {
+  ngan: ['Waiting', 'Assigned', 'In Progress', 'Done'],
+  langPaeng: ['รอนัด', 'นัดแล้ว', 'เสร็จแล้ว'],
+  som: ['รอส่ง', 'ส่งซ่อมแล้ว', 'รับคืนแล้ว'],
+};
+
+const FILTER_DEFAULTS = {
+  ngan: ['Assigned', 'In Progress', 'Waiting'],
+  langPaeng: ['รอนัด', 'นัดแล้ว'],
+  som: ['รอซ่อม', 'ส่งซ่อมแล้ว'],
+};
+
+const DOW_TH = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+const MONTH_TH = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+const MONTH_SHORT = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+  'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+let sb = null;
+let realtimeReady = false;
+let realtimeReloadTimer = null;
+let allData = { ngan: [], langPaeng: [], som: [] };
+let filters = {
+  ngan: new Set(FILTER_DEFAULTS.ngan),
+  langPaeng: new Set(FILTER_DEFAULTS.langPaeng),
+  som: new Set(FILTER_DEFAULTS.som),
+};
+let pendingComment = null;
+let calView = 'list';
+let calDate = new Date();
+let calSelectedDate = null;
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function viewerOptionsHtml(selected = '') {
+  return [
+    '<option value="">-- เลือกผู้ใช้งาน --</option>',
+    ...VIEWER_USERS.map(name => `<option value="${name}"${name === selected ? ' selected' : ''}>${name}</option>`),
+  ].join('');
+}
+
+function renderViewerOptions(selected = '') {
+  const el = document.getElementById('nameInput');
+  if (el) el.innerHTML = viewerOptionsHtml(selected);
+}
+
+function formatDateDisplay(value) {
+  if (!value) return '';
+  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) return `${match[3]}/${match[2]}/${match[1]}`;
+  return String(value);
+}
+
+function formatTimeDisplay(value) {
+  if (!value) return '';
+  const match = String(value).match(/^(\d{1,2}):(\d{2})/);
+  if (match) return `${String(match[1]).padStart(2, '0')}:${match[2]}`;
+  return String(value);
+}
+
+function formatCommentDateTime(value) {
+  const date = value ? new Date(value) : new Date();
+  if (Number.isNaN(date.getTime())) return '';
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Bangkok',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(date).reduce((acc, part) => {
+    acc[part.type] = part.value;
+    return acc;
+  }, {});
+  return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
+}
+
+function parseDisplayDate(value) {
+  if (!value) return null;
+  const text = String(value).trim();
+  let match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  match = text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (match) return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+  const parsed = new Date(text);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function pickRaw(raw, key, fallback = '') {
+  const value = raw && raw[key];
+  return value !== undefined && value !== null && String(value).trim() !== '' ? value : fallback;
+}
+
+function combineNoteAndComments(note, comments) {
+  const lines = [];
+  const base = String(note || '').trim();
+  if (base) lines.push(base);
+  (comments || []).forEach(comment => {
+    const line = `[${formatCommentDateTime(comment.commented_at || comment.created_at)}] ${comment.author || 'ไม่ระบุ'}: ${comment.message || ''}`;
+    lines.push(line.trim());
+  });
+  return lines.filter(Boolean).join('\n');
+}
+
+function parseCommentLog(note) {
+  return String(note || '')
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const match = line.match(/^\[(.+?)\]\s*([^:]+):\s*(.*)$/);
+      if (match) return { dateTime: match[1], author: match[2], text: match[3] };
+      return { dateTime: '', author: 'บันทึกเดิม', text: line };
+    });
+}
+
+function commentCount(note) {
+  return parseCommentLog(note).length;
+}
+
+function commentSummaryHtml(note) {
+  const comments = parseCommentLog(note);
+  if (!comments.length) return '';
+  const last = comments[comments.length - 1];
+  const meta = [last.dateTime, last.author].filter(Boolean).join(' · ');
+  return `
+    <div class="comment-preview">
+      <i class="bi bi-chat-left-text me-1"></i>${meta ? `<strong>${escapeHtml(meta)}:</strong> ` : ''}${escapeHtml(last.text)}
+    </div>
+  `;
+}
+
+function renderCommentLog(note) {
+  const comments = parseCommentLog(note);
+  const el = document.getElementById('commentLog');
+  if (!el) return;
+  if (!comments.length) {
+    el.innerHTML = '<div class="empty-state py-4"><div class="small">ยังไม่มี comment</div></div>';
+    return;
+  }
+  el.innerHTML = comments.map(comment => `
+    <div class="comment-bubble">
+      <div class="comment-meta">${escapeHtml([comment.dateTime, comment.author].filter(Boolean).join(' · '))}</div>
+      <div class="comment-text">${escapeHtml(comment.text)}</div>
+    </div>
+  `).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function displayStatus(tabKey, status) {
+  if (tabKey === 'som' && status === 'รอส่ง') return 'รอซ่อม';
+  return status || '';
+}
+
+function matchesFilter(tabKey, row, value) {
+  if (tabKey === 'som' && value === 'รอซ่อม') return row.status === 'รอซ่อม' || row.status === 'รอส่ง';
+  return row.status === value;
+}
+
+function getVisibleRows(tabKey) {
+  const filterValue = filters[tabKey];
+  return allData[tabKey].filter(row => {
+    if (filterValue instanceof Set) {
+      if (filterValue.size === 0) return true;
+      return [...filterValue].some(value => matchesFilter(tabKey, row, value));
+    }
+    return filterValue === 'all' || matchesFilter(tabKey, row, filterValue);
+  });
+}
+
+function getCalendarRows(tabKey) {
+  const defaults = FILTER_DEFAULTS[tabKey] || [];
+  if (!defaults.length) return allData[tabKey] || [];
+  return (allData[tabKey] || []).filter(row => defaults.some(value => matchesFilter(tabKey, row, value)));
+}
+
+function dateKey(date) {
+  if (!date || Number.isNaN(date.getTime())) return '';
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function todayKey() {
+  return dateKey(new Date());
+}
+
+function statusClass(tabKey, status) {
+  if (status === 'Assigned') return 'assigned';
+  if (status === 'Done' || status === 'เสร็จแล้ว' || status === 'รับคืนแล้ว') return 'done';
+  if (status === 'ยกเลิก' || status === 'Reject') return 'cancel';
+  if (status === 'รอซ่อม') return 'waiting';
+  const options = STATUS_CONFIG[tabKey] || [];
+  if (!options.length) return 'progress';
+  const idx = options.indexOf(status);
+  if (idx <= 0) return 'waiting';
+  if (idx === options.length - 1) return 'done';
+  return 'progress';
+}
+
+function mapJobRow(job, comments) {
+  const raw = job.raw_data || {};
+  return {
+    id: job.id,
+    sheet_key: job.sheet_key,
+    sheet_row: job.sheet_row || 0,
+    status: job.status || '',
+    customer: pickRaw(raw, 'ลูกค้า', job.customer_name || job.title || ''),
+    item: pickRaw(raw, 'รายการ', job.title || ''),
+    detail: pickRaw(raw, 'รายละเอียด', job.detail || ''),
+    phone: pickRaw(raw, 'เบอร์โทร', job.phone || ''),
+    date: pickRaw(raw, 'วันที่', formatDateDisplay(job.job_date)),
+    time: pickRaw(raw, 'เวลา', formatTimeDisplay(job.job_time)),
+    created_date: pickRaw(raw, 'วันที่สร้าง', formatDateDisplay(job.created_date)),
+    appointment_date: pickRaw(raw, 'วันที่ดำเนินการ', pickRaw(raw, 'วันที่นัด', formatDateDisplay(job.appointment_date))),
+    report_date: pickRaw(raw, 'วันที่แจ้ง', formatDateDisplay(job.job_date)),
+    site_date: pickRaw(raw, 'วันที่เข้างาน', formatDateDisplay(job.sent_date)),
+    site_time: pickRaw(raw, 'เวลาเข้างาน', pickRaw(raw, 'เวลานัดหมาย', formatTimeDisplay(job.job_time))),
+    return_date: pickRaw(raw, 'วันที่ส่งคืน', formatDateDisplay(job.received_date)),
+    technician: pickRaw(raw, 'ช่าง', job.technician || ''),
+    type: pickRaw(raw, 'ประเภท', job.job_type || ''),
+    kwp: pickRaw(raw, 'kWp', ''),
+    maps_url: pickRaw(raw, 'Maps', pickRaw(raw, 'Maps Link', job.maps_url || '')),
+    assigned_start: pickRaw(raw, 'วันที่เริ่มงาน', ''),
+    assigned_end: pickRaw(raw, 'วันที่สิ้นสุดงาน', ''),
+    _noteBase: job.note || '',
+    note: combineNoteAndComments(job.note || '', comments || []),
+    _comments: comments || [],
+  };
+}
+
+function setLoading(visible) {
+  document.getElementById('loading').style.display = visible ? 'flex' : 'none';
+}
+
+function saveName() {
+  const value = (document.getElementById('nameInput').value || '').trim();
+  if (!VIEWER_USERS.includes(value)) {
+    alert('กรุณาเลือกผู้ใช้งาน');
+    return;
+  }
+  localStorage.setItem('hiSolarJdkViewerUser', value);
+  document.getElementById('userChip').textContent = `👤 ${value}`;
+  document.getElementById('nameModal').style.display = 'none';
+  if (sb) loadData();
+}
+
+function changeName() {
+  const current = localStorage.getItem('hiSolarJdkViewerUser') || '';
+  renderViewerOptions(current);
+  document.getElementById('nameModal').style.display = 'flex';
+}
+
+function switchTab(tabKey) {
+  TAB_KEYS.forEach(key => {
+    document.getElementById(`panel-${key}`).classList.toggle('active', key === tabKey);
+    document.querySelector(`.nav-btn[data-tab="${key}"]`)?.classList.toggle('active', key === tabKey);
+  });
+}
+
+function setFilter(tabKey, value, button) {
+  if (filters[tabKey] instanceof Set) {
+    const scroll = button.closest('.filter-scroll');
+    const allChip = scroll?.querySelector('[data-filter-all]');
+    if (value === 'all') {
+      filters[tabKey] = new Set();
+      scroll?.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+      allChip?.classList.add('active');
+    } else {
+      if (filters[tabKey].has(value)) {
+        filters[tabKey].delete(value);
+        button.classList.remove('active');
+      } else {
+        filters[tabKey].add(value);
+        button.classList.add('active');
+      }
+      allChip?.classList.toggle('active', filters[tabKey].size === 0);
+    }
+  } else {
+    filters[tabKey] = value;
+    button.closest('.filter-scroll')?.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+    button.classList.add('active');
+  }
+  renderTab(tabKey);
+  updateStats();
+  if (calView !== 'list') renderCalendar();
+}
+
+function getTabSortDate(tabKey, row) {
+  if (tabKey === 'ngan') {
+    if (row.status === 'Assigned' && row.assigned_start) return parseDisplayDate(row.assigned_start);
+    return parseDisplayDate(row.date || row.created_date || '');
+  }
+  if (tabKey === 'langPaeng') {
+    return parseDisplayDate(row.appointment_date || row.report_date || '');
+  }
+  return parseDisplayDate(row.report_date || row.site_date || row.return_date || '');
+}
+
+function getNganListPriority(status) {
+  if (status === 'Assigned' || status === 'In Progress') return 0;
+  if (status === 'Waiting') return 1;
+  return 2;
+}
+
+function getNganStatusOrder(status) {
+  if (status === 'Assigned') return 0;
+  if (status === 'In Progress') return 1;
+  if (status === 'Waiting') return 2;
+  return 99;
+}
+
+function buildCard(tabKey, row) {
+  const sc = statusClass(tabKey, row.status);
+  const comments = commentCount(row.note || '');
+  const statusBadge = `<span class="status-badge ${sc}">${escapeHtml(displayStatus(tabKey, row.status) || '-')}</span>`;
+  const commentBadge = comments ? `<span class="info-badge"><i class="bi bi-chat-left-dots"></i>${comments} comment</span>` : '';
+  const mapsBtn = row.maps_url
+    ? `<a class="btn btn-sm btn-outline-secondary btn-map" href="${escapeHtml(row.maps_url)}" target="_blank" rel="noopener"><i class="bi bi-geo-alt-fill me-1"></i>แผนที่</a>`
+    : '';
+
+  let title = '';
+  let titleHtml = '';
+  let cardDate = '';
+  let detail = '';
+  let detailHtml = '';
+  let meta = '';
+  let extra = '';
+
+  if (tabKey === 'ngan') {
+    title = row.customer || '—';
+    titleHtml = escapeHtml(title);
+    cardDate = row.date || row.created_date || '';
+    detail = row.detail || '';
+    detailHtml = escapeHtml(detail).replace(/\r?\n/g, '<br>');
+    const parts = [];
+    if (row.date) parts.push(`<i class="bi bi-calendar3 me-1"></i>${escapeHtml(row.date)}${row.time ? ` ${escapeHtml(row.time)} น.` : ''}`);
+    if (row.technician) parts.push(`<i class="bi bi-person-fill me-1"></i>${escapeHtml(row.technician)}`);
+    if (row.type) parts.push(`<i class="bi bi-lightning-charge me-1"></i>${escapeHtml(row.type)}`);
+    if (row.phone) parts.push(`<i class="bi bi-telephone-fill me-1"></i><a href="tel:${escapeHtml(row.phone)}">${escapeHtml(row.phone)}</a>`);
+    meta = parts.join('<span class="mx-2">·</span>');
+    if (row.status === 'Assigned' && row.assigned_start) {
+      const range = row.assigned_end ? `${escapeHtml(row.assigned_start)} - ${escapeHtml(row.assigned_end)}` : escapeHtml(row.assigned_start);
+      extra += `<div class="assigned-badge"><i class="bi bi-calendar-range"></i>${range}</div>`;
+    }
+  } else if (tabKey === 'langPaeng') {
+    title = row.customer || '—';
+    titleHtml = escapeHtml(title);
+    cardDate = row.appointment_date || row.report_date || '';
+    const parts = [];
+    if (row.report_date) parts.push(`<i class="bi bi-calendar-plus me-1"></i>แจ้ง ${escapeHtml(row.report_date)}`);
+    if (row.appointment_date) parts.push(`<i class="bi bi-calendar-check me-1"></i>ดำเนินการ ${escapeHtml(row.appointment_date)}`);
+    detail = parts.join('&nbsp;&nbsp;');
+    detailHtml = detail;
+    const metaParts = [];
+    if (row.technician) metaParts.push(`<i class="bi bi-person-fill me-1"></i>${escapeHtml(row.technician)}`);
+    if (row.phone) metaParts.push(`<i class="bi bi-telephone-fill me-1"></i><a href="tel:${escapeHtml(row.phone)}">${escapeHtml(row.phone)}</a>`);
+    meta = metaParts.join('<span class="mx-2">·</span>');
+    if (row.kwp) extra += `<div class="info-badge"><i class="bi bi-lightning-charge-fill"></i>${escapeHtml(row.kwp)} kWp</div>`;
+  } else if (tabKey === 'som') {
+    title = row.item || row.customer || '—';
+    titleHtml = escapeHtml(title);
+    cardDate = row.report_date || row.site_date || '';
+    detail = row.customer ? `<i class="bi bi-person-fill me-1"></i>${escapeHtml(row.customer)}` : '';
+    detailHtml = detail;
+    const metaParts = [];
+    if (row.report_date) metaParts.push(`<i class="bi bi-bell me-1"></i>แจ้ง ${escapeHtml(row.report_date)}`);
+    if (row.site_date) metaParts.push(`<i class="bi bi-tools me-1"></i>เข้างาน ${escapeHtml(row.site_date)}${row.site_time ? ` ${escapeHtml(row.site_time)} น.` : ''}`);
+    if (row.return_date) metaParts.push(`<i class="bi bi-check2-circle me-1"></i>ส่งคืน ${escapeHtml(row.return_date)}`);
+    if (row.phone) metaParts.push(`<i class="bi bi-telephone-fill me-1"></i><a href="tel:${escapeHtml(row.phone)}">${escapeHtml(row.phone)}</a>`);
+    meta = metaParts.join('<span class="mx-2">·</span>');
+  }
+
+  extra += commentSummaryHtml(row.note || '');
+
+  return `
+    <article class="card job-card status-${sc}">
+      <div class="card-body">
+        <div class="card-top">
+          <div class="card-title">${titleHtml}</div>
+          <div class="card-date">${escapeHtml(cardDate)}</div>
+        </div>
+        ${detail ? `<div class="card-detail">${detailHtml}</div>` : ''}
+        ${meta ? `<div class="card-meta">${meta}</div>` : ''}
+        ${statusBadge}${commentBadge}
+        ${extra}
+        <div class="card-actions">
+          <button class="btn btn-sm btn-outline-secondary btn-comment" type="button" onclick="openCommentModal('${tabKey}','${row.id}')">
+            <i class="bi bi-chat-dots me-1"></i>Comment
+          </button>
+          ${mapsBtn}
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function getAllJobsWithDates() {
+  const result = [];
+  const datePicker = {
+    ngan: row => row.status === 'Assigned' && row.assigned_start ? row.assigned_start : (row.date || row.created_date),
+    langPaeng: row => row.appointment_date || row.report_date,
+  };
+
+  TAB_KEYS.forEach(tabKey => {
+    if (tabKey === 'som') {
+      getCalendarRows(tabKey).forEach(row => {
+        const reportDate = parseDisplayDate(row.report_date);
+        if (reportDate) result.push({ tabKey, job: row, date: reportDate, dk: dateKey(reportDate), somEventType: 'report' });
+
+        const siteDate = parseDisplayDate(row.site_date);
+        if (siteDate) result.push({ tabKey, job: row, date: siteDate, dk: dateKey(siteDate), somEventType: 'site' });
+
+        if (!reportDate && !siteDate) {
+          const returnDate = parseDisplayDate(row.return_date);
+          if (returnDate) result.push({ tabKey, job: row, date: returnDate, dk: dateKey(returnDate), somEventType: 'return' });
+        }
+      });
+      return;
+    }
+
+    const pickDate = datePicker[tabKey];
+    getCalendarRows(tabKey).forEach(row => {
+      const date = parseDisplayDate(pickDate(row));
+      if (!date) return;
+      result.push({ tabKey, job: row, date, dk: dateKey(date) });
+    });
+  });
+
+  return result;
+}
+
+function setCalView(view) {
+  calView = view;
+  const calendarPanel = document.getElementById('calendarPanel');
+  const mainContent = document.getElementById('mainContent');
+
+  if (view === 'list') {
+    calendarPanel.style.display = 'none';
+    mainContent.style.display = '';
+  } else {
+    calendarPanel.style.display = 'block';
+    mainContent.style.display = 'none';
+    if (!calSelectedDate) calSelectedDate = todayKey();
+    renderCalendar();
+  }
+
+  ['list', 'day', 'week', 'month'].forEach(name => {
+    document.getElementById(`calBtn-${name}`)?.classList.toggle('active', name === view);
+  });
+}
+
+function calNavPrev() {
+  if (calView === 'month') calDate = new Date(calDate.getFullYear(), calDate.getMonth() - 1, 1);
+  else if (calView === 'week') calDate = new Date(calDate.getTime() - 7 * 86400000);
+  else if (calView === 'day') calDate = new Date(calDate.getTime() - 86400000);
+  renderCalendar();
+}
+
+function calNavNext() {
+  if (calView === 'month') calDate = new Date(calDate.getFullYear(), calDate.getMonth() + 1, 1);
+  else if (calView === 'week') calDate = new Date(calDate.getTime() + 7 * 86400000);
+  else if (calView === 'day') calDate = new Date(calDate.getTime() + 86400000);
+  renderCalendar();
+}
+
+function formatCalShort(dayKeyValue) {
+  const match = String(dayKeyValue).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return dayKeyValue;
+  return `${parseInt(match[3], 10)} ${MONTH_SHORT[parseInt(match[2], 10) - 1]}`;
+}
+
+function formatCalFull(dayKeyValue) {
+  const match = String(dayKeyValue).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return dayKeyValue;
+  const date = new Date(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10));
+  return `${DOW_TH[date.getDay()]}ที่ ${parseInt(match[3], 10)} ${MONTH_TH[parseInt(match[2], 10) - 1]} ${parseInt(match[1], 10) + 543}`;
+}
+
+function buildCalEventCard(item) {
+  const { tabKey, job } = item;
+  const sc = statusClass(tabKey, job.status);
+  const tabChip = `<span class="cal-event-tab ${tabKey}">${TAB_NAMES[tabKey]}</span>`;
+  const statusBadge = `<span class="status-badge ${sc}">${escapeHtml(displayStatus(tabKey, job.status) || '-')}</span>`;
+
+  let title = '';
+  let dateText = '';
+  let detail = '';
+  let meta = '';
+
+  if (tabKey === 'ngan') {
+    title = job.customer || '—';
+    dateText = job.date || job.created_date || '';
+    detail = job.detail ? escapeHtml(job.detail).replace(/\r?\n/g, '<br>') : '';
+    const parts = [];
+    if (job.date) parts.push(`<i class="bi bi-calendar3 me-1"></i>${escapeHtml(job.date)}${job.time ? ` ${escapeHtml(job.time)} น.` : ''}`);
+    if (job.technician) parts.push(`<i class="bi bi-person-fill me-1"></i>${escapeHtml(job.technician)}`);
+    if (job.type) parts.push(`<i class="bi bi-lightning-charge me-1"></i>${escapeHtml(job.type)}`);
+    meta = parts.join('<span class="mx-2">·</span>');
+  } else if (tabKey === 'langPaeng') {
+    title = job.customer || '—';
+    dateText = job.appointment_date || job.report_date || '';
+    const parts = [];
+    if (job.report_date) parts.push(`<i class="bi bi-calendar-plus me-1"></i>แจ้ง ${escapeHtml(job.report_date)}`);
+    if (job.appointment_date) parts.push(`<i class="bi bi-calendar-check me-1"></i>ดำเนินการ ${escapeHtml(job.appointment_date)}`);
+    detail = parts.join('&nbsp;&nbsp;');
+    meta = job.technician ? `<i class="bi bi-person-fill me-1"></i>${escapeHtml(job.technician)}` : '';
+  } else if (tabKey === 'som') {
+    title = job.item || job.customer || '—';
+    if (item.somEventType === 'site' && job.site_date) {
+      dateText = `เข้างาน ${job.site_date}${job.site_time ? ` ${job.site_time} น.` : ''}`;
+    } else if (item.somEventType === 'return' && job.return_date) {
+      dateText = `ส่งคืน ${job.return_date}`;
+    } else {
+      dateText = `รับแจ้ง ${job.report_date || ''}`.trim();
+    }
+    detail = job.customer ? `<i class="bi bi-person-fill me-1"></i>${escapeHtml(job.customer)}` : '';
+    const parts = [];
+    if (job.report_date) parts.push(`<i class="bi bi-bell me-1"></i>แจ้ง ${escapeHtml(job.report_date)}`);
+    if (job.site_date) parts.push(`<i class="bi bi-tools me-1"></i>เข้างาน ${escapeHtml(job.site_date)}${job.site_time ? ` ${escapeHtml(job.site_time)} น.` : ''}`);
+    if (job.return_date) parts.push(`<i class="bi bi-check2-circle me-1"></i>ส่งคืน ${escapeHtml(job.return_date)}`);
+    meta = parts.join('<span class="mx-2">·</span>');
+  }
+
+  return `
+    <article class="cal-event-card ${sc}" onclick="openCommentModal('${tabKey}','${job.id}')">
+      <div class="cal-event-header">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          ${tabChip}
+          ${statusBadge}
+        </div>
+        <div class="card-date">${escapeHtml(dateText)}</div>
+      </div>
+      <div class="cal-event-title">${escapeHtml(title)}</div>
+      ${detail ? `<div class="card-detail mt-1 mb-1">${detail}</div>` : ''}
+      ${meta ? `<div class="cal-event-meta">${meta}</div>` : ''}
+      ${commentSummaryHtml(job.note || '')}
+    </article>
+  `;
+}
+
+function buildCalEventsBlock(items) {
+  if (!items.length) {
+    return '<div class="empty-state py-4"><div class="small">ไม่มีงาน</div></div>';
+  }
+  return `<div class="cal-events-list">${items.map(buildCalEventCard).join('')}</div>`;
+}
+
+function renderMonthView() {
+  const year = calDate.getFullYear();
+  const month = calDate.getMonth();
+  document.getElementById('calNavTitle').textContent = `${MONTH_TH[month]} ${year + 543}`;
+
+  const jobsByDay = {};
+  getAllJobsWithDates().forEach(item => {
+    (jobsByDay[item.dk] ||= []).push(item);
+  });
+
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = todayKey();
+  const selected = calSelectedDate;
+
+  let html = '<div class="cal-month-grid">';
+  DOW_TH.forEach(day => { html += `<div class="cal-dow">${day}</div>`; });
+  for (let i = 0; i < firstDow; i += 1) html += '<div class="cal-day"></div>';
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const dk = dateKey(new Date(year, month, day));
+    const dayJobs = jobsByDay[dk] || [];
+    const dots = dayJobs.slice(0, 5).map(item => `<div class="cal-dot ${statusClass(item.tabKey, item.job.status)}"></div>`).join('');
+    html += `
+      <div class="cal-day${dk === today ? ' today' : ''}${dk === selected ? ' selected' : ''}" onclick="calDayClick('${dk}')">
+        <div class="cal-day-num">${day}</div>
+        ${dots ? `<div class="cal-dots">${dots}</div>` : ''}
+      </div>
+    `;
+  }
+  html += '</div>';
+
+  if (selected) {
+    const selectedJobs = jobsByDay[selected] || [];
+    const label = selected === today ? 'วันนี้' : formatCalShort(selected);
+    html += `<div class="cal-day-header"><i class="bi bi-calendar-event me-1 text-success"></i>${label}${selectedJobs.length ? ` - ${selectedJobs.length} งาน` : ' - ไม่มีงาน'}</div>`;
+    html += `<div id="calSelectedEvents">${buildCalEventsBlock(selectedJobs)}</div>`;
+  }
+
+  document.getElementById('calContent').innerHTML = html;
+}
+
+function renderWeekView() {
+  const dow = calDate.getDay();
+  const firstDay = new Date(calDate);
+  firstDay.setDate(calDate.getDate() - dow);
+  const days = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(firstDay);
+    date.setDate(firstDay.getDate() + index);
+    return date;
+  });
+
+  document.getElementById('calNavTitle').textContent = `${formatCalShort(dateKey(days[0]))} - ${formatCalShort(dateKey(days[6]))}`;
+
+  const jobsByDay = {};
+  getAllJobsWithDates().forEach(item => {
+    (jobsByDay[item.dk] ||= []).push(item);
+  });
+
+  const today = todayKey();
+  let html = '<div class="cal-week-scroll"><div class="cal-week-grid">';
+  days.forEach(day => {
+    const dk = dateKey(day);
+    html += `
+      <div class="cal-week-col">
+        <div class="cal-week-dow">${DOW_TH[day.getDay()]}</div>
+        <div class="cal-week-date${dk === today ? ' today' : ''}">${day.getDate()}</div>
+        ${(jobsByDay[dk] || []).map(item => `
+          <div class="cal-week-event ${statusClass(item.tabKey, item.job.status)}" onclick="openCommentModal('${item.tabKey}','${item.job.id}')" title="${escapeHtml(item.job.customer || item.job.item || '')}">
+            ${escapeHtml((item.job.customer || item.job.item || '—').slice(0, 12))}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  });
+  html += '</div></div>';
+  document.getElementById('calContent').innerHTML = html;
+}
+
+function renderDayView() {
+  const dk = dateKey(calDate);
+  const today = todayKey();
+  const items = getAllJobsWithDates().filter(item => item.dk === dk);
+  document.getElementById('calNavTitle').textContent = formatCalFull(dk);
+
+  let html = '';
+  if (!items.length) {
+    html = '<div class="empty-state py-4"><i class="bi bi-calendar-x"></i><div class="mt-2 small">ไม่มีงานวันนี้</div></div>';
+  } else {
+    html = `<div class="cal-day-header"><i class="bi bi-calendar-check me-1 text-success"></i>${dk === today ? 'วันนี้' : formatCalShort(dk)} - ${items.length} งาน</div>`;
+    html += buildCalEventsBlock(items);
+  }
+  document.getElementById('calContent').innerHTML = html;
+}
+
+function renderCalendar() {
+  if (calView === 'month') renderMonthView();
+  else if (calView === 'week') renderWeekView();
+  else if (calView === 'day') renderDayView();
+}
+
+function calDayClick(dk) {
+  calSelectedDate = dk;
+  const match = dk.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) calDate = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  renderMonthView();
+  requestAnimationFrame(() => {
+    const selectedBlock = document.getElementById('calSelectedEvents');
+    selectedBlock?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+function renderTab(tabKey) {
+  const host = document.getElementById(`list-${tabKey}`);
+  if (!host) return;
+
+  const rows = getVisibleRows(tabKey)
+    .sort((a, b) => {
+      if (tabKey === 'ngan') {
+        const pa = getNganListPriority(a.status);
+        const pb = getNganListPriority(b.status);
+        if (pa !== pb) return pa - pb;
+      }
+
+      const da = getTabSortDate(tabKey, a);
+      const db = getTabSortDate(tabKey, b);
+      if (!da && !db) return (a.sheet_row || 0) - (b.sheet_row || 0);
+      if (!da) return 1;
+      if (!db) return -1;
+      if (da.getTime() === db.getTime()) {
+        if (tabKey === 'ngan') {
+          const sa = getNganStatusOrder(a.status);
+          const sb = getNganStatusOrder(b.status);
+          if (sa !== sb) return sa - sb;
+        }
+        return (a.sheet_row || 0) - (b.sheet_row || 0);
+      }
+      return da - db;
+    });
+
+  if (!rows.length) {
+    host.innerHTML = `
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <div class="mt-2 small">ไม่มีรายการในเมนูนี้</div>
+      </div>
+    `;
+    return;
+  }
+
+  host.innerHTML = rows.map(row => buildCard(tabKey, row)).join('');
+}
+
+function renderAll() {
+  TAB_KEYS.forEach(renderTab);
+  if (calView !== 'list') renderCalendar();
+}
+
+function updateStats() {
+  document.getElementById('s-ngan').textContent = getVisibleRows('ngan').length;
+  document.getElementById('s-langPaeng').textContent = getVisibleRows('langPaeng').length;
+  document.getElementById('s-som').textContent = getVisibleRows('som').length;
+}
+
+async function loadData() {
+  if (!sb) return;
+  setLoading(true);
+  try {
+    const [jobsRes, commentsRes] = await Promise.all([
+      sb.from('hi_solar_jobs').select('*').in('sheet_key', TAB_KEYS).order('sheet_row'),
+      sb.from('hi_solar_job_comments').select('*').order('commented_at'),
+    ]);
+
+    if (jobsRes.error) throw jobsRes.error;
+    if (commentsRes.error) throw commentsRes.error;
+
+    const commentsByJob = (commentsRes.data || []).reduce((acc, comment) => {
+      (acc[comment.job_id] ||= []).push(comment);
+      return acc;
+    }, {});
+
+    allData = { ngan: [], langPaeng: [], som: [] };
+    (jobsRes.data || []).forEach(job => {
+      if (!allData[job.sheet_key]) return;
+      allData[job.sheet_key].push(mapJobRow(job, commentsByJob[job.id] || []));
+    });
+
+    renderAll();
+    updateStats();
+  } catch (error) {
+    console.error('loadData failed', error);
+    showToast(`โหลดข้อมูลไม่สำเร็จ: ${error.message || error}`, 'danger');
+  } finally {
+    setLoading(false);
+  }
+}
+
+function setupRealtime() {
+  if (!sb || realtimeReady) return;
+  realtimeReady = true;
+
+  ['hi_solar_jobs', 'hi_solar_job_comments'].forEach(tableName => {
+    sb.channel(`jdk_rt_${tableName}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: tableName }, () => {
+        clearTimeout(realtimeReloadTimer);
+        realtimeReloadTimer = setTimeout(() => loadData(), 250);
+      })
+      .subscribe(status => {
+        document.getElementById('rtIndicator').style.display = status === 'SUBSCRIBED' ? 'flex' : 'none';
+      });
+  });
+}
+
+function openCommentModal(tabKey, id) {
+  const item = allData[tabKey].find(row => row.id === id);
+  if (!item) return;
+  pendingComment = { tabKey, id };
+  document.getElementById('commentModalTitle').textContent = `${TAB_NAMES[tabKey]} — ${item.customer || item.item || 'รายการ'}`;
+  document.getElementById('commentInput').value = '';
+  renderCommentLog(item.note || '');
+  document.getElementById('commentModal').classList.add('show');
+  setTimeout(() => document.getElementById('commentInput')?.focus(), 50);
+}
+
+function closeCommentModal() {
+  document.getElementById('commentModal').classList.remove('show');
+  pendingComment = null;
+}
+
+async function submitComment() {
+  if (!pendingComment || !sb) return;
+  const input = document.getElementById('commentInput');
+  const message = (input.value || '').trim();
+  if (!message) {
+    alert('กรุณาพิมพ์ comment');
+    return;
+  }
+
+  const user = localStorage.getItem('hiSolarJdkViewerUser') || '';
+  if (!VIEWER_USERS.includes(user)) {
+    alert('กรุณาเลือกผู้ใช้งานก่อน');
+    changeName();
+    return;
+  }
+
+  const button = document.getElementById('commentSubmitBtn');
+  const original = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
+
+  try {
+    const commentedAt = new Date().toISOString();
+    const { data, error } = await sb.from('hi_solar_job_comments').insert({
+      job_id: pendingComment.id,
+      author: user,
+      message,
+      source: 'jdk-viewer',
+      commented_at: commentedAt,
+    }).select('*').single();
+
+    if (error) throw error;
+
+    const item = allData[pendingComment.tabKey].find(row => row.id === pendingComment.id);
+    if (item) {
+      item._comments = [...(item._comments || []), data];
+      item.note = combineNoteAndComments(item._noteBase || '', item._comments);
+      renderCommentLog(item.note || '');
+      renderTab(pendingComment.tabKey);
+    }
+
+    input.value = '';
+    showToast('เพิ่ม comment แล้ว', 'success');
+  } catch (error) {
+    console.error('submitComment failed', error);
+    showToast(`เพิ่ม comment ไม่สำเร็จ: ${error.message || error}`, 'danger');
+  } finally {
+    button.disabled = false;
+    button.innerHTML = original;
+  }
+}
+
+function showToast(message, type = 'success') {
+  const colors = {
+    success: '#0f766e',
+    danger: '#dc2626',
+    info: '#2563eb',
+  };
+  const toast = document.createElement('div');
+  toast.style.cssText = [
+    'position:fixed',
+    'top:72px',
+    'left:50%',
+    'transform:translateX(-50%)',
+    'z-index:400',
+    `background:${colors[type] || '#0f172a'}`,
+    'color:#fff',
+    'padding:9px 16px',
+    'border-radius:999px',
+    'font-size:13px',
+    'font-weight:500',
+    'box-shadow:0 10px 24px rgba(15,23,42,0.18)',
+    'max-width:min(92vw,440px)',
+    'text-align:center',
+  ].join(';');
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function initCommentInput() {
+  const input = document.getElementById('commentInput');
+  if (!input) return;
+  input.addEventListener('keydown', event => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+      event.preventDefault();
+      submitComment();
+    }
+  });
+}
+
+(function init() {
+  const hasSupabaseUrl = /^https:\/\/[a-z0-9]+\.supabase\.co$/i.test(SUPABASE_URL);
+  const hasAnonKey = /^(eyJ|sb_publishable_)/.test(SUPABASE_ANON_KEY);
+  const savedUser = localStorage.getItem('hiSolarJdkViewerUser') || '';
+
+  renderViewerOptions(savedUser);
+  initCommentInput();
+
+  if (!hasSupabaseUrl || !hasAnonKey) {
+    document.getElementById('configBanner').style.display = 'block';
+    setLoading(false);
+    if (savedUser) {
+      document.getElementById('userChip').textContent = `👤 ${savedUser}`;
+      document.getElementById('nameModal').style.display = 'none';
+    }
+    renderAll();
+    updateStats();
+    return;
+  }
+
+  sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  setupRealtime();
+
+  if (savedUser && VIEWER_USERS.includes(savedUser)) {
+    document.getElementById('userChip').textContent = `👤 ${savedUser}`;
+    document.getElementById('nameModal').style.display = 'none';
+    loadData();
+  } else {
+    setLoading(false);
+  }
+})();
+</script>
+</body>
+</html>
