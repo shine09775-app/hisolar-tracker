@@ -173,8 +173,14 @@
     .sheet-opt.cancel   { background: var(--hs-red-l);   color: #b91c1c; }
 
     /* Name Modal */
-    .name-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 20px; }
-    .name-box { background: #fff; border-radius: 16px; padding: 28px 24px; width: 100%; max-width: 340px; }
+    .name-overlay { position: fixed; inset: 0; background: linear-gradient(160deg, #ccf0ee 0%, #e8f4fd 50%, #d4edda 100%); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 24px; }
+    .name-box { background: #fff; border-radius: 24px; padding: 36px 28px; width: 100%; max-width: 360px; box-shadow: 0 8px 40px rgba(0,0,0,.10); }
+    .login-title { font-size: 2rem; font-weight: 700; color: var(--hs-primary); margin-bottom: 6px; }
+    .login-sub { color: #64748b; font-size: 14px; margin-bottom: 28px; }
+    .btn-hisolar { background: var(--hs-primary); color: #fff; border: none; width: 100%; padding: 15px; font-size: 16px; font-weight: 700; border-radius: 14px; margin-bottom: 14px; cursor: pointer; }
+    .btn-hisolar:hover { background: var(--hs-primary-d); }
+    .btn-jdk { background: #1e3a8a; color: #fff; border: none; width: 100%; padding: 15px; font-size: 16px; font-weight: 700; border-radius: 14px; cursor: pointer; }
+    .btn-jdk:hover { background: #1e40af; }
 
     /* Loading */
     #loading { position: fixed; inset: 0; background: rgba(255,255,255,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 400; gap: 14px; }
@@ -278,18 +284,25 @@
 <!-- Name Modal -->
 <div class="name-overlay" id="nameModal">
   <div class="name-box">
-    <div class="text-center mb-3">
-      <i class="bi bi-sun-fill text-warning" style="font-size:2.8rem;"></i>
-      <h2 class="section-title mt-2 mb-0">Hi Solar Tracker</h2>
-      <div class="accent-bar mx-auto mt-2"></div>
+
+    <!-- Step 1: เลือกเมนู -->
+    <div id="loginStep1">
+      <div class="login-title">Login</div>
+      <div class="login-sub">เลือกเมนูที่ต้องการเข้าใช้งาน</div>
+      <button class="btn-hisolar" onclick="goHiSolar()">Hi Solar</button>
+      <button class="btn-jdk" onclick="goJdk()">JDK</button>
     </div>
-    <p class="text-muted small mb-3">ระบุชื่อของคุณ เพื่อบันทึกการอัปเดตงาน</p>
-    <select id="nameInput" class="form-select mb-3" onkeydown="if(event.key==='Enter')saveName()">
-      <option value="">-- เลือกทีมงาน --</option>
-    </select>
-    <button class="btn btn-primary w-100 fw-semibold" onclick="saveName()">
-      <i class="bi bi-box-arrow-in-right me-1"></i> เข้าใช้งาน
-    </button>
+
+    <!-- Step 2: รหัสผ่าน Hi Solar -->
+    <div id="loginStep2" style="display:none">
+      <button onclick="showLoginStep1()" style="background:none;border:none;color:#64748b;font-size:13px;padding:0;margin-bottom:16px;cursor:pointer;">← ย้อนกลับ</button>
+      <div class="login-title" style="font-size:1.6rem;">Hi Solar</div>
+      <div class="login-sub">กรอกรหัสผ่านเพื่อเข้าใช้งาน</div>
+      <input type="password" id="hiSolarPwd" class="form-control mb-3" placeholder="รหัสผ่าน" style="font-size:16px;padding:12px;" onkeydown="if(event.key==='Enter')validateHiSolar()">
+      <div id="pwdError" style="color:#ef4444;font-size:13px;margin-bottom:10px;display:none;">รหัสผ่านไม่ถูกต้อง</div>
+      <button class="btn-hisolar" onclick="validateHiSolar()">เข้าใช้งาน</button>
+    </div>
+
   </div>
 </div>
 
@@ -309,7 +322,7 @@
         <span class="rt-dot"></span>
         <span style="color:rgba(255,255,255,.7);font-size:11px;">Live</span>
       </span>
-      <button class="user-chip" id="userChip" onclick="changeName()">—</button>
+      <button class="user-chip" id="userChip" onclick="changeName()">Hi Solar</button>
     </div>
   </div>
 
@@ -1155,9 +1168,37 @@ async function submitAddForm(event, tabKey) {
   }
 }
 
+function goHiSolar() {
+  document.getElementById('loginStep1').style.display = 'none';
+  document.getElementById('loginStep2').style.display = 'block';
+  document.getElementById('hiSolarPwd').value = '';
+  document.getElementById('pwdError').style.display = 'none';
+  setTimeout(() => document.getElementById('hiSolarPwd').focus(), 100);
+}
+
+function showLoginStep1() {
+  document.getElementById('loginStep2').style.display = 'none';
+  document.getElementById('loginStep1').style.display = 'block';
+}
+
+function validateHiSolar() {
+  const pwd = document.getElementById('hiSolarPwd').value;
+  if (pwd === '0091') {
+    window.location.href = './hisolar_planner.html';
+  } else {
+    document.getElementById('pwdError').style.display = 'block';
+    document.getElementById('hiSolarPwd').value = '';
+    document.getElementById('hiSolarPwd').focus();
+  }
+}
+
+function goJdk() {
+  window.location.href = './JDK.html';
+}
+
 function saveName() {
-  const v = document.getElementById('nameInput').value.trim();
-  if (!TEAM_MEMBERS.includes(v)) return alert('กรุณาเลือกทีมงาน');
+  const v = document.getElementById('nameInput')?.value.trim();
+  if (!v || !TEAM_MEMBERS.includes(v)) return;
   localStorage.setItem('hiSolarUser', v);
   document.getElementById('nameModal').style.display = 'none';
   document.getElementById('userChip').textContent = '👤 ' + v;
@@ -1167,8 +1208,6 @@ function saveName() {
 }
 
 function changeName() {
-  const current = localStorage.getItem('hiSolarUser') || '';
-  renderTeamOptions(current);
   document.getElementById('nameModal').style.display = 'flex';
 }
 
@@ -2309,14 +2348,8 @@ function initCommentInput() {
   sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   setupRealtime();
 
-  const name = localStorage.getItem('hiSolarUser');
-  if (name) {
-    document.getElementById('nameModal').style.display = 'none';
-    document.getElementById('userChip').textContent = '👤 ' + name;
-    loadData();
-  } else {
-    document.getElementById('loading').style.display = 'none';
-  }
+  // Always show login popup so each team member selects their name every session
+  document.getElementById('loading').style.display = 'none';
 })();
 </script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>

@@ -597,6 +597,10 @@
       </div>
     </div>
     <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เวลานัด</label>
+      <input class="form-control" type="time" id="elAppointmentTime">
+    </div>
+    <div class="mb-2">
       <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ช่าง</label>
       <select class="form-select" id="elTechnician"></select>
     </div>
@@ -940,6 +944,7 @@ const ADD_FORM_CONFIG = {
     { name:'maps_url', label:'Maps', type:'url' },
     { name:'report_date', label:'วันที่ลูกค้าแจ้ง', type:'date' },
     { name:'appointment_date', label:'วันที่ดำเนินการ', type:'date' },
+    { name:'appointment_time', label:'เวลานัด', type:'time' },
     { name:'technician', label:'ช่าง', type:'team' },
     { name:'price', label:'ค่าดำเนินการ (฿)', type:'number' },
     { name:'pv_kwp', label:'กำลังวัตต์ kWp', type:'number', step:'0.01' },
@@ -1161,6 +1166,7 @@ function mapJobRow(job, comments) {
     time: pickRaw(raw, 'เวลา', formatTimeDisplay(job.job_time)),
     created_date: pickRaw(raw, 'วันที่สร้าง', formatDateDisplay(job.created_date)),
     appointment_date: pickRaw(raw, 'วันที่ดำเนินการ', pickRaw(raw, 'วันที่นัด', formatDateDisplay(job.appointment_date))),
+    appointment_time: pickRaw(raw, 'เวลานัด', job.sheet_key === 'langPaeng' ? formatTimeDisplay(job.job_time) : ''),
     follow_up_date: pickRaw(raw, 'วันที่ Follow up', ''),
     report_date: pickRaw(raw, 'วันที่แจ้ง', formatDateDisplay(job.job_date)),
     site_date: pickRaw(raw, 'วันที่เข้างาน', formatDateDisplay(job.sent_date)),
@@ -1306,12 +1312,13 @@ function buildInsertPayload(tabKey, data) {
     raw['Maps'] = data.maps_url || '';
     raw['วันที่แจ้ง'] = data.report_date || '';
     raw['วันที่ดำเนินการ'] = data.appointment_date || '';
+    raw['เวลานัด'] = data.appointment_time || '';
     raw['ช่าง'] = data.technician || '';
     raw['ค่าดำเนินการ'] = data.price || '';
     raw['kWp'] = data.pv_kwp || '';
     raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
     raw['หมายเหตุ'] = data.note || '';
-    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', phone: data.phone || '', maps_url: data.maps_url || '', job_date: data.report_date || null, appointment_date: data.appointment_date || null, technician: data.technician || '', price: data.price ? Number(data.price) : null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
+    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', phone: data.phone || '', maps_url: data.maps_url || '', job_date: data.report_date || null, appointment_date: data.appointment_date || null, job_time: data.appointment_time ? `${data.appointment_time}:00` : null, technician: data.technician || '', price: data.price ? Number(data.price) : null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
   }
   if (tabKey === 'som') {
     raw['รายการ'] = data.item || '';
@@ -1790,7 +1797,7 @@ function buildCalEventCard(j) {
     name   = r.customer || '—';
     const lp = [];
     if (r.report_date)      lp.push(`<i class="bi bi-calendar-plus me-1"></i>แจ้ง ${escapeHtml(r.report_date)}`);
-    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${escapeHtml(r.appointment_date)}`);
+    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${escapeHtml(r.appointment_date)}${r.appointment_time ? ` <i class="bi bi-clock me-1 ms-1"></i>${escapeHtml(r.appointment_time)} น.` : ''}`);
     detail = lp.join('&nbsp;&nbsp;');
     cardDate = r.appointment_date || r.report_date || '';
     meta   = r.technician ? `<i class="bi bi-person-fill me-1"></i>${escapeHtml(r.technician)}` : '';
@@ -2083,7 +2090,7 @@ function buildCard(key, r) {
     name   = r.customer || '—';
     const lp = [];
     if (r.report_date)      lp.push(`<i class="bi bi-calendar-plus me-1"></i>แจ้ง ${r.report_date}`);
-    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${r.appointment_date}`);
+    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${r.appointment_date}${r.appointment_time ? ` <i class="bi bi-clock me-1 ms-1"></i>${r.appointment_time} น.` : ''}`);
     detail = lp.join('&nbsp;&nbsp;');
     meta   = r.technician ? `<i class="bi bi-person-fill me-1"></i>${r.technician}` : '';
     cardDate = r.appointment_date || r.report_date || '';
@@ -2407,6 +2414,7 @@ function openEditLangPaengModal(id) {
   document.getElementById('elMapsUrl').value         = r.maps_url         || '';
   document.getElementById('elReportDate').value      = displayDateToInputDate(r.report_date);
   document.getElementById('elAppointmentDate').value = displayDateToInputDate(r.appointment_date);
+  document.getElementById('elAppointmentTime').value = r.appointment_time || '';
   document.getElementById('elTechnician').innerHTML  = teamOptionsHtml(r.technician || '');
   document.getElementById('elPrice').value           = r.price  ?? '';
   document.getElementById('elKwp').value             = r.kwp    ?? '';
@@ -2424,6 +2432,7 @@ async function submitEditLangPaeng() {
   const mapsUrl     = document.getElementById('elMapsUrl').value.trim();
   const reportDate  = document.getElementById('elReportDate').value;
   const apptDate    = document.getElementById('elAppointmentDate').value;
+  const apptTime    = document.getElementById('elAppointmentTime').value;
   const technician  = document.getElementById('elTechnician').value;
   const priceVal    = document.getElementById('elPrice').value;
   const kwpVal      = document.getElementById('elKwp').value;
@@ -2436,11 +2445,12 @@ async function submitEditLangPaeng() {
     const newRaw = { ...(r?._rawData || {}) };
     newRaw['ลูกค้า'] = customer; newRaw['เบอร์โทร'] = phone;
     newRaw['Maps'] = mapsUrl; newRaw['วันที่แจ้ง'] = reportDate;
-    newRaw['วันที่ดำเนินการ'] = apptDate; newRaw['ช่าง'] = technician;
+    newRaw['วันที่ดำเนินการ'] = apptDate; newRaw['เวลานัด'] = apptTime; newRaw['ช่าง'] = technician;
     newRaw['ค่าดำเนินการ'] = priceVal; newRaw['kWp'] = kwpVal;
     const { error } = await sb.from('hi_solar_jobs').update({
       customer_name: customer, phone: phone || null, maps_url: mapsUrl || null,
       job_date: reportDate || null, appointment_date: apptDate || null,
+      job_time: apptTime ? `${apptTime}:00` : null,
       technician: technician || null,
       price: priceVal ? Number(priceVal) : null,
       raw_data: newRaw, updated_at: new Date().toISOString(),
@@ -2450,6 +2460,7 @@ async function submitEditLangPaeng() {
       r.customer = customer; r.phone = phone; r.maps_url = mapsUrl;
       r.report_date = formatDateDisplay(reportDate);
       r.appointment_date = formatDateDisplay(apptDate);
+      r.appointment_time = formatTimeDisplay(apptTime);
       r.technician = technician;
       r.price = priceVal; r.kwp = kwpVal;
       r._rawData = newRaw;
