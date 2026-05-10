@@ -667,6 +667,7 @@ const ADD_FORM_CONFIG = {
     { name:'maps_url', label:'Maps', type:'url' },
     { name:'report_date', label:'วันที่ลูกค้าแจ้ง', type:'date' },
     { name:'appointment_date', label:'วันที่ดำเนินการ', type:'date' },
+    { name:'appointment_time', label:'เวลานัด', type:'time' },
     { name:'technician', label:'ช่าง', type:'team' },
     { name:'status', label:'สถานะ', type:'status', value:'รอนัด' },
     { name:'note', label:'หมายเหตุ', type:'textarea' },
@@ -936,6 +937,7 @@ function mapJobRow(job, comments) {
     time: pickRaw(raw, 'เวลา', formatTimeDisplay(job.job_time)),
     created_date: pickRaw(raw, 'วันที่สร้าง', formatDateDisplay(job.created_date)),
     appointment_date: pickRaw(raw, 'วันที่ดำเนินการ', pickRaw(raw, 'วันที่นัด', formatDateDisplay(job.appointment_date))),
+    appointment_time: pickRaw(raw, 'เวลานัด', ''),
     follow_up_date: pickRaw(raw, 'วันที่ Follow up', ''),
     report_date: pickRaw(raw, 'วันที่แจ้ง', ''),
     site_date: pickRaw(raw, 'วันที่เข้างาน', formatDateDisplay(job.sent_date)),
@@ -1071,6 +1073,7 @@ function buildInsertPayload(tabKey, data) {
     raw['Maps'] = data.maps_url || '';
     raw['วันที่แจ้ง'] = data.report_date || '';
     raw['วันที่ดำเนินการ'] = data.appointment_date || '';
+    raw['เวลานัด'] = data.appointment_time || '';
     raw['ช่าง'] = data.technician || '';
     raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
     raw['หมายเหตุ'] = data.note || '';
@@ -2077,7 +2080,7 @@ function buildCard(key, r) {
     name   = r.customer || '—';
     const lp = [];
     if (r.report_date)      lp.push(`<i class="bi bi-calendar-plus me-1"></i>แจ้ง ${r.report_date}`);
-    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${r.appointment_date}`);
+    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${r.appointment_date}${r.appointment_time ? ' ' + r.appointment_time : ''}`);
     detail = lp.join('&nbsp;&nbsp;');
     meta   = r.technician ? `<i class="bi bi-person-fill me-1"></i>${r.technician}` : '';
     cardDate = r.appointment_date || r.report_date || '';
