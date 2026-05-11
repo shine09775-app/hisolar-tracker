@@ -678,7 +678,7 @@
       <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ลูกค้า *</label>
       <input class="form-control" type="text" id="ebCustomer">
     </div>
-    <div class="row g-2 mb-3">
+    <div class="row g-2 mb-2">
       <div class="col">
         <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ยอด (฿)</label>
         <input class="form-control" type="number" id="ebAmount">
@@ -687,6 +687,40 @@
         <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่</label>
         <input class="form-control" type="date" id="ebDate">
       </div>
+    </div>
+    <hr class="my-2">
+    <div class="fw-semibold mb-2" style="font-size:13px;color:#16a34a;"><i class="bi bi-file-earmark-text me-1"></i>ข้อมูล e-Tax Invoice</div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ชื่อ</label>
+        <input class="form-control" type="text" id="ebFirstName">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">นามสกุล</label>
+        <input class="form-control" type="text" id="ebLastName">
+      </div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">หมายเลขประจำตัวผู้เสียภาษี / บัตรประชาชน</label>
+      <input class="form-control" type="text" id="ebTaxId" placeholder="13 หลัก">
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ที่อยู่</label>
+      <textarea class="form-control" rows="2" id="ebAddress"></textarea>
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">Email</label>
+        <input class="form-control" type="email" id="ebEmail">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เบอร์โทรศัพท์</label>
+        <input class="form-control" type="tel" id="ebEtaxPhone">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่ออก e-Tax Invoice</label>
+      <input class="form-control" type="date" id="ebEtaxDate">
     </div>
     <div class="d-flex gap-2">
       <button class="btn btn-primary flex-fill fw-semibold" id="editBilSubmitBtn" onclick="submitEditBil()">
@@ -1179,6 +1213,13 @@ function mapJobRow(job, comments) {
     price: pickRaw(raw, 'ราคา', pickRaw(raw, 'ค่าดำเนินการ', job.price ?? '')),
     kwp:   pickRaw(raw, 'kWp', ''),
     amount: pickRaw(raw, 'ยอด', job.amount ?? ''),
+    etax_first_name: pickRaw(raw, 'ชื่อ', ''),
+    etax_last_name:  pickRaw(raw, 'นามสกุล', ''),
+    etax_tax_id:     pickRaw(raw, 'หมายเลขผู้เสียภาษี', ''),
+    etax_address:    pickRaw(raw, 'ที่อยู่', ''),
+    etax_email:      pickRaw(raw, 'Email', ''),
+    etax_phone:      pickRaw(raw, 'เบอร์โทรศัพท์', ''),
+    etax_date:       pickRaw(raw, 'วันที่ออก E-Tax', ''),
     maps_url: pickRaw(raw, 'Maps', pickRaw(raw, 'Maps Link', job.maps_url || '')),
     assigned_start: pickRaw(raw, 'วันที่เริ่มงาน', ''),
     assigned_end:   pickRaw(raw, 'วันที่สิ้นสุดงาน', ''),
@@ -2113,8 +2154,12 @@ function buildCard(key, r) {
   } else if (key === 'bil') {
     name   = r.customer || '—';
     detail = r.date ? `<i class="bi bi-calendar3 me-1"></i>${r.date}` : '';
-    meta   = '';
-    extra  = r.amount ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.amount)}</span>` : '';
+    const etaxMeta = [];
+    if (r.etax_first_name || r.etax_last_name) etaxMeta.push(`<i class="bi bi-person-vcard me-1"></i>${escapeHtml((r.etax_first_name + ' ' + r.etax_last_name).trim())}`);
+    if (r.etax_tax_id)  etaxMeta.push(`<i class="bi bi-card-text me-1"></i>${escapeHtml(r.etax_tax_id)}`);
+    if (r.etax_date)    etaxMeta.push(`<i class="bi bi-file-earmark-text me-1"></i>E-Tax ${escapeHtml(r.etax_date)}`);
+    meta  = etaxMeta.join('<span class="mx-2">·</span>');
+    extra = r.amount ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.amount)}</span>` : '';
   } else if (key === 'permit') {
     name   = r.customer || '—';
     detail = r.site_name ? `<i class="bi bi-building me-1"></i>${escapeHtml(r.site_name)}` : '';
@@ -2544,9 +2589,16 @@ function openEditBilModal(id) {
   const r = allData['bil'].find(x => x.id === id);
   if (!r) return;
   pendingEditBil = { id };
-  document.getElementById('ebCustomer').value = r.customer || '';
-  document.getElementById('ebAmount').value   = r.amount   ?? '';
-  document.getElementById('ebDate').value     = displayDateToInputDate(r.date);
+  document.getElementById('ebCustomer').value  = r.customer        || '';
+  document.getElementById('ebAmount').value    = r.amount          ?? '';
+  document.getElementById('ebDate').value      = displayDateToInputDate(r.date);
+  document.getElementById('ebFirstName').value = r.etax_first_name || '';
+  document.getElementById('ebLastName').value  = r.etax_last_name  || '';
+  document.getElementById('ebTaxId').value     = r.etax_tax_id     || '';
+  document.getElementById('ebAddress').value   = r.etax_address    || '';
+  document.getElementById('ebEmail').value     = r.etax_email      || '';
+  document.getElementById('ebEtaxPhone').value = r.etax_phone      || '';
+  document.getElementById('ebEtaxDate').value  = displayDateToInputDate(r.etax_date);
   document.getElementById('editBilModal').classList.add('show');
 }
 function closeEditBilModal() {
@@ -2556,9 +2608,16 @@ function closeEditBilModal() {
 async function submitEditBil() {
   if (!pendingEditBil) return;
   const { id } = pendingEditBil;
-  const customer = document.getElementById('ebCustomer').value.trim();
-  const amount   = document.getElementById('ebAmount').value;
-  const dateVal  = document.getElementById('ebDate').value;
+  const customer  = document.getElementById('ebCustomer').value.trim();
+  const amount    = document.getElementById('ebAmount').value;
+  const dateVal   = document.getElementById('ebDate').value;
+  const firstName = document.getElementById('ebFirstName').value.trim();
+  const lastName  = document.getElementById('ebLastName').value.trim();
+  const taxId     = document.getElementById('ebTaxId').value.trim();
+  const address   = document.getElementById('ebAddress').value.trim();
+  const email     = document.getElementById('ebEmail').value.trim();
+  const etaxPhone = document.getElementById('ebEtaxPhone').value.trim();
+  const etaxDate  = document.getElementById('ebEtaxDate').value;
   if (!customer) { showToast('กรุณาระบุชื่อลูกค้า', 'danger'); return; }
   const btn = document.getElementById('editBilSubmitBtn');
   const orig = btn.innerHTML; btn.disabled = true;
@@ -2566,17 +2625,29 @@ async function submitEditBil() {
   try {
     const r = allData['bil'].find(x => x.id === id);
     const newRaw = { ...(r?._rawData || {}) };
-    newRaw['ลูกค้า'] = customer;
-    newRaw['ยอด'] = amount;
-    newRaw['วันที่'] = dateVal;
+    newRaw['ลูกค้า']              = customer;
+    newRaw['ยอด']                 = amount;
+    newRaw['วันที่']              = dateVal;
+    newRaw['ชื่อ']                = firstName;
+    newRaw['นามสกุล']             = lastName;
+    newRaw['หมายเลขผู้เสียภาษี'] = taxId;
+    newRaw['ที่อยู่']             = address;
+    newRaw['Email']               = email;
+    newRaw['เบอร์โทรศัพท์']      = etaxPhone;
+    newRaw['วันที่ออก E-Tax']     = etaxDate;
     const { error } = await sb.from('hi_solar_jobs').update({
       customer_name: customer, amount: amount ? Number(amount) : null,
       job_date: dateVal || null, raw_data: newRaw, updated_at: new Date().toISOString(),
     }).eq('id', id);
     if (error) throw error;
     if (r) {
-      r.customer = customer; r.amount = amount;
-      r.date = formatDateDisplay(dateVal); r._rawData = newRaw;
+      r.customer        = customer;    r.amount    = amount;
+      r.date            = formatDateDisplay(dateVal);
+      r.etax_first_name = firstName;   r.etax_last_name = lastName;
+      r.etax_tax_id     = taxId;       r.etax_address   = address;
+      r.etax_email      = email;       r.etax_phone     = etaxPhone;
+      r.etax_date       = formatDateDisplay(etaxDate);
+      r._rawData = newRaw;
     }
     closeEditBilModal(); renderTab('bil');
     showToast('บันทึกข้อมูลแล้ว', 'success');
