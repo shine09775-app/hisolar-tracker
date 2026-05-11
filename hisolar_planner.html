@@ -449,8 +449,9 @@
       <div class="filter-scroll">
         <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('som','all',this)">ทั้งหมด</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','รอส่ง',this)">🟡 รอส่ง</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','Assigned',this)">🟣 Assigned</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','ส่งซ่อมแล้ว',this)">🔵 ส่งซ่อมแล้ว</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','รับคืนแล้ว',this)">🟢 รับคืนแล้ว</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','ดำเนินการแล้วเสร็จ',this)">🟢 ดำเนินการแล้วเสร็จ</button>
       </div>
       <div id="list-som"></div>
     </div>
@@ -943,7 +944,7 @@ const STATUS_CONFIG = {
   ngan:      ['Waiting', 'Assigned', 'In Progress', 'Done'],
   duNgan:    ['รอดูงาน', 'รอนัดหมาย', 'ดูงานแล้ว'],
   langPaeng: ['รอนัด', 'นัดแล้ว', 'เสร็จแล้ว'],
-  som:       ['รอส่ง', 'ส่งซ่อมแล้ว', 'รับคืนแล้ว'],
+  som:       ['รอส่ง', 'Assigned', 'ส่งซ่อมแล้ว', 'ดำเนินการแล้วเสร็จ'],
   bil:       ['รอออกบิล', 'ออกบิลแล้ว', 'รับชำระแล้ว'],
   permit:    ['Waiting', 'In Progress', 'Need Fix', 'Done', 'Reject'],
 };
@@ -2019,6 +2020,10 @@ function getTabSortDate(key, r) {
     if (r.status === 'Assigned' && r.assigned_start) return parseDisplayDate(r.assigned_start);
     return parseDisplayDate(r.date || r.created_date || '');
   }
+  if (key === 'som') {
+    if (r.status === 'Assigned' && r.assigned_start) return parseDisplayDate(r.assigned_start);
+    return parseDisplayDate(r.site_date || r.report_date || '');
+  }
   if (key === 'permit') {
     return r.created_at ? new Date(r.created_at) : null;
   }
@@ -2150,6 +2155,10 @@ function buildCard(key, r) {
     meta  = sp.join('&nbsp;&nbsp;');
     cardDate = r.report_date || '';
     extra = '';
+    if (r.status === 'Assigned' && r.assigned_start) {
+      const endPart = r.assigned_end ? ` – ${escapeHtml(formatDateDisplay(r.assigned_end))}` : '';
+      extra += `<div><span class="assigned-range"><i class="bi bi-calendar-range me-1"></i>${escapeHtml(formatDateDisplay(r.assigned_start))}${endPart}</span></div>`;
+    }
 
   } else if (key === 'bil') {
     name   = r.customer || '—';
@@ -2224,7 +2233,7 @@ function updateStats() {
   const td   = todayStr();
   document.getElementById('s-ngan').textContent      = pend('ngan', ['Waiting','Assigned','In Progress']);
   document.getElementById('s-langPaeng').textContent  = pend('langPaeng', ['รอนัด','นัดแล้ว']);
-  document.getElementById('s-som').textContent        = pend('som', ['รอส่ง','ส่งซ่อมแล้ว']);
+  document.getElementById('s-som').textContent        = pend('som', ['รอส่ง','Assigned','ส่งซ่อมแล้ว']);
   document.getElementById('s-bil').textContent        = pend('bil', ['รอออกบิล','ออกบิลแล้ว']);
   document.getElementById('s-duNgan').textContent     = allData['duNgan'].filter(r => r.date === td && r.status !== 'ดูงานแล้ว').length;
   document.getElementById('s-permit').textContent     = pend('permit', ['Waiting','In Progress','Need Fix']);
@@ -2236,7 +2245,7 @@ function updateBadges() {
   set('b-ngan',      pend('ngan',['Waiting','Assigned','In Progress']));
   set('b-duNgan',    pend('duNgan',['รอดูงาน','รอนัดหมาย']));
   set('b-langPaeng', pend('langPaeng',['รอนัด','นัดแล้ว']));
-  set('b-som',       pend('som',['รอส่ง','ส่งซ่อมแล้ว']));
+  set('b-som',       pend('som',['รอส่ง','Assigned','ส่งซ่อมแล้ว']));
   set('b-bil',       pend('bil',['รอออกบิล','ออกบิลแล้ว']));
   set('b-permit',    pend('permit',['Waiting','In Progress','Need Fix']));
 }
@@ -2309,7 +2318,7 @@ function pickStatus(status) {
   if (!pendingUpdate) return;
   const { tabKey, id } = pendingUpdate;
   closeStatusModal();
-  if (status === 'Assigned' && tabKey === 'ngan') {
+  if (status === 'Assigned' && (tabKey === 'ngan' || tabKey === 'som')) {
     openAssignedModal(tabKey, id);
   } else if (tabKey === 'permit') {
     callUpdatePermitStatus(id, status);
