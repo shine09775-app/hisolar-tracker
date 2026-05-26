@@ -447,9 +447,9 @@
       <div class="accent-bar"></div>
       <div id="addHost-som"></div>
       <div class="filter-scroll">
-        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('som','all',this)">ทั้งหมด</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','รอส่ง',this)">🟡 รอส่ง</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','Assigned',this)">🟣 Assigned</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" data-filter-all onclick="setFilter('som','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('som','รอส่ง',this)">🟡 รอส่ง</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('som','Assigned',this)">🟣 Assigned</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','ส่งซ่อมแล้ว',this)">🔵 ส่งซ่อมแล้ว</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','ดำเนินการแล้วเสร็จ',this)">🟢 ดำเนินการแล้วเสร็จ</button>
       </div>
@@ -1021,7 +1021,7 @@ const ADD_FORM_CONFIG = {
 
 // ── State ─────────────────────────────────────────────
 let allData       = { ngan:[], duNgan:[], langPaeng:[], som:[], bil:[], permit:[] };
-let filters       = { ngan: new Set(['Assigned','In Progress','Waiting']), duNgan: new Set(['รอดูงาน','รอนัดหมาย']), langPaeng: new Set(['รอนัด','นัดแล้ว']), som:'all', bil:'all', permit:'all' };
+let filters       = { ngan: new Set(['Assigned','In Progress','Waiting']), duNgan: new Set(['รอดูงาน','รอนัดหมาย']), langPaeng: new Set(['รอนัด','นัดแล้ว']), som: new Set(['รอส่ง','Assigned']), bil:'all', permit:'all' };
 let pendingUpdate = null;
 let pendingComment = null;
 
