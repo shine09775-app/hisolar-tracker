@@ -4,10 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#16a34a">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Hi Solar">
   <title>Hi Solar — Job Tracker</title>
 
+  <link rel="icon" type="image/png" href="icon_hisolar.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="site.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -120,34 +125,6 @@
     .bulk-link { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 12px; padding: 10px 12px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; color: #166534; text-decoration: none; font-size: 13px; }
     .bulk-link:hover { background: #f8fafc; color: #166534; }
     .form-note { font-size: 11px; color: #64748b; margin-top: 4px; }
-    .permit-tools { display: grid; gap: 10px; margin-bottom: 12px; }
-    .permit-select-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .mini-badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 600; }
-    .mini-badge.neutral { background: #e2e8f0; color: #334155; }
-    .mini-badge.info { background: var(--hs-blue-l); color: #1e40af; }
-    .mini-badge.warning { background: var(--hs-amber-l); color: #92400e; }
-    .mini-badge.success { background: var(--hs-primary-l); color: var(--hs-primary-d); }
-    .mini-badge.danger { background: var(--hs-red-l); color: #b91c1c; }
-    .permit-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; margin-bottom: 6px; }
-    .permit-subtitle { font-size: 13px; color: #475569; line-height: 1.4; }
-    .permit-meta-grid { display: grid; gap: 4px; font-size: 12px; color: #64748b; }
-    .permit-warning-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-    .permit-sheet .sheet-title { text-align: left; margin-bottom: 0; color: #1e293b; font-weight: 600; }
-    .permit-section-title { font-size: 13px; font-weight: 700; color: #1e293b; margin: 16px 0 8px; }
-    .permit-field-grid { display: grid; gap: 10px; }
-    .permit-check-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-    .permit-check-item { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; font-size: 12px; color: #334155; }
-    .permit-check-item input { margin: 0; }
-    .permit-timeline { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 2px; }
-    .permit-timeline::-webkit-scrollbar { display: none; }
-    .permit-step { flex-shrink: 0; border-radius: 999px; padding: 5px 10px; background: #e2e8f0; color: #64748b; font-size: 11px; font-weight: 600; }
-    .permit-step.done { background: var(--hs-primary-l); color: var(--hs-primary-d); }
-    .permit-step.active { background: var(--hs-primary); color: #fff; }
-    .permit-step.next { background: var(--hs-blue-l); color: #1e40af; }
-    .permit-log-list { max-height: 180px; overflow-y: auto; padding-right: 2px; }
-    .permit-log-item { border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; padding: 9px 10px; margin-bottom: 8px; }
-    .permit-log-meta { color: #64748b; font-size: 11px; margin-bottom: 3px; font-weight: 500; }
-    .permit-log-text { color: #1e293b; font-size: 12px; line-height: 1.45; }
 
     /* Bottom Nav */
     .bottom-nav {
@@ -173,14 +150,8 @@
     .sheet-opt.cancel   { background: var(--hs-red-l);   color: #b91c1c; }
 
     /* Name Modal */
-    .name-overlay { position: fixed; inset: 0; background: linear-gradient(160deg, #ccf0ee 0%, #e8f4fd 50%, #d4edda 100%); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 24px; }
-    .name-box { background: #fff; border-radius: 24px; padding: 36px 28px; width: 100%; max-width: 360px; box-shadow: 0 8px 40px rgba(0,0,0,.10); }
-    .login-title { font-size: 2rem; font-weight: 700; color: var(--hs-primary); margin-bottom: 6px; }
-    .login-sub { color: #64748b; font-size: 14px; margin-bottom: 28px; }
-    .btn-hisolar { background: var(--hs-primary); color: #fff; border: none; width: 100%; padding: 15px; font-size: 16px; font-weight: 700; border-radius: 14px; margin-bottom: 14px; cursor: pointer; }
-    .btn-hisolar:hover { background: var(--hs-primary-d); }
-    .btn-jdk { background: #1e3a8a; color: #fff; border: none; width: 100%; padding: 15px; font-size: 16px; font-weight: 700; border-radius: 14px; cursor: pointer; }
-    .btn-jdk:hover { background: #1e40af; }
+    .name-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 20px; }
+    .name-box { background: #fff; border-radius: 16px; padding: 28px 24px; width: 100%; max-width: 340px; }
 
     /* Loading */
     #loading { position: fixed; inset: 0; background: rgba(255,255,255,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 400; gap: 14px; }
@@ -270,6 +241,38 @@
     .cal-week-event.progress { background: var(--hs-blue-l); color: #1e40af; }
     .cal-week-event.done     { background: #f1f5f9; color: #64748b; }
     .cal-week-event.cancel   { background: var(--hs-red-l); color: #b91c1c; }
+
+    /* Today divider */
+    .today-divider { text-align:center; font-size:11px; color:#64748b; font-weight:600; padding:2px 0; position:relative; margin:8px 0 4px; }
+    .today-divider::before { content:''; position:absolute; left:0; right:0; top:50%; height:1px; background:#cbd5e1; }
+    .today-divider span { background:#f1f5f9; padding:0 10px; position:relative; }
+
+    /* Permit */
+    .job-card.permit-card   { border-left-color: #6366f1 !important; }
+    .permit-phase-btn       { display:inline-flex;align-items:center;gap:5px;border:none;border-radius:20px;padding:4px 13px;font-size:12px;font-weight:600;cursor:pointer;background:#e0e7ff;color:#3730a3; }
+    .permit-phase-btn .phase-step { background:#6366f1;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .permit-status-badge.waiting    { background:var(--hs-amber-l);color:#92400e; }
+    .permit-status-badge.progress   { background:var(--hs-blue-l);color:#1e40af; }
+    .permit-status-badge.done       { background:var(--hs-primary-l);color:var(--hs-primary-d); }
+    .permit-status-badge.waiting.need-fix { background:#fef3c7;color:#92400e; }
+    .permit-status-badge.cancel     { background:var(--hs-red-l);color:#b91c1c; }
+    .sheet-opt.phase        { background:#e0e7ff;color:#3730a3; }
+    .sheet-opt.phase.active { background:#6366f1;color:#fff; }
+    .sheet-opt.phase.ph-done{ background:#d1fae5;color:#065f46; }
+    .permit-info-row        { font-size:12px;color:#64748b;margin:3px 0; }
+    .permit-util-badge      { font-size:11px;font-weight:600;background:#dbeafe;color:#1e40af;border-radius:4px;padding:1px 7px; }
+    .permit-meter-badge     { font-size:11px;font-weight:600;background:#fef3c7;color:#92400e;border-radius:4px;padding:1px 7px; }
+    .log-bubble.log-phase   { border-left:3px solid #6366f1; }
+    .log-bubble.log-status  { border-left:3px solid var(--hs-amber); }
+    .log-bubble.log-comment { border-left:3px solid #94a3b8; }
+
+    /* Assigned (purple) */
+    .job-card.status-assigned  { border-left-color: #7c3aed !important; }
+    .status-badge.assigned     { background: #ede9fe; color: #4c1d95; }
+    .sheet-opt.assigned        { background: #ede9fe; color: #4c1d95; }
+    .cal-dot.assigned          { background: #7c3aed; }
+    .cal-week-event.assigned   { background: #ede9fe; color: #4c1d95; }
+    .assigned-range            { display:inline-flex; align-items:center; gap:4px; background:#ede9fe; color:#4c1d95; border-radius:6px; padding:2px 10px; font-size:12px; font-weight:600; margin-bottom:6px; }
   </style>
   <link rel="stylesheet" href="./hi-solar-theme-reference.css">
 </head>
@@ -284,25 +287,18 @@
 <!-- Name Modal -->
 <div class="name-overlay" id="nameModal">
   <div class="name-box">
-
-    <!-- Step 1: เลือกเมนู -->
-    <div id="loginStep1">
-      <div class="login-title">Login</div>
-      <div class="login-sub">เลือกเมนูที่ต้องการเข้าใช้งาน</div>
-      <button class="btn-hisolar" onclick="goHiSolar()">Hi Solar</button>
-      <button class="btn-jdk" onclick="goJdk()">JDK</button>
+    <div class="text-center mb-3">
+      <i class="bi bi-sun-fill text-warning" style="font-size:2.8rem;"></i>
+      <h2 class="section-title mt-2 mb-0">Hi Solar Tracker</h2>
+      <div class="accent-bar mx-auto mt-2"></div>
     </div>
-
-    <!-- Step 2: รหัสผ่าน Hi Solar -->
-    <div id="loginStep2" style="display:none">
-      <button onclick="showLoginStep1()" style="background:none;border:none;color:#64748b;font-size:13px;padding:0;margin-bottom:16px;cursor:pointer;">← ย้อนกลับ</button>
-      <div class="login-title" style="font-size:1.6rem;">Hi Solar</div>
-      <div class="login-sub">กรอกรหัสผ่านเพื่อเข้าใช้งาน</div>
-      <input type="password" id="hiSolarPwd" class="form-control mb-3" placeholder="รหัสผ่าน" style="font-size:16px;padding:12px;" onkeydown="if(event.key==='Enter')validateHiSolar()">
-      <div id="pwdError" style="color:#ef4444;font-size:13px;margin-bottom:10px;display:none;">รหัสผ่านไม่ถูกต้อง</div>
-      <button class="btn-hisolar" onclick="validateHiSolar()">เข้าใช้งาน</button>
-    </div>
-
+    <p class="text-muted small mb-3">ระบุชื่อของคุณ เพื่อบันทึกการอัปเดตงาน</p>
+    <select id="nameInput" class="form-select mb-3" onkeydown="if(event.key==='Enter')saveName()">
+      <option value="">-- เลือกทีมงาน --</option>
+    </select>
+    <button class="btn btn-primary w-100 fw-semibold" onclick="saveName()">
+      <i class="bi bi-box-arrow-in-right me-1"></i> เข้าใช้งาน
+    </button>
   </div>
 </div>
 
@@ -322,7 +318,7 @@
         <span class="rt-dot"></span>
         <span style="color:rgba(255,255,255,.7);font-size:11px;">Live</span>
       </span>
-      <button class="user-chip" id="userChip" onclick="changeName()">Hi Solar</button>
+      <button class="user-chip" id="userChip" onclick="changeName()">—</button>
     </div>
   </div>
 
@@ -339,6 +335,7 @@
       <div class="col stat-item"><div class="num" id="s-langPaeng">—</div><div class="lbl">ล้างแผง</div></div>
       <div class="col stat-item"><div class="num" id="s-som">—</div><div class="lbl">ซ่อม</div></div>
       <div class="col stat-item"><div class="num" id="s-bil">—</div><div class="lbl">รอบิล</div></div>
+      <div class="col stat-item"><div class="num" id="s-permit">—</div><div class="lbl">ขออนุญาติ</div></div>
     </div>
   </div>
 
@@ -357,7 +354,7 @@
         </button>
       </div>
     </div>
-    <div class="upload-toolbar__status" id="xlsxUploadStatus">รองรับชีต งาน, ดูงาน, ล้างแผง, ซ่อม, บิล, ขออนุญาต และจะไม่แตะชีต Log</div>
+    <div class="upload-toolbar__status" id="xlsxUploadStatus">รองรับชีต งาน, ดูงาน, ล้างแผง, ซ่อม, บิล และจะไม่แตะชีต Log</div>
     <!-- View Toggle -->
     <div class="cal-toggle-row">
       <button class="cal-view-btn active" id="calBtn-list" onclick="setCalView('list')">
@@ -398,9 +395,10 @@
       <div class="accent-bar"></div>
       <div id="addHost-ngan"></div>
       <div class="filter-scroll">
-        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('ngan','all',this)">ทั้งหมด</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('ngan','Waiting',this)">🟡 Waiting</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('ngan','In Progress',this)">🔵 In Progress</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" data-filter-all onclick="setFilter('ngan','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('ngan','Assigned',this)">🟣 Assigned</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('ngan','In Progress',this)">🔵 In Progress</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('ngan','Waiting',this)">🟡 Waiting</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('ngan','Done',this)">🟢 Done</button>
       </div>
       <div id="list-ngan"></div>
@@ -415,9 +413,9 @@
       <div class="accent-bar"></div>
       <div id="addHost-duNgan"></div>
       <div class="filter-scroll">
-        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('duNgan','all',this)">ทั้งหมด</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('duNgan','รอดูงาน',this)">🟡 รอดูงาน</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('duNgan','รอนัดหมาย',this)">🔵 รอนัดหมาย</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" data-filter-all onclick="setFilter('duNgan','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('duNgan','รอดูงาน',this)">🟡 รอดูงาน</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('duNgan','รอนัดหมาย',this)">🔵 รอนัดหมาย</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('duNgan','ดูงานแล้ว',this)">🟢 ดูงานแล้ว</button>
       </div>
       <div id="list-duNgan"></div>
@@ -432,9 +430,9 @@
       <div class="accent-bar"></div>
       <div id="addHost-langPaeng"></div>
       <div class="filter-scroll">
-        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('langPaeng','all',this)">ทั้งหมด</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('langPaeng','รอนัด',this)">🟡 รอนัด</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('langPaeng','นัดแล้ว',this)">🔵 นัดแล้ว</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" data-filter-all onclick="setFilter('langPaeng','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('langPaeng','รอนัด',this)">🟡 รอนัด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('langPaeng','นัดแล้ว',this)">🔵 นัดแล้ว</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('langPaeng','เสร็จแล้ว',this)">🟢 เสร็จแล้ว</button>
       </div>
       <div id="list-langPaeng"></div>
@@ -449,10 +447,11 @@
       <div class="accent-bar"></div>
       <div id="addHost-som"></div>
       <div class="filter-scroll">
-        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('som','all',this)">ทั้งหมด</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','รอส่ง',this)">🟡 รอส่ง</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" data-filter-all onclick="setFilter('som','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('som','รอส่ง',this)">🟡 รอส่ง</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('som','Assigned',this)">🟣 Assigned</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','ส่งซ่อมแล้ว',this)">🔵 ส่งซ่อมแล้ว</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','รับคืนแล้ว',this)">🟢 รับคืนแล้ว</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','ดำเนินการแล้วเสร็จ',this)">🟢 ดำเนินการแล้วเสร็จ</button>
       </div>
       <div id="list-som"></div>
     </div>
@@ -474,44 +473,21 @@
       <div id="list-bil"></div>
     </div>
 
+    <!-- ขออนุญาติ -->
     <div class="tab-panel" id="panel-permit">
       <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
-        <h2 class="section-title mb-0"><i class="bi bi-file-earmark-check me-2 text-primary"></i>ขออนุญาต</h2>
-        <div class="d-flex gap-2">
-          <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="openPermitModal()"><i class="bi bi-plus-lg"></i></button>
-          <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
-        </div>
+        <h2 class="section-title mb-0"><i class="bi bi-file-earmark-check me-2 text-primary"></i>ขออนุญาติ</h2>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
       </div>
       <div class="accent-bar"></div>
-      <div class="permit-tools">
-        <input class="form-control" id="permitSearchInput" placeholder="ค้นหา ชื่อลูกค้า / สถานที่ / เลขคำขอ" oninput="setPermitSearch(this.value)">
-        <div class="filter-scroll">
-          <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setPermitProviderFilter('all',this)">ทั้งหมด</button>
-          <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setPermitProviderFilter('PEA',this)">PEA</button>
-          <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setPermitProviderFilter('MEA',this)">MEA</button>
-        </div>
-        <div class="permit-select-row">
-          <select class="form-select form-select-sm" id="permitPhaseFilter" onchange="setPermitPhaseFilter(this.value)">
-            <option value="all">ทุกขั้นตอน</option>
-            <option value="PRECHECK">PRECHECK</option>
-            <option value="DOCS">DOCS</option>
-            <option value="SUBMITTED">SUBMITTED</option>
-            <option value="COMMENT">COMMENT</option>
-            <option value="CONTRACT">CONTRACT</option>
-            <option value="INSTALLED">INSTALLED</option>
-            <option value="INSPECTION">INSPECTION</option>
-            <option value="APPROVED">APPROVED</option>
-            <option value="CLOSED">CLOSED</option>
-          </select>
-          <select class="form-select form-select-sm" id="permitStatusFilter" onchange="setPermitStatusFilter(this.value)">
-            <option value="all">ทุกสถานะ</option>
-            <option value="WAITING">WAITING</option>
-            <option value="IN_PROGRESS">IN_PROGRESS</option>
-            <option value="NEED_FIX">NEED_FIX</option>
-            <option value="DONE">DONE</option>
-            <option value="REJECTED">REJECTED</option>
-          </select>
-        </div>
+      <div id="addHost-permit"></div>
+      <div class="filter-scroll">
+        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('permit','all',this)">ทั้งหมด</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('permit','Waiting',this)">🟡 Waiting</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('permit','In Progress',this)">🔵 In Progress</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('permit','Need Fix',this)">🟠 Need Fix</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('permit','Done',this)">🟢 Done</button>
+        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('permit','Reject',this)">🔴 Reject</button>
       </div>
       <div id="list-permit"></div>
     </div>
@@ -542,7 +518,7 @@
     </button>
     <button class="nav-btn" data-tab="permit" onclick="switchTab('permit')">
       <span class="nav-badge" id="b-permit" style="display:none"></span>
-      <i class="bi bi-file-earmark-check"></i>ขออนุญาต
+      <i class="bi bi-file-earmark-check"></i>ขออนุญาติ
     </button>
   </nav>
 
@@ -595,25 +571,323 @@
   </div>
 </div>
 
-<div class="sheet-overlay" id="permitModal" onclick="if(event.target===this)closePermitModal()">
-  <div class="sheet-box permit-sheet">
-    <div class="d-flex align-items-center justify-content-between mb-2">
-      <div class="sheet-title" id="permitModalTitle">ขออนุญาต</div>
-      <button class="btn btn-sm btn-light" type="button" onclick="closePermitModal()"><i class="bi bi-x-lg"></i></button>
+<!-- Edit LangPaeng Bottom Sheet -->
+<div class="sheet-overlay" id="editLangPaengModal" onclick="if(event.target===this)closeEditLangPaengModal()">
+  <div class="sheet-box">
+    <div class="sheet-title">✏️ แก้ไขล้างแผง</div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ลูกค้า *</label>
+      <input class="form-control" type="text" id="elCustomer">
     </div>
-    <div class="permit-timeline" id="permitWorkflowSteps"></div>
-    <form id="permitForm" onsubmit="submitPermitForm(event)">
-      <input type="hidden" id="permitId">
-      <div id="permitFormFields"></div>
-      <div class="permit-section-title">ประวัติ</div>
-      <div class="permit-log-list" id="permitLogList"></div>
-      <div class="d-flex gap-2 mt-3">
-        <button class="btn btn-primary flex-fill fw-semibold" id="permitSubmitBtn" type="submit">
-          <i class="bi bi-check2-circle me-1"></i> บันทึก
-        </button>
-        <button class="btn btn-light flex-fill" type="button" onclick="closePermitModal()">ปิด</button>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เบอร์โทร</label>
+      <input class="form-control" type="tel" id="elPhone">
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">Maps URL</label>
+      <input class="form-control" type="url" id="elMapsUrl" placeholder="https://maps.google.com/...">
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่ลูกค้าแจ้ง</label>
+        <input class="form-control" type="date" id="elReportDate">
       </div>
-    </form>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่ดำเนินการ</label>
+        <input class="form-control" type="date" id="elAppointmentDate">
+      </div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เวลานัด</label>
+      <input class="form-control" type="time" id="elAppointmentTime">
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ช่าง</label>
+      <select class="form-select" id="elTechnician"></select>
+    </div>
+    <div class="row g-2 mb-3">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ค่าดำเนินการ (฿)</label>
+        <input class="form-control" type="number" id="elPrice">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">กำลังวัตต์ kWp</label>
+        <input class="form-control" type="number" step="0.01" id="elKwp">
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary flex-fill fw-semibold" id="editLangPaengSubmitBtn" onclick="submitEditLangPaeng()">
+        <i class="bi bi-check2-circle me-1"></i> บันทึก
+      </button>
+      <button class="btn btn-light flex-fill" onclick="closeEditLangPaengModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Som Bottom Sheet -->
+<div class="sheet-overlay" id="editSomModal" onclick="if(event.target===this)closeEditSomModal()">
+  <div class="sheet-box">
+    <div class="sheet-title">✏️ แก้ไขซ่อม</div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">รายการ *</label>
+      <input class="form-control" type="text" id="esItem">
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ลูกค้า</label>
+      <input class="form-control" type="text" id="esCustomer">
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เบอร์โทร</label>
+      <input class="form-control" type="tel" id="esPhone">
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">Maps URL</label>
+      <input class="form-control" type="url" id="esMapsUrl" placeholder="https://maps.google.com/...">
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่ได้รับแจ้ง</label>
+        <input class="form-control" type="date" id="esReportDate">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่เข้าหน้างาน</label>
+        <input class="form-control" type="date" id="esSiteDate">
+      </div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เวลานัดหมาย</label>
+      <input class="form-control" type="time" id="esSiteTime">
+    </div>
+    <div class="mb-3">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่ส่งคืนลูกค้า</label>
+      <input class="form-control" type="date" id="esReturnDate">
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary flex-fill fw-semibold" id="editSomSubmitBtn" onclick="submitEditSom()">
+        <i class="bi bi-check2-circle me-1"></i> บันทึก
+      </button>
+      <button class="btn btn-light flex-fill" onclick="closeEditSomModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Bil Bottom Sheet -->
+<div class="sheet-overlay" id="editBilModal" onclick="if(event.target===this)closeEditBilModal()">
+  <div class="sheet-box">
+    <div class="sheet-title">✏️ แก้ไขบิล VAT</div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ลูกค้า *</label>
+      <input class="form-control" type="text" id="ebCustomer">
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ยอด (฿)</label>
+        <input class="form-control" type="number" id="ebAmount">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่</label>
+        <input class="form-control" type="date" id="ebDate">
+      </div>
+    </div>
+    <hr class="my-2">
+    <div class="fw-semibold mb-2" style="font-size:13px;color:#16a34a;"><i class="bi bi-file-earmark-text me-1"></i>ข้อมูล e-Tax Invoice</div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ชื่อ</label>
+        <input class="form-control" type="text" id="ebFirstName">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">นามสกุล</label>
+        <input class="form-control" type="text" id="ebLastName">
+      </div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">หมายเลขประจำตัวผู้เสียภาษี / บัตรประชาชน</label>
+      <input class="form-control" type="text" id="ebTaxId" placeholder="13 หลัก">
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ที่อยู่</label>
+      <textarea class="form-control" rows="2" id="ebAddress"></textarea>
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">Email</label>
+        <input class="form-control" type="email" id="ebEmail">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เบอร์โทรศัพท์</label>
+        <input class="form-control" type="tel" id="ebEtaxPhone">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่ออก e-Tax Invoice</label>
+      <input class="form-control" type="date" id="ebEtaxDate">
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary flex-fill fw-semibold" id="editBilSubmitBtn" onclick="submitEditBil()">
+        <i class="bi bi-check2-circle me-1"></i> บันทึก
+      </button>
+      <button class="btn btn-light flex-fill" onclick="closeEditBilModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit DuNgan Bottom Sheet -->
+<div class="sheet-overlay" id="editDuNganModal" onclick="if(event.target===this)closeEditDuNganModal()">
+  <div class="sheet-box">
+    <div class="sheet-title">✏️ แก้ไขดูงาน</div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่ *</label>
+        <input class="form-control" type="date" id="edDate">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เวลา</label>
+        <input class="form-control" type="time" id="edTime">
+      </div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ลูกค้า *</label>
+      <input class="form-control" type="text" id="edCustomer">
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เบอร์โทร</label>
+      <input class="form-control" type="tel" id="edPhone">
+    </div>
+    <div class="mb-3">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">Maps URL</label>
+      <input class="form-control" type="url" id="edMapsUrl" placeholder="https://maps.google.com/...">
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary flex-fill fw-semibold" id="editDuNganSubmitBtn" onclick="submitEditDuNgan()">
+        <i class="bi bi-check2-circle me-1"></i> บันทึก
+      </button>
+      <button class="btn btn-light flex-fill" onclick="closeEditDuNganModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Permit Bottom Sheet -->
+<div class="sheet-overlay" id="editPermitModal" onclick="if(event.target===this)closeEditPermitModal()">
+  <div class="sheet-box">
+    <div class="sheet-title">✏️ แก้ไขข้อมูลขออนุญาติ</div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ชื่อลูกค้า *</label>
+      <input class="form-control" type="text" id="epCustomer">
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เบอร์โทร</label>
+      <input class="form-control" type="tel" id="epPhone">
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ชื่อสถานที่ *</label>
+      <input class="form-control" type="text" id="epSiteName">
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ที่อยู่ติดตั้ง</label>
+      <textarea class="form-control" rows="2" id="epAddress"></textarea>
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">CA No.</label>
+        <input class="form-control" type="text" id="epCaNo">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">PV kWp</label>
+        <input class="form-control" type="number" step="0.01" id="epPvKwp">
+      </div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ยี่ห้อ Inverter</label>
+      <input class="form-control" type="text" id="epInverterBrand">
+    </div>
+    <div class="mb-3">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เลขคำขอ</label>
+      <input class="form-control" type="text" id="epRequestNo">
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary flex-fill fw-semibold" id="editPermitSubmitBtn" onclick="submitEditPermit()">
+        <i class="bi bi-check2-circle me-1"></i> บันทึก
+      </button>
+      <button class="btn btn-light flex-fill" onclick="closeEditPermitModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Phase Bottom Sheet -->
+<div class="sheet-overlay" id="phaseModal" onclick="if(event.target===this)closePhaseModal()">
+  <div class="sheet-box">
+    <div class="sheet-title" id="phaseModalTitle">เปลี่ยน Phase</div>
+    <div id="phaseOptions"></div>
+    <button class="btn btn-light w-100 mt-1" onclick="closePhaseModal()"><i class="bi bi-x me-1"></i>ปิด</button>
+  </div>
+</div>
+
+<!-- Edit Ngan Bottom Sheet -->
+<div class="sheet-overlay" id="editNganModal" onclick="if(event.target===this)closeEditNganModal()">
+  <div class="sheet-box">
+    <div class="sheet-title">✏️ แก้ไขงาน</div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">Maps URL</label>
+      <input class="form-control" type="url" id="editNganMapsUrl" placeholder="https://maps.google.com/...">
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่นัด</label>
+        <input class="form-control" type="date" id="editNganDate">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เวลา</label>
+        <input class="form-control" type="time" id="editNganTime">
+      </div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ช่าง</label>
+      <select class="form-select" id="editNganTechnician"></select>
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ประเภท</label>
+        <input class="form-control" type="text" id="editNganType">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ราคา</label>
+        <input class="form-control" type="number" id="editNganPrice">
+      </div>
+    </div>
+    <div class="d-flex gap-2 mt-3">
+      <button class="btn btn-primary flex-fill fw-semibold" id="editNganSubmitBtn" onclick="submitEditNgan()">
+        <i class="bi bi-check2-circle me-1"></i> บันทึก
+      </button>
+      <button class="btn btn-light flex-fill" onclick="closeEditNganModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assigned Schedule Bottom Sheet -->
+<div class="sheet-overlay" id="assignedModal" onclick="if(event.target===this)closeAssignedModal()">
+  <div class="sheet-box">
+    <div class="sheet-title">📅 กำหนดคิวงาน — Assigned</div>
+    <div class="row g-2 mb-3">
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่เริ่มงาน *</label>
+        <input class="form-control" type="date" id="assignedStart">
+      </div>
+      <div class="col">
+        <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่สิ้นสุด</label>
+        <input class="form-control" type="date" id="assignedEnd">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ช่าง</label>
+      <select class="form-select" id="assignedTechnician"></select>
+    </div>
+    <div class="d-flex gap-2 mt-2">
+      <button class="btn btn-primary flex-fill fw-semibold" id="assignedSubmitBtn" onclick="submitAssigned()">
+        <i class="bi bi-check2-circle me-1"></i> บันทึก Assigned
+      </button>
+      <button class="btn btn-light flex-fill" onclick="closeAssignedModal()">ปิด</button>
+    </div>
   </div>
 </div>
 
@@ -632,22 +906,47 @@ const SUPABASE_ANON_KEY = 'sb_publishable_Kxzef_y7E3VAmhYvH4eS3g_o3fG7JLn';
 const GOOGLE_SHEET_URL  = '';
 const TEAM_MEMBERS = ['Shine', 'Wassan', 'Wave', 'OT', 'Lui', 'Aoom'];
 
+// ── Permit constants ──────────────────────────────────
+const PERMIT_PHASES = [
+  { key:'PRECHECK',   label:'เตรียมเอกสาร' },
+  { key:'DOCS',       label:'ส่งเอกสาร' },
+  { key:'COMMENT',    label:'รับคำแนะนำ/แก้ไข' },
+  { key:'APPROVED',   label:'อนุมัติ' },
+  { key:'CONTRACT',   label:'ชำระเงิน' },
+  { key:'SUBMITTED',  label:'ยื่นเอกสาร' },
+  { key:'INSPECTION', label:'นัดตรวจ' },
+  { key:'CLOSED',     label:'ออกเอกสารขนานไฟฟ้า' },
+];
+const PERMIT_PHASE_MAP   = Object.fromEntries(PERMIT_PHASES.map(p => [p.label, p.key]));
+const PERMIT_PHASE_LABEL = Object.fromEntries(PERMIT_PHASES.map(p => [p.key, p.label]));
+
+const PERMIT_STATUSES = [
+  { key:'WAITING',     label:'Waiting' },
+  { key:'IN_PROGRESS', label:'In Progress' },
+  { key:'NEED_FIX',    label:'Need Fix' },
+  { key:'DONE',        label:'Done' },
+  { key:'REJECTED',    label:'Reject' },
+];
+const PERMIT_STATUS_MAP   = Object.fromEntries(PERMIT_STATUSES.map(s => [s.label, s.key]));
+const PERMIT_STATUS_LABEL = Object.fromEntries(PERMIT_STATUSES.map(s => [s.key, s.label]));
+
 // ── Init Supabase client ──────────────────────────────
 const { createClient } = window.supabase;
 let sb = null;
 let realtimeReloadTimer = null;
 
 // ── Table map ─────────────────────────────────────────
-const TAB_KEYS = ['ngan', 'duNgan', 'langPaeng', 'som', 'bil'];
+const TAB_KEYS = ['ngan', 'duNgan', 'langPaeng', 'som', 'bil', 'permit'];
 
-const TAB_NAMES = { ngan:'งาน', duNgan:'ดูงาน', langPaeng:'ล้างแผง', som:'ซ่อม', bil:'บิล VAT', permit:'ขออนุญาต' };
+const TAB_NAMES = { ngan:'งาน', duNgan:'ดูงาน', langPaeng:'ล้างแผง', som:'ซ่อม', bil:'บิล VAT', permit:'ขออนุญาติ' };
 
 const STATUS_CONFIG = {
-  ngan:      ['Waiting', 'In Progress', 'Done'],
+  ngan:      ['Waiting', 'Assigned', 'In Progress', 'Done'],
   duNgan:    ['รอดูงาน', 'รอนัดหมาย', 'ดูงานแล้ว'],
   langPaeng: ['รอนัด', 'นัดแล้ว', 'เสร็จแล้ว'],
-  som:       ['รอส่ง', 'ส่งซ่อมแล้ว', 'รับคืนแล้ว'],
+  som:       ['รอส่ง', 'Assigned', 'ส่งซ่อมแล้ว', 'ดำเนินการแล้วเสร็จ'],
   bil:       ['รอออกบิล', 'ออกบิลแล้ว', 'รับชำระแล้ว'],
+  permit:    ['Waiting', 'In Progress', 'Need Fix', 'Done', 'Reject'],
 };
 
 const ADD_FORM_CONFIG = {
@@ -682,6 +981,8 @@ const ADD_FORM_CONFIG = {
     { name:'appointment_date', label:'วันที่ดำเนินการ', type:'date' },
     { name:'appointment_time', label:'เวลานัด', type:'time' },
     { name:'technician', label:'ช่าง', type:'team' },
+    { name:'price', label:'ค่าดำเนินการ (฿)', type:'number' },
+    { name:'pv_kwp', label:'กำลังวัตต์ kWp', type:'number', step:'0.01' },
     { name:'status', label:'สถานะ', type:'status', value:'รอนัด' },
     { name:'note', label:'หมายเหตุ', type:'textarea' },
   ],
@@ -689,8 +990,10 @@ const ADD_FORM_CONFIG = {
     { name:'item', label:'รายการ', required:true },
     { name:'customer', label:'ลูกค้า' },
     { name:'phone', label:'เบอร์โทร', type:'tel' },
+    { name:'maps_url', label:'Maps', type:'url' },
     { name:'report_date', label:'วันที่ได้รับแจ้ง', type:'date' },
     { name:'site_date', label:'วันที่เข้าไปหน้างาน', type:'date' },
+    { name:'site_time', label:'เวลานัดหมาย', type:'time' },
     { name:'return_date', label:'วันที่ส่งคืนลูกค้า', type:'date' },
     { name:'status', label:'สถานะ', type:'status', value:'รอส่ง' },
     { name:'note', label:'หมายเหตุ', type:'textarea' },
@@ -702,109 +1005,32 @@ const ADD_FORM_CONFIG = {
     { name:'status', label:'สถานะ', type:'status', value:'รอออกบิล' },
     { name:'note', label:'หมายเหตุ', type:'textarea' },
   ],
+  permit: [
+    { name:'customer',       label:'ชื่อลูกค้า',      required:true },
+    { name:'phone',          label:'เบอร์โทร',          type:'tel' },
+    { name:'site_name',      label:'ชื่อสถานที่',      required:true },
+    { name:'address',        label:'ที่อยู่ติดตั้ง',   type:'textarea' },
+    { name:'utility',        label:'การไฟฟ้า',          type:'select', options:['PEA','MEA'], value:'PEA' },
+    { name:'meter_type',     label:'Meter',             type:'select', options:['1P','3P'],   value:'1P' },
+    { name:'ca_no',          label:'CA No.' },
+    { name:'pv_kwp',         label:'PV kWp',            type:'number', step:'0.01' },
+    { name:'inverter_brand', label:'ยี่ห้อ Inverter' },
+    { name:'request_no',     label:'เลขคำขอ' },
+  ],
 };
 
-const PERMIT_PHASES = ['PRECHECK', 'DOCS', 'SUBMITTED', 'COMMENT', 'CONTRACT', 'INSTALLED', 'INSPECTION', 'APPROVED', 'CLOSED'];
-const PERMIT_STATUSES = ['WAITING', 'IN_PROGRESS', 'NEED_FIX', 'DONE', 'REJECTED'];
-const PERMIT_WORKFLOW_TEMPLATES = Object.freeze({
-  PEA_SELF_USE: ['PRECHECK', 'DOCS', 'SUBMITTED', 'COMMENT', 'CONTRACT', 'INSTALLED', 'INSPECTION', 'APPROVED', 'CLOSED'],
-  MEA_SELF_USE: ['PRECHECK', 'DOCS', 'SUBMITTED', 'COMMENT', 'CONTRACT', 'INSTALLED', 'INSPECTION', 'APPROVED', 'CLOSED'],
-  PEA_HOUSEHOLD_SELL: ['PRECHECK', 'DOCS', 'SUBMITTED', 'COMMENT', 'CONTRACT', 'INSTALLED', 'INSPECTION', 'APPROVED', 'CLOSED'],
-  MEA_HOUSEHOLD_SELL: ['PRECHECK', 'DOCS', 'SUBMITTED', 'COMMENT', 'CONTRACT', 'INSTALLED', 'INSPECTION', 'APPROVED', 'CLOSED'],
-});
-const PERMIT_CHECKLIST_FIELDS = [
-  { name:'id_card', label:'สำเนาบัตรประชาชน' },
-  { name:'house_registration', label:'ทะเบียนบ้าน' },
-  { name:'electricity_bill', label:'บิลไฟ' },
-  { name:'authorization_letter', label:'หนังสือมอบอำนาจ' },
-  { name:'sld', label:'SLD' },
-  { name:'inverter_datasheet', label:'Inverter Datasheet' },
-  { name:'layout', label:'Layout' },
-  { name:'meter_photo', label:'รูปมิเตอร์' },
-  { name:'mdb_photo', label:'รูป MDB' },
-];
-const PERMIT_FORM_SECTIONS = [
-  {
-    title: 'ข้อมูลลูกค้า',
-    fields: [
-      { name:'customer_name', label:'ชื่อลูกค้า', required:true },
-      { name:'phone', label:'เบอร์โทร', type:'tel' },
-      { name:'site_name', label:'ชื่อสถานที่', required:true },
-      { name:'site_address', label:'ที่อยู่ติดตั้ง', type:'textarea' },
-      { name:'utility_provider', label:'หน่วยงาน', type:'select', options:['PEA', 'MEA'], value:'PEA' },
-      { name:'assigned_to', label:'ผู้รับผิดชอบ', type:'team' },
-      { name:'priority', label:'ความสำคัญ', type:'select', options:['LOW', 'MEDIUM', 'HIGH', 'URGENT'], value:'MEDIUM' },
-    ],
-  },
-  {
-    title: 'ข้อมูลระบบ',
-    fields: [
-      { name:'permit_type', label:'Permit Type' },
-      { name:'project_type', label:'Project Type' },
-      { name:'meter_phase', label:'Meter Phase', type:'select', options:['', '1P', '3P'] },
-      { name:'meter_no', label:'เลขมิเตอร์' },
-      { name:'ca_no', label:'CA No.' },
-      { name:'pv_kwp', label:'PV kWp', type:'number', step:'0.01' },
-      { name:'inverter_brand', label:'ยี่ห้อ Inverter' },
-      { name:'inverter_model', label:'รุ่น Inverter' },
-      { name:'inverter_kw', label:'Inverter kW', type:'number', step:'0.01' },
-      { name:'export_mode', label:'Export Mode', type:'select', options:['', 'SELF_USE', 'ZERO_EXPORT', 'SELL_BACK'], value:'SELF_USE' },
-    ],
-  },
-  {
-    title: 'Workflow',
-    fields: [
-      { name:'workflow_key', label:'Workflow Template', type:'select', options:Object.keys(PERMIT_WORKFLOW_TEMPLATES), value:'PEA_SELF_USE' },
-      { name:'phase', label:'Phase', type:'select', options:PERMIT_PHASES, value:'PRECHECK' },
-      { name:'status', label:'Status', type:'select', options:PERMIT_STATUSES, value:'WAITING' },
-      { name:'application_no', label:'เลขคำขอ' },
-      { name:'payment_status', label:'สถานะชำระเงิน', type:'select', options:['', 'UNPAID', 'PENDING', 'PAID'], value:'UNPAID' },
-      { name:'next_action_date', label:'วันติดตามถัดไป', type:'date' },
-      { name:'aging_days', label:'Aging Days', type:'number' },
-    ],
-  },
-  {
-    title: 'Milestone Dates',
-    fields: [
-      { name:'submit_date', label:'Submit Date', type:'date' },
-      { name:'comment_date', label:'Comment Date', type:'date' },
-      { name:'resubmit_date', label:'Resubmit Date', type:'date' },
-      { name:'contract_date', label:'Contract Date', type:'date' },
-      { name:'install_date', label:'Install Date', type:'date' },
-      { name:'photo_upload_date', label:'Photo Upload Date', type:'date' },
-      { name:'inspection_date', label:'Inspection Date', type:'date' },
-      { name:'meter_change_date', label:'Meter Change Date', type:'date' },
-      { name:'parallel_date', label:'Parallel Date', type:'date' },
-    ],
-  },
-  {
-    title: 'เอกสาร',
-    fields: [
-      { name:'owner_docs_complete', label:'เอกสารเจ้าของครบ', type:'checkbox' },
-      { name:'design_docs_complete', label:'เอกสารออกแบบครบ', type:'checkbox' },
-      { name:'installation_docs_complete', label:'เอกสารติดตั้งครบ', type:'checkbox' },
-    ],
-  },
-  {
-    title: 'หมายเหตุ',
-    fields: [
-      { name:'remark', label:'Remark', type:'textarea' },
-    ],
-  },
-];
-
 // ── State ─────────────────────────────────────────────
-let allData       = { ngan:[], duNgan:[], langPaeng:[], som:[], bil:[] };
-let filters       = { ngan:'all', duNgan:'all', langPaeng:'all', som:'all', bil:'all' };
-let permitData     = [];
-let permitLogs     = [];
-let permitFilters  = { provider:'all', phase:'all', status:'all', search:'' };
+let allData       = { ngan:[], duNgan:[], langPaeng:[], som:[], bil:[], permit:[] };
+let filters       = { ngan: new Set(['Assigned','In Progress','Waiting']), duNgan: new Set(['รอดูงาน','รอนัดหมาย']), langPaeng: new Set(['รอนัด','นัดแล้ว']), som: new Set(['รอส่ง','Assigned']), bil:'all', permit:'all' };
 let pendingUpdate = null;
 let pendingComment = null;
 
 // ── Helpers ───────────────────────────────────────────
 function statusClass(tabKey, status) {
-  if (status === 'ยกเลิก') return 'cancel';
+  if (status === 'ยกเลิก' || status === 'Reject') return 'cancel';
+  if (status === 'Assigned') return 'assigned';
+  if (status === 'Need Fix') return 'waiting';
+  if (status === 'Done')     return 'done';
   const opts = STATUS_CONFIG[tabKey] || [];
   const idx  = opts.indexOf(status);
   if (idx === 0) return 'waiting';
@@ -936,6 +1162,31 @@ function combineNoteAndComments(note, comments) {
   return lines.join('\n');
 }
 
+function mapPermitRow(p, logs) {
+  return {
+    id:             p.id,
+    _isPermit:      true,
+    customer:       p.customer_name || '',
+    phone:          p.phone || '',
+    site_name:      p.site_name || '',
+    address:        p.site_address || '',
+    utility:        p.utility_provider || 'PEA',
+    meter_type:     p.meter_phase || '',
+    ca_no:          p.ca_no || '',
+    pv_kwp:         p.pv_kwp ?? '',
+    inverter_brand: p.inverter_brand || '',
+    request_no:     p.application_no || '',
+    phase:          PERMIT_PHASE_LABEL[p.phase] || p.phase || 'เตรียมเอกสาร',
+    _phaseKey:      p.phase || 'PRECHECK',
+    status:         PERMIT_STATUS_LABEL[p.status] || p.status || 'Waiting',
+    _statusKey:     p.status || 'WAITING',
+    remark:         p.remark || '',
+    _logs:          logs || [],
+    updated_at:     p.updated_at || '',
+    created_at:     p.created_at || '',
+  };
+}
+
 function mapJobRow(job, comments) {
   const raw = job.raw_data || {};
   return {
@@ -950,22 +1201,34 @@ function mapJobRow(job, comments) {
     time: pickRaw(raw, 'เวลา', formatTimeDisplay(job.job_time)),
     created_date: pickRaw(raw, 'วันที่สร้าง', formatDateDisplay(job.created_date)),
     appointment_date: pickRaw(raw, 'วันที่ดำเนินการ', pickRaw(raw, 'วันที่นัด', formatDateDisplay(job.appointment_date))),
-    appointment_time: pickRaw(raw, 'เวลานัด', ''),
+    appointment_time: pickRaw(raw, 'เวลานัด', job.sheet_key === 'langPaeng' ? formatTimeDisplay(job.job_time) : ''),
     follow_up_date: pickRaw(raw, 'วันที่ Follow up', ''),
-    report_date: pickRaw(raw, 'วันที่แจ้ง', ''),
+    report_date: pickRaw(raw, 'วันที่แจ้ง', formatDateDisplay(job.job_date)),
     site_date: pickRaw(raw, 'วันที่เข้างาน', formatDateDisplay(job.sent_date)),
+    site_time: pickRaw(raw, 'เวลาเข้างาน', pickRaw(raw, 'เวลานัดหมาย', formatTimeDisplay(job.job_time))),
     return_date: pickRaw(raw, 'วันที่ส่งคืน', formatDateDisplay(job.received_date)),
     sent_date: pickRaw(raw, 'วันที่ส่ง', formatDateDisplay(job.sent_date)),
     received_date: pickRaw(raw, 'วันที่รับ', formatDateDisplay(job.received_date)),
     technician: pickRaw(raw, 'ช่าง', job.technician || ''),
     type: pickRaw(raw, 'ประเภท', job.job_type || ''),
-    price: pickRaw(raw, 'ราคา', job.price ?? ''),
+    price: pickRaw(raw, 'ราคา', pickRaw(raw, 'ค่าดำเนินการ', job.price ?? '')),
+    kwp:   pickRaw(raw, 'kWp', ''),
     amount: pickRaw(raw, 'ยอด', job.amount ?? ''),
+    etax_first_name: pickRaw(raw, 'ชื่อ', ''),
+    etax_last_name:  pickRaw(raw, 'นามสกุล', ''),
+    etax_tax_id:     pickRaw(raw, 'หมายเลขผู้เสียภาษี', ''),
+    etax_address:    pickRaw(raw, 'ที่อยู่', ''),
+    etax_email:      pickRaw(raw, 'Email', ''),
+    etax_phone:      pickRaw(raw, 'เบอร์โทรศัพท์', ''),
+    etax_date:       pickRaw(raw, 'วันที่ออก E-Tax', ''),
     maps_url: pickRaw(raw, 'Maps', pickRaw(raw, 'Maps Link', job.maps_url || '')),
+    assigned_start: pickRaw(raw, 'วันที่เริ่มงาน', ''),
+    assigned_end:   pickRaw(raw, 'วันที่สิ้นสุดงาน', ''),
     _noteBase: job.note || '',
     note: combineNoteAndComments(job.note || '', comments || []),
     updated_at: job.updated_at || '',
     _comments: comments || [],
+    _rawData: raw,
   };
 }
 
@@ -990,10 +1253,15 @@ function addFieldHtml(tabKey, field) {
   if (field.type === 'status') {
     return `<div><label class="form-label mb-1" for="${id}">${field.label}</label><select class="form-select" id="${id}" data-field="${field.name}">${(STATUS_CONFIG[tabKey] || []).map(status => `<option value="${status}"${status === value ? ' selected' : ''}>${status}</option>`).join('')}</select></div>`;
   }
+  if (field.type === 'select') {
+    const opts = (field.options || []).map(o => `<option value="${o}"${o === value ? ' selected' : ''}>${o}</option>`).join('');
+    return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><select class="form-select" id="${id}" data-field="${field.name}">${opts}</select></div>`;
+  }
   if (field.type === 'team') {
     return `<div><label class="form-label mb-1" for="${id}">${field.label}</label><select class="form-select" id="${id}" data-field="${field.name}">${teamOptionsHtml(localStorage.getItem('hiSolarUser') || '')}</select></div>`;
   }
-  return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><input class="form-control" id="${id}" data-field="${field.name}" data-type="${field.type || 'text'}" type="${field.type || 'text'}" value="${escapeHtml(value)}"${field.required ? ' required' : ''}></div>`;
+  const stepAttr = field.step ? ` step="${field.step}"` : '';
+  return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><input class="form-control" id="${id}" data-field="${field.name}" data-type="${field.type || 'text'}" type="${field.type || 'text'}" value="${escapeHtml(value)}"${field.required ? ' required' : ''}${stepAttr}></div>`;
 }
 
 function googleSheetLinkHtml() {
@@ -1088,20 +1356,45 @@ function buildInsertPayload(tabKey, data) {
     raw['วันที่ดำเนินการ'] = data.appointment_date || '';
     raw['เวลานัด'] = data.appointment_time || '';
     raw['ช่าง'] = data.technician || '';
+    raw['ค่าดำเนินการ'] = data.price || '';
+    raw['kWp'] = data.pv_kwp || '';
     raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
     raw['หมายเหตุ'] = data.note || '';
-    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', phone: data.phone || '', maps_url: data.maps_url || '', job_date: data.report_date || null, appointment_date: data.appointment_date || null, technician: data.technician || '', status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
+    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', phone: data.phone || '', maps_url: data.maps_url || '', job_date: data.report_date || null, appointment_date: data.appointment_date || null, job_time: data.appointment_time ? `${data.appointment_time}:00` : null, technician: data.technician || '', price: data.price ? Number(data.price) : null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
   }
   if (tabKey === 'som') {
     raw['รายการ'] = data.item || '';
     raw['ลูกค้า'] = data.customer || '';
     raw['เบอร์โทร'] = data.phone || '';
+    raw['Maps'] = data.maps_url || '';
     raw['วันที่แจ้ง'] = data.report_date || '';
     raw['วันที่เข้างาน'] = data.site_date || '';
+    raw['เวลาเข้างาน'] = data.site_time || '';
     raw['วันที่ส่งคืน'] = data.return_date || '';
     raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
     raw['หมายเหตุ'] = data.note || '';
-    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], title: data.item || '', customer_name: data.customer || '', phone: data.phone || '', job_date: data.report_date || null, sent_date: data.site_date || null, received_date: data.return_date || null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
+    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], title: data.item || '', customer_name: data.customer || '', phone: data.phone || '', maps_url: data.maps_url || '', job_date: data.report_date || null, job_time: data.site_time ? `${data.site_time}:00` : null, sent_date: data.site_date || null, received_date: data.return_date || null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
+  }
+  if (tabKey === 'permit') {
+    const wfSuffix = Math.random().toString(36).slice(2,6).toUpperCase();
+    return {
+      customer_name:    data.customer || '',
+      phone:            data.phone || '',
+      site_name:        data.site_name || '',
+      site_address:     data.address || '',
+      utility_provider: data.utility || 'PEA',
+      meter_phase:      data.meter_type || '1P',
+      ca_no:            data.ca_no || null,
+      pv_kwp:           data.pv_kwp ? parseFloat(data.pv_kwp) : null,
+      inverter_brand:   data.inverter_brand || null,
+      application_no:   data.request_no || null,
+      workflow_key:     `PERMIT-${now.slice(0,10).replace(/-/g,'')}-${wfSuffix}`,
+      phase:            'PRECHECK',
+      status:           'WAITING',
+      raw_data:         {},
+      created_at:       now,
+      updated_at:       now,
+    };
   }
   raw['ลูกค้า'] = data.customer || '';
   raw['ยอด'] = data.amount || '';
@@ -1122,7 +1415,7 @@ function formatSupabaseError(error, actionText = 'ทำรายการ') {
     return `${actionText}ไม่ได้: Supabase ยังไม่เปิดสิทธิ์ให้หน้าเว็บนี้เขียนข้อมูล กรุณารันไฟล์ supabase/schema.sql ใน Supabase SQL Editor และใช้ไฟล์นี้แทน supabase-setup.sql`;
   }
   if (code === '42P01' || /relation .* does not exist|table .* does not exist/i.test(text)) {
-    return `${actionText}ไม่ได้: ยังไม่พบตารางที่จำเป็นใน Supabase กรุณารันไฟล์ supabase/schema.sql หรือ supabase/permit-module.sql ก่อน`;
+    return `${actionText}ไม่ได้: ยังไม่พบตาราง hi_solar_jobs หรือ hi_solar_job_comments ใน Supabase กรุณารันไฟล์ supabase/schema.sql ก่อน`;
   }
   if (code === '22P02' || /invalid input syntax|date\/time field value out of range|invalid input/i.test(text)) {
     return `${actionText}ไม่ได้: รูปแบบข้อมูลไม่ถูกต้อง ตรวจวันที่ เวลา และตัวเลขอีกครั้ง`;
@@ -1153,7 +1446,8 @@ async function submitAddForm(event, tabKey) {
       data[el.dataset.field] = normalizeFormValue(el);
     });
     const payload = buildInsertPayload(tabKey, data);
-    const { error } = await sb.from('hi_solar_jobs').insert(payload);
+    const tableName = tabKey === 'permit' ? 'hi_solar_permits' : 'hi_solar_jobs';
+    const { error } = await sb.from(tableName).insert(payload);
     if (error) throw error;
     resetAddForm(tabKey);
     document.getElementById(`addPanel-${tabKey}`)?.classList.remove('open');
@@ -1168,46 +1462,19 @@ async function submitAddForm(event, tabKey) {
   }
 }
 
-function goHiSolar() {
-  document.getElementById('loginStep1').style.display = 'none';
-  document.getElementById('loginStep2').style.display = 'block';
-  document.getElementById('hiSolarPwd').value = '';
-  document.getElementById('pwdError').style.display = 'none';
-  setTimeout(() => document.getElementById('hiSolarPwd').focus(), 100);
-}
-
-function showLoginStep1() {
-  document.getElementById('loginStep2').style.display = 'none';
-  document.getElementById('loginStep1').style.display = 'block';
-}
-
-function validateHiSolar() {
-  const pwd = document.getElementById('hiSolarPwd').value;
-  if (pwd === '0091') {
-    window.location.href = './hisolar_planner.html';
-  } else {
-    document.getElementById('pwdError').style.display = 'block';
-    document.getElementById('hiSolarPwd').value = '';
-    document.getElementById('hiSolarPwd').focus();
-  }
-}
-
-function goJdk() {
-  window.location.href = './JDK.html';
-}
-
 function saveName() {
-  const v = document.getElementById('nameInput')?.value.trim();
-  if (!v || !TEAM_MEMBERS.includes(v)) return;
+  const v = document.getElementById('nameInput').value.trim();
+  if (!TEAM_MEMBERS.includes(v)) return alert('กรุณาเลือกทีมงาน');
   localStorage.setItem('hiSolarUser', v);
   document.getElementById('nameModal').style.display = 'none';
   document.getElementById('userChip').textContent = '👤 ' + v;
   document.querySelectorAll('[data-field="technician"]').forEach(el => { el.value = v; });
-  document.querySelectorAll('[data-permit-field="assigned_to"]').forEach(el => { el.value = v; });
   if (sb) loadData();
 }
 
 function changeName() {
+  const current = localStorage.getItem('hiSolarUser') || '';
+  renderTeamOptions(current);
   document.getElementById('nameModal').style.display = 'flex';
 }
 
@@ -1215,27 +1482,35 @@ function changeName() {
 async function loadData() {
   document.getElementById('loading').style.display = 'flex';
   try {
-    const [jobsRes, commentsRes, permitsRes, permitLogsRes] = await Promise.all([
+    const [jobsRes, commentsRes] = await Promise.all([
       sb.from('hi_solar_jobs').select('*').order('sheet_row'),
       sb.from('hi_solar_job_comments').select('*').order('commented_at'),
-      sb.from('hi_solar_permits').select('*').order('next_action_date', { ascending: true }),
-      sb.from('hi_solar_permit_logs').select('*').order('created_at', { ascending: false }),
     ]);
     if (jobsRes.error) throw jobsRes.error;
     if (commentsRes.error) throw commentsRes.error;
-    if (permitsRes.error) throw permitsRes.error;
-    if (permitLogsRes.error) throw permitLogsRes.error;
     const commentsByJob = (commentsRes.data || []).reduce((acc, comment) => {
       (acc[comment.job_id] ||= []).push(comment);
       return acc;
     }, {});
-    allData = { ngan:[], duNgan:[], langPaeng:[], som:[], bil:[] };
+    allData = { ngan:[], duNgan:[], langPaeng:[], som:[], bil:[], permit:[] };
     (jobsRes.data || []).forEach(job => {
       if (!allData[job.sheet_key]) return;
       allData[job.sheet_key].push(mapJobRow(job, commentsByJob[job.id] || []));
     });
-    permitData = (permitsRes.data || []).map(mapPermitRow);
-    permitLogs = permitLogsRes.data || [];
+    // Load permits (graceful — table may not exist yet)
+    try {
+      const [permitsRes, permitLogsRes] = await Promise.all([
+        sb.from('hi_solar_permits').select('*').order('created_at', { ascending: false }),
+        sb.from('hi_solar_permit_logs').select('*').order('created_at'),
+      ]);
+      if (!permitsRes.error) {
+        const logsByPermit = (permitLogsRes.data || []).reduce((acc, log) => {
+          (acc[log.permit_id] ||= []).push(log);
+          return acc;
+        }, {});
+        allData.permit = (permitsRes.data || []).map(p => mapPermitRow(p, logsByPermit[p.id] || []));
+      }
+    } catch (e) { console.warn('permit tables not ready:', e.message); }
   } catch (e) {
     console.error('loadData failed', e);
     showToast(formatSupabaseError(e, 'โหลดข้อมูล'), 'danger');
@@ -1284,13 +1559,38 @@ async function callAddComment(tabKey, id, comment) {
   };
 }
 
+function renderPermitLogs(logs) {
+  const el = document.getElementById('commentLog');
+  if (!el) return;
+  if (!logs.length) { el.innerHTML = '<div class="empty-state py-4"><div class="small">ยังไม่มีประวัติ</div></div>'; return; }
+  el.innerHTML = logs.map(log => {
+    const dt = formatCommentDateTime(log.created_at);
+    let text = '', icon = 'chat-text', cls = 'log-comment';
+    if (log.action === 'PHASE_CHANGE') {
+      icon = 'arrow-right-circle-fill'; cls = 'log-phase';
+      text = `Phase: ${PERMIT_PHASE_LABEL[log.from_phase] || log.from_phase} → ${PERMIT_PHASE_LABEL[log.to_phase] || log.to_phase}`;
+    } else if (log.action === 'STATUS_CHANGE') {
+      icon = 'flag-fill'; cls = 'log-status';
+      text = `Status: ${PERMIT_STATUS_LABEL[log.from_status] || log.from_status} → ${PERMIT_STATUS_LABEL[log.to_status] || log.to_status}`;
+    } else {
+      text = log.metadata?.message || log.metadata?.text || '';
+    }
+    return `<div class="comment-bubble ${cls}"><div class="comment-meta"><i class="bi bi-${icon} me-1"></i>${escapeHtml(dt)} · ${escapeHtml(log.actor)}</div><div class="comment-text">${escapeHtml(text)}</div></div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
 function openCommentModal(tabKey, id) {
   const item = allData[tabKey].find(r => r.id === id);
   if (!item) return;
-  pendingComment = { tabKey, id };
+  pendingComment = { tabKey, id, _isPermit: tabKey === 'permit' };
   document.getElementById('commentModalTitle').textContent = `${TAB_NAMES[tabKey] || tabKey} — ${item.customer || item.item || 'รายการ'}`;
   document.getElementById('commentInput').value = '';
-  renderCommentLog(item.note || '');
+  if (tabKey === 'permit') {
+    renderPermitLogs(item._logs || []);
+  } else {
+    renderCommentLog(item.note || '');
+  }
   document.getElementById('commentModal').classList.add('show');
   setTimeout(() => document.getElementById('commentInput')?.focus(), 50);
 }
@@ -1323,6 +1623,7 @@ async function callUpdate(tabKey, id, newStatus) {
 
 async function submitComment() {
   if (!pendingComment) return;
+  if (pendingComment._isPermit) { await submitPermitComment(); return; }
   const input = document.getElementById('commentInput');
   const comment = input.value.trim();
   if (!comment) return alert('กรุณาพิมพ์ comment');
@@ -1354,6 +1655,35 @@ async function submitComment() {
   }
 }
 
+async function submitPermitComment() {
+  const input = document.getElementById('commentInput');
+  const text  = input.value.trim();
+  if (!text) return alert('กรุณาพิมพ์ข้อความ');
+  const btn = document.getElementById('commentSubmitBtn');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังส่ง';
+  try {
+    const { id } = pendingComment;
+    const user = localStorage.getItem('hiSolarUser') || 'ไม่ระบุ';
+    const now  = new Date().toISOString();
+    const { data, error } = await sb.from('hi_solar_permit_logs').insert({
+      permit_id: id, action: 'COMMENT', actor: user,
+      metadata: { message: text }, created_at: now,
+    }).select('*').single();
+    if (error) throw error;
+    const item = allData.permit.find(r => r.id === id);
+    if (item) { item._logs = [...(item._logs || []), data]; renderPermitLogs(item._logs); renderTab('permit'); }
+    input.value = '';
+    showToast('บันทึกแล้ว', 'success');
+  } catch (e) {
+    showToast(formatSupabaseError(e, 'บันทึก'), 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
 // ── Calendar ──────────────────────────────────────────
 const DOW_TH   = ['อา','จ','อ','พ','พฤ','ศ','ส'];
 const MONTH_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -1373,21 +1703,46 @@ function todayKey() { return dateKey(new Date()); }
 
 function parseDisplayDate(str) {
   if (!str) return null;
-  const m = String(str).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (!m) return null;
-  const d = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
-  return isNaN(d) ? null : d;
+  const s = String(str);
+  // DD/MM/YYYY
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) {
+    const d = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+    return isNaN(d) ? null : d;
+  }
+  // YYYY-MM-DD (form input format)
+  const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m2) {
+    const d = new Date(parseInt(m2[1]), parseInt(m2[2])-1, parseInt(m2[3]));
+    return isNaN(d) ? null : d;
+  }
+  return null;
 }
 
 function getAllJobsWithDates() {
   const result = [];
   const dateField = {
-    ngan:      j => j.date,
+    ngan:      j => j.status === 'Assigned' && j.assigned_start ? formatDateDisplay(j.assigned_start) : j.date,
     duNgan:    j => j.date,
     langPaeng: j => j.appointment_date || j.report_date,
-    som:       j => j.report_date || j.site_date,
   };
   Object.keys(allData).forEach(tabKey => {
+    if (tabKey === 'som') {
+      allData[tabKey].forEach(job => {
+        const reportDate = parseDisplayDate(job.report_date);
+        if (reportDate) result.push({ tabKey, job, date: reportDate, dk: dateKey(reportDate), somEventType: 'report' });
+
+        const siteDate = parseDisplayDate(job.site_date);
+        if (siteDate) result.push({ tabKey, job, date: siteDate, dk: dateKey(siteDate), somEventType: 'site' });
+
+        if (!reportDate && !siteDate) {
+          const returnDate = parseDisplayDate(job.return_date);
+          if (returnDate) result.push({ tabKey, job, date: returnDate, dk: dateKey(returnDate), somEventType: 'return' });
+        }
+      });
+      return;
+    }
+
     const fn = dateField[tabKey];
     if (!fn) return;
     allData[tabKey].forEach(job => {
@@ -1465,6 +1820,10 @@ function buildCalEventCard(j) {
     if (r.type)       mp.push(`<i class="bi bi-lightning-charge me-1"></i>${escapeHtml(r.type)}`);
     meta  = mp.join('<span class="mx-2">·</span>');
     extra = r.price ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.price)}</span>` : '';
+    if (r.status === 'Assigned' && r.assigned_start) {
+      const endPart = r.assigned_end ? ` – ${escapeHtml(formatDateDisplay(r.assigned_end))}` : '';
+      extra += `<div><span class="assigned-range"><i class="bi bi-calendar-range me-1"></i>${escapeHtml(formatDateDisplay(r.assigned_start))}${endPart}</span></div>`;
+    }
   } else if (key === 'duNgan') {
     name     = r.customer || '—';
     cardDate = r.date     || '';
@@ -1480,7 +1839,7 @@ function buildCalEventCard(j) {
     name   = r.customer || '—';
     const lp = [];
     if (r.report_date)      lp.push(`<i class="bi bi-calendar-plus me-1"></i>แจ้ง ${escapeHtml(r.report_date)}`);
-    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${escapeHtml(r.appointment_date)}`);
+    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${escapeHtml(r.appointment_date)}${r.appointment_time ? ` <i class="bi bi-clock me-1 ms-1"></i>${escapeHtml(r.appointment_time)} น.` : ''}`);
     detail = lp.join('&nbsp;&nbsp;');
     cardDate = r.appointment_date || r.report_date || '';
     meta   = r.technician ? `<i class="bi bi-person-fill me-1"></i>${escapeHtml(r.technician)}` : '';
@@ -1489,10 +1848,16 @@ function buildCalEventCard(j) {
     detail = r.customer ? `<i class="bi bi-person-fill me-1"></i>${escapeHtml(r.customer)}` : '';
     const sp = [];
     if (r.report_date)  sp.push(`<i class="bi bi-bell me-1"></i>แจ้ง ${escapeHtml(r.report_date)}`);
-    if (r.site_date)    sp.push(`<i class="bi bi-tools me-1"></i>เข้างาน ${escapeHtml(r.site_date)}`);
+    if (r.site_date)    sp.push(`<i class="bi bi-tools me-1"></i>เข้างาน ${escapeHtml(r.site_date)}${r.site_time ? ` ${escapeHtml(r.site_time)} น.` : ''}`);
     if (r.return_date)  sp.push(`<i class="bi bi-check2-circle me-1"></i>ส่งคืน ${escapeHtml(r.return_date)}`);
     meta = sp.join('&nbsp;&nbsp;');
-    cardDate = r.report_date || '';
+    if (j.somEventType === 'site' && r.site_date) {
+      cardDate = `เข้างาน ${r.site_date}${r.site_time ? ` ${r.site_time} น.` : ''}`;
+    } else if (j.somEventType === 'return' && r.return_date) {
+      cardDate = `ส่งคืน ${r.return_date}`;
+    } else {
+      cardDate = `รับแจ้ง ${r.report_date || ''}`.trim();
+    }
   } else if (key === 'bil') {
     name   = r.customer || '—';
     detail = r.date ? `<i class="bi bi-calendar3 me-1"></i>${escapeHtml(r.date)}` : '';
@@ -1500,10 +1865,11 @@ function buildCalEventCard(j) {
   }
   extra += commentSummaryHtml(r.note || '');
 
-  const statusBtn  = `<button class="status-badge ${sc}" onclick="event.stopPropagation();openStatusModal('${key}','${r.id}')">${escapeHtml(r.status)}</button>`;
-  const commentBtn = `<button class="btn btn-sm btn-outline-secondary btn-comment" onclick="event.stopPropagation();openCommentModal('${key}','${r.id}')"><i class="bi bi-chat-dots me-1"></i>Comment</button>`;
-  const mapsBtn    = r.maps_url ? `<a href="${escapeHtml(r.maps_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="btn btn-sm btn-outline-secondary btn-map"><i class="bi bi-geo-alt-fill me-1"></i>แผนที่</a>` : '';
-  const tabChip    = `<span class="cal-event-tab ${key}" style="font-size:10px;padding:1px 7px;border-radius:4px;">${TAB_NAMES[key]}</span>`;
+  const statusBtn   = `<button class="status-badge ${sc}" onclick="event.stopPropagation();openStatusModal('${key}','${r.id}')">${escapeHtml(r.status)}</button>`;
+  const commentBtn  = `<button class="btn btn-sm btn-outline-secondary btn-comment" onclick="event.stopPropagation();openCommentModal('${key}','${r.id}')"><i class="bi bi-chat-dots me-1"></i>Comment</button>`;
+  const mapsBtn     = r.maps_url ? `<a href="${escapeHtml(r.maps_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="btn btn-sm btn-outline-secondary btn-map"><i class="bi bi-geo-alt-fill me-1"></i>แผนที่</a>` : '';
+  const editCalBtn  = key === 'ngan' ? `<button class="btn btn-sm btn-outline-secondary btn-map" onclick="event.stopPropagation();openEditNganModal('${r.id}')"><i class="bi bi-pencil me-1"></i>แก้ไข</button>` : '';
+  const tabChip     = `<span class="cal-event-tab ${key}" style="font-size:10px;padding:1px 7px;border-radius:4px;">${TAB_NAMES[key]}</span>`;
 
   return `
   <article class="card job-card status-${sc}" onclick="openCommentModal('${key}','${r.id}')">
@@ -1516,7 +1882,7 @@ function buildCalEventCard(j) {
       ${meta   ? `<div class="card-meta">${meta}</div>` : ''}
       ${extra}
       <div class="d-flex gap-2 flex-wrap mt-2 align-items-center">
-        ${statusBtn}${commentBtn}${mapsBtn}
+        ${statusBtn}${commentBtn}${mapsBtn}${editCalBtn}
       </div>
     </div>
   </article>`;
@@ -1647,435 +2013,77 @@ function calDayClick(dk) {
 }
 
 // ── renderAll ─────────────────────────────────────────
-function emptyPermitChecklist() {
-  return PERMIT_CHECKLIST_FIELDS.reduce((acc, field) => {
-    acc[field.name] = false;
-    return acc;
-  }, {});
-}
+function renderAll() { Object.keys(STATUS_CONFIG).forEach(renderTab); if (calView !== 'list') renderCalendar(); }
 
-function permitStatusClass(status) {
-  if (status === 'DONE') return 'done';
-  if (status === 'REJECTED' || status === 'NEED_FIX') return 'cancel';
-  if (status === 'IN_PROGRESS') return 'progress';
-  return 'waiting';
-}
-
-function permitBadgeTone(status) {
-  if (status === 'DONE') return 'success';
-  if (status === 'REJECTED' || status === 'NEED_FIX') return 'danger';
-  if (status === 'IN_PROGRESS') return 'info';
-  return 'warning';
-}
-
-function inferPermitWorkflowKey(record = {}) {
-  const provider = String(record.utility_provider || 'PEA').toUpperCase() === 'MEA' ? 'MEA' : 'PEA';
-  const joined = [record.permit_type, record.project_type, record.export_mode].join(' ').toUpperCase();
-  return joined.includes('SELL') ? `${provider}_HOUSEHOLD_SELL` : `${provider}_SELF_USE`;
-}
-
-function computePermitAgingDays(record = {}) {
-  const today = new Date();
-  const baseValue = record.submit_date || record.next_action_date || record.created_at;
-  if (!baseValue) return 0;
-  const base = new Date(baseValue);
-  if (Number.isNaN(base.getTime())) return 0;
-  return Math.max(0, Math.floor((today.getTime() - base.getTime()) / 86400000));
-}
-
-function permitFieldHtml(field) {
-  const id = `permit-${field.name}`;
-  if (field.type === 'textarea') {
-    return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><textarea class="form-control" id="${id}" rows="3" data-permit-field="${field.name}" data-permit-type="textarea"${field.required ? ' required' : ''}></textarea></div>`;
+function getTabSortDate(key, r) {
+  if (key === 'ngan') {
+    if (r.status === 'Assigned' && r.assigned_start) return parseDisplayDate(r.assigned_start);
+    return parseDisplayDate(r.date || r.created_date || '');
   }
-  if (field.type === 'select') {
-    return `<div><label class="form-label mb-1" for="${id}">${field.label}</label><select class="form-select" id="${id}" data-permit-field="${field.name}" data-permit-type="select">${(field.options || []).map(option => `<option value="${option}"${option === (field.value || '') ? ' selected' : ''}>${option || '-'}</option>`).join('')}</select></div>`;
+  if (key === 'som') {
+    if (r.status === 'Assigned' && r.assigned_start) return parseDisplayDate(r.assigned_start);
+    return parseDisplayDate(r.site_date || r.report_date || '');
   }
-  if (field.type === 'team') {
-    return `<div><label class="form-label mb-1" for="${id}">${field.label}</label><select class="form-select" id="${id}" data-permit-field="${field.name}" data-permit-type="team">${teamOptionsHtml(localStorage.getItem('hiSolarUser') || '')}</select></div>`;
+  if (key === 'permit') {
+    return r.created_at ? new Date(r.created_at) : null;
   }
-  if (field.type === 'checkbox') {
-    return `<label class="permit-check-item"><input type="checkbox" id="${id}" data-permit-field="${field.name}" data-permit-type="checkbox"><span>${field.label}</span></label>`;
-  }
-  return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><input class="form-control" id="${id}" data-permit-field="${field.name}" data-permit-type="${field.type || 'text'}" type="${field.type || 'text'}"${field.step ? ` step="${field.step}"` : ''}${field.required ? ' required' : ''}></div>`;
+  return parseDisplayDate(r.date || r.created_date || '');
 }
 
-function renderPermitFormFields() {
-  const host = document.getElementById('permitFormFields');
-  if (!host) return;
-  host.innerHTML = [
-    ...PERMIT_FORM_SECTIONS.map(section => `
-      <div class="permit-section-title">${section.title}</div>
-      <div class="permit-field-grid">
-        ${section.fields.map(permitFieldHtml).join('')}
-      </div>
-    `),
-    `<div class="permit-section-title">Document Checklist</div>
-     <div class="permit-check-grid">
-       ${PERMIT_CHECKLIST_FIELDS.map(field => `<label class="permit-check-item"><input type="checkbox" data-permit-check="${field.name}" id="permit-check-${field.name}"><span>${field.label}</span></label>`).join('')}
-     </div>`,
-  ].join('');
+function getNganListPriority(status) {
+  if (status === 'Assigned' || status === 'In Progress') return 0;
+  if (status === 'Waiting') return 1;
+  return 2;
 }
 
-function newPermitRecord() {
-  return {
-    utility_provider: 'PEA',
-    workflow_key: 'PEA_SELF_USE',
-    phase: 'PRECHECK',
-    status: 'WAITING',
-    priority: 'MEDIUM',
-    payment_status: 'UNPAID',
-    assigned_to: localStorage.getItem('hiSolarUser') || '',
-    document_checklist: emptyPermitChecklist(),
-    owner_docs_complete: false,
-    design_docs_complete: false,
-    installation_docs_complete: false,
-    aging_days: 0,
-  };
-}
-
-function mapPermitRow(record) {
-  return {
-    ...newPermitRecord(),
-    ...record,
-    workflow_key: record.workflow_key || inferPermitWorkflowKey(record),
-    utility_provider: record.utility_provider || 'PEA',
-    phase: record.phase || 'PRECHECK',
-    status: record.status || 'WAITING',
-    payment_status: record.payment_status || '',
-    document_checklist: { ...emptyPermitChecklist(), ...(record.document_checklist || {}) },
-    aging_days: Number.isFinite(Number(record.aging_days)) ? Number(record.aging_days) : computePermitAgingDays(record),
-  };
-}
-
-function permitWarningTags(record) {
-  const tags = [];
-  const docsComplete = record.owner_docs_complete && record.design_docs_complete && record.installation_docs_complete;
-  if (['DOCS', 'SUBMITTED', 'COMMENT', 'CONTRACT', 'INSTALLED', 'INSPECTION', 'APPROVED'].includes(record.phase) && !docsComplete) {
-    tags.push({ label:'เอกสารไม่ครบ', tone:'warning' });
-  }
-  if (record.phase === 'COMMENT' || record.status === 'NEED_FIX' || record.comment_date) {
-    tags.push({ label:'มี comment', tone:'danger' });
-  }
-  if (record.payment_status && String(record.payment_status).toUpperCase() !== 'PAID') {
-    tags.push({ label:'รอชำระ', tone:'info' });
-  }
-  if ((record.phase === 'APPROVED' || record.phase === 'CLOSED') && !record.meter_change_date) {
-    tags.push({ label:'รอเปลี่ยนมิเตอร์', tone:'warning' });
-  }
-  return tags;
-}
-
-function permitMatchesFilters(record) {
-  const search = String(permitFilters.search || '').toLowerCase();
-  if (permitFilters.provider !== 'all' && record.utility_provider !== permitFilters.provider) return false;
-  if (permitFilters.phase !== 'all' && record.phase !== permitFilters.phase) return false;
-  if (permitFilters.status !== 'all' && record.status !== permitFilters.status) return false;
-  if (!search) return true;
-  return [record.customer_name, record.site_name, record.application_no].some(value => String(value || '').toLowerCase().includes(search));
-}
-
-function setPermitProviderFilter(value, el) {
-  permitFilters.provider = value;
-  el.closest('.filter-scroll').querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
-  el.classList.add('active');
-  renderPermitList();
-}
-
-function setPermitPhaseFilter(value) {
-  permitFilters.phase = value;
-  renderPermitList();
-}
-
-function setPermitStatusFilter(value) {
-  permitFilters.status = value;
-  renderPermitList();
-}
-
-function setPermitSearch(value) {
-  permitFilters.search = String(value || '').trim();
-  renderPermitList();
-}
-
-function renderPermitTimeline(record) {
-  const el = document.getElementById('permitWorkflowSteps');
-  if (!el) return;
-  const phases = PERMIT_WORKFLOW_TEMPLATES[record.workflow_key] || PERMIT_PHASES;
-  const currentIndex = phases.indexOf(record.phase);
-  el.innerHTML = phases.map((phase, index) => {
-    const cls = index < currentIndex ? 'permit-step done' : index === currentIndex ? 'permit-step active' : index === currentIndex + 1 ? 'permit-step next' : 'permit-step';
-    return `<div class="${cls}">${phase}</div>`;
-  }).join('');
-}
-
-function renderPermitLogs(permitId) {
-  const el = document.getElementById('permitLogList');
-  if (!el) return;
-  if (!permitId) {
-    el.innerHTML = '<div class="empty-state py-3"><div class="small">ยังไม่มีประวัติ</div></div>';
-    return;
-  }
-  const rows = permitLogs.filter(log => log.permit_id === permitId).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  if (!rows.length) {
-    el.innerHTML = '<div class="empty-state py-3"><div class="small">ยังไม่มีประวัติ</div></div>';
-    return;
-  }
-  el.innerHTML = rows.map(log => `
-    <div class="permit-log-item">
-      <div class="permit-log-meta">${escapeHtml(formatCommentDateTime(log.created_at))} · ${escapeHtml(log.actor || 'ไม่ระบุ')}</div>
-      <div class="permit-log-text">${escapeHtml(log.action || 'UPDATED')}${log.to_phase || log.to_status ? ` · ${escapeHtml([log.to_phase, log.to_status].filter(Boolean).join(' / '))}` : ''}</div>
-    </div>
-  `).join('');
-}
-
-function populatePermitForm(record) {
-  document.getElementById('permitId').value = record.id || '';
-  document.querySelectorAll('[data-permit-field]').forEach(el => {
-    const field = el.dataset.permitField;
-    const type = el.dataset.permitType;
-    const value = record[field];
-    if (type === 'checkbox') {
-      el.checked = !!value;
-    } else if (type === 'date') {
-      el.value = value ? String(value).slice(0, 10) : '';
-    } else {
-      el.value = value ?? '';
-    }
-  });
-  document.querySelectorAll('[data-permit-check]').forEach(el => {
-    el.checked = !!record.document_checklist?.[el.dataset.permitCheck];
-  });
-  document.getElementById('permitModalTitle').textContent = record.id
-    ? `ขออนุญาต — ${record.customer_name || record.site_name || 'รายการ'}`
-    : 'เพิ่มขออนุญาต';
-  renderPermitTimeline(record);
-  renderPermitLogs(record.id || '');
-}
-
-function openPermitModal(id = '') {
-  const record = id ? (permitData.find(item => item.id === id) || newPermitRecord()) : newPermitRecord();
-  populatePermitForm(record);
-  document.getElementById('permitModal').classList.add('show');
-}
-
-function closePermitModal() {
-  document.getElementById('permitModal').classList.remove('show');
-}
-
-function collectPermitFormData(form) {
-  const data = {};
-  form.querySelectorAll('[data-permit-field]').forEach(el => {
-    const field = el.dataset.permitField;
-    const type = el.dataset.permitType;
-    if (type === 'checkbox') {
-      data[field] = el.checked;
-    } else if (type === 'number') {
-      data[field] = el.value === '' ? null : Number(el.value);
-    } else {
-      data[field] = String(el.value || '').trim();
-    }
-  });
-  data.document_checklist = emptyPermitChecklist();
-  form.querySelectorAll('[data-permit-check]').forEach(el => {
-    data.document_checklist[el.dataset.permitCheck] = el.checked;
-  });
-  return data;
-}
-
-function buildPermitRawData(record) {
-  const raw = {};
-  [
-    'customer_name', 'phone', 'site_name', 'site_address', 'utility_provider', 'permit_type', 'project_type', 'meter_phase', 'meter_no', 'ca_no',
-    'pv_kwp', 'inverter_brand', 'inverter_model', 'inverter_kw', 'export_mode', 'workflow_key', 'phase', 'status', 'application_no',
-    'submit_date', 'comment_date', 'resubmit_date', 'contract_date', 'install_date', 'photo_upload_date', 'inspection_date',
-    'meter_change_date', 'parallel_date', 'assigned_to', 'priority', 'next_action_date', 'aging_days',
-    'owner_docs_complete', 'design_docs_complete', 'installation_docs_complete', 'payment_status', 'remark',
-  ].forEach(key => {
-    raw[key] = record[key] ?? '';
-  });
-  Object.entries(record.document_checklist || {}).forEach(([key, value]) => {
-    raw[key] = value;
-  });
-  return raw;
-}
-
-function normalizePermitPayload(data, existing = null) {
-  const merged = { ...(existing || newPermitRecord()), ...data };
-  const workflowKey = merged.workflow_key || inferPermitWorkflowKey(merged);
-  const normalized = {
-    customer_name: merged.customer_name || '',
-    phone: merged.phone || '',
-    site_name: merged.site_name || '',
-    site_address: merged.site_address || '',
-    utility_provider: ['PEA', 'MEA'].includes(merged.utility_provider) ? merged.utility_provider : 'PEA',
-    permit_type: merged.permit_type || '',
-    project_type: merged.project_type || '',
-    meter_phase: merged.meter_phase || '',
-    meter_no: merged.meter_no || '',
-    ca_no: merged.ca_no || '',
-    pv_kwp: merged.pv_kwp === '' || merged.pv_kwp === null ? null : Number(merged.pv_kwp),
-    inverter_brand: merged.inverter_brand || '',
-    inverter_model: merged.inverter_model || '',
-    inverter_kw: merged.inverter_kw === '' || merged.inverter_kw === null ? null : Number(merged.inverter_kw),
-    export_mode: merged.export_mode || '',
-    workflow_key: workflowKey,
-    phase: PERMIT_PHASES.includes(merged.phase) ? merged.phase : 'PRECHECK',
-    status: PERMIT_STATUSES.includes(merged.status) ? merged.status : 'WAITING',
-    application_no: merged.application_no || '',
-    submit_date: merged.submit_date || null,
-    comment_date: merged.comment_date || null,
-    resubmit_date: merged.resubmit_date || null,
-    contract_date: merged.contract_date || null,
-    install_date: merged.install_date || null,
-    photo_upload_date: merged.photo_upload_date || null,
-    inspection_date: merged.inspection_date || null,
-    meter_change_date: merged.meter_change_date || null,
-    parallel_date: merged.parallel_date || null,
-    assigned_to: merged.assigned_to || '',
-    priority: merged.priority || 'MEDIUM',
-    next_action_date: merged.next_action_date || null,
-    owner_docs_complete: !!merged.owner_docs_complete,
-    design_docs_complete: !!merged.design_docs_complete,
-    installation_docs_complete: !!merged.installation_docs_complete,
-    payment_status: merged.payment_status || '',
-    remark: merged.remark || '',
-    document_checklist: { ...emptyPermitChecklist(), ...(merged.document_checklist || {}) },
-    raw_data: {},
-    updated_at: new Date().toISOString(),
-  };
-  normalized.aging_days = merged.aging_days === '' || merged.aging_days === null || Number.isNaN(Number(merged.aging_days))
-    ? computePermitAgingDays({ ...normalized, created_at: existing?.created_at })
-    : Number(merged.aging_days);
-  normalized.raw_data = buildPermitRawData(normalized);
-  return normalized;
-}
-
-async function createPermitLog(action, previousRecord, nextRecord) {
-  if (!nextRecord?.id) return;
-  try {
-    await sb.from('hi_solar_permit_logs').insert({
-      permit_id: nextRecord.id,
-      action,
-      actor: localStorage.getItem('hiSolarUser') || 'ไม่ระบุ',
-      from_phase: previousRecord?.phase || null,
-      to_phase: nextRecord.phase || null,
-      from_status: previousRecord?.status || null,
-      to_status: nextRecord.status || null,
-      metadata: {
-        workflow_key: nextRecord.workflow_key || '',
-        application_no: nextRecord.application_no || '',
-        next_action_date: nextRecord.next_action_date || null,
-      },
-    });
-  } catch (error) {
-    console.error('createPermitLog failed', error);
-  }
-}
-
-async function submitPermitForm(event) {
-  event.preventDefault();
-  const form = event.target;
-  if (!form.reportValidity()) return;
-  const submitBtn = document.getElementById('permitSubmitBtn');
-  const originalText = submitBtn.innerHTML;
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
-
-  try {
-    const id = document.getElementById('permitId').value;
-    const existing = id ? permitData.find(item => item.id === id) : null;
-    const payload = normalizePermitPayload(collectPermitFormData(form), existing);
-
-    let savedRecord = null;
-    if (id) {
-      const { data, error } = await sb.from('hi_solar_permits').update(payload).eq('id', id).select('*').single();
-      if (error) throw error;
-      savedRecord = data;
-    } else {
-      const { data, error } = await sb.from('hi_solar_permits').insert(payload).select('*').single();
-      if (error) throw error;
-      savedRecord = data;
-    }
-
-    const logAction = !existing ? 'CREATED' : (existing.phase !== payload.phase || existing.status !== payload.status ? 'PHASE_STATUS_CHANGED' : 'UPDATED');
-    await createPermitLog(logAction, existing, savedRecord);
-    closePermitModal();
-    await loadData();
-    showToast(id ? 'อัปเดตข้อมูลขออนุญาตแล้ว' : 'เพิ่มข้อมูลขออนุญาตแล้ว', 'success');
-  } catch (error) {
-    console.error('submitPermitForm failed', error);
-    showToast(formatSupabaseError(error, 'บันทึกข้อมูลขออนุญาต'), 'danger');
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalText;
-  }
-}
-
-function buildPermitCard(record) {
-  const warnings = permitWarningTags(record);
-  return `
-    <article class="card job-card status-${permitStatusClass(record.status)}" onclick="openPermitModal('${record.id}')">
-      <div class="card-body">
-        <div class="permit-head">
-          <div>
-            <div class="card-customer">${escapeHtml(record.customer_name || '-')}</div>
-            <div class="permit-subtitle">${escapeHtml(record.site_name || '-')}</div>
-          </div>
-          <div class="d-flex flex-column align-items-end gap-1">
-            <span class="mini-badge neutral">${escapeHtml(record.utility_provider || '-')}</span>
-            <span class="mini-badge ${permitBadgeTone(record.status)}">${escapeHtml(record.status || '-')}</span>
-          </div>
-        </div>
-        <div class="d-flex flex-wrap gap-2 mb-2">
-          <span class="mini-badge neutral">${escapeHtml(record.phase || '-')}</span>
-          ${record.application_no ? `<span class="mini-badge info">${escapeHtml(record.application_no)}</span>` : ''}
-        </div>
-        <div class="permit-meta-grid">
-          <div><i class="bi bi-person-badge me-1"></i>${escapeHtml(record.assigned_to || '-')}</div>
-          <div><i class="bi bi-calendar-event me-1"></i>${record.next_action_date ? escapeHtml(formatDateDisplay(record.next_action_date)) : 'ยังไม่กำหนด'}</div>
-          <div><i class="bi bi-hourglass-split me-1"></i>${escapeHtml(String(record.aging_days ?? 0))} วัน</div>
-        </div>
-        ${warnings.length ? `<div class="permit-warning-row">${warnings.map(tag => `<span class="mini-badge ${tag.tone}">${escapeHtml(tag.label)}</span>`).join('')}</div>` : ''}
-        <div class="d-flex gap-2 flex-wrap mt-2">
-          <button class="btn btn-sm btn-outline-secondary btn-comment" type="button" onclick="event.stopPropagation();openPermitModal('${record.id}')"><i class="bi bi-pencil-square me-1"></i>รายละเอียด</button>
-        </div>
-      </div>
-    </article>
-  `;
-}
-
-function renderPermitList() {
-  const el = document.getElementById('list-permit');
-  if (!el) return;
-  const rows = permitData.filter(permitMatchesFilters);
-  if (!rows.length) {
-    el.innerHTML = `<div class="empty-state"><i class="bi bi-file-earmark-check text-success"></i><div class="mt-2 small">ยังไม่มีรายการขออนุญาต</div></div>`;
-    return;
-  }
-  el.innerHTML = rows
-    .sort((a, b) => {
-      const aDate = a.next_action_date || '9999-12-31';
-      const bDate = b.next_action_date || '9999-12-31';
-      return aDate.localeCompare(bDate) || (b.aging_days || 0) - (a.aging_days || 0);
-    })
-    .map(buildPermitCard)
-    .join('');
-}
-
-function renderAll() {
-  Object.keys(STATUS_CONFIG).forEach(renderTab);
-  renderPermitList();
-  if (calView !== 'list') renderCalendar();
+function getNganStatusOrder(status) {
+  if (status === 'Assigned') return 0;
+  if (status === 'In Progress') return 1;
+  if (status === 'Waiting') return 2;
+  return 99;
 }
 
 function renderTab(key) {
   const el   = document.getElementById('list-' + key);
-  const rows = allData[key].filter(r => filters[key] === 'all' || r.status === filters[key]);
+  const rows = allData[key].filter(r => {
+    const f = filters[key];
+    if (f instanceof Set) return f.size === 0 || f.has(r.status || STATUS_CONFIG[key][0]);
+    return f === 'all' || r.status === f;
+  });
   if (!rows.length) {
     el.innerHTML = `<div class="empty-state"><i class="bi bi-check2-circle text-success"></i><div class="mt-2 small">ไม่มีรายการ</div></div>`;
     return;
   }
-  el.innerHTML = rows.map(r => buildCard(key, r)).join('');
+  // Sort ascending: past → today → future
+  rows.sort((a, b) => {
+    if (key === 'ngan') {
+      const pa = getNganListPriority(a.status);
+      const pb = getNganListPriority(b.status);
+      if (pa !== pb) return pa - pb;
+    }
+    const da = getTabSortDate(key, a), db = getTabSortDate(key, b);
+    if (!da && !db) return 0;
+    if (!da) return key === 'ngan' ? 1 : -1;
+    if (!db) return key === 'ngan' ? -1 : 1;
+    if (da.getTime() === db.getTime() && key === 'ngan') {
+      const sa = getNganStatusOrder(a.status);
+      const sb = getNganStatusOrder(b.status);
+      if (sa !== sb) return sa - sb;
+    }
+    return da - db;
+  });
+  const today = new Date(); today.setHours(0,0,0,0);
+  let dividerInserted = false;
+  const parts = [];
+  for (const r of rows) {
+    const d = getTabSortDate(key, r);
+    if (!dividerInserted && d && d >= today) {
+      parts.push(`<div class="today-divider" id="today-anchor"><span>วันนี้ขึ้นไป</span></div>`);
+      dividerInserted = true;
+    }
+    parts.push(buildCard(key, r));
+  }
+  el.innerHTML = parts.join('');
 }
 
 function buildCard(key, r) {
@@ -2084,6 +2092,10 @@ function buildCard(key, r) {
   const mapsUrl = r.maps_url || '';
   const mapsBtn = mapsUrl
     ? `<a class="btn btn-sm btn-outline-secondary btn-map" href="${mapsUrl}" target="_blank" rel="noopener"><i class="bi bi-geo-alt-fill me-1"></i>แผนที่</a>`
+    : '';
+  const _editFn = { ngan:'openEditNganModal', langPaeng:'openEditLangPaengModal', som:'openEditSomModal', bil:'openEditBilModal' };
+  const editNganBtn = _editFn[key]
+    ? `<button class="btn btn-sm btn-outline-secondary btn-map" onclick="${_editFn[key]}('${r.id}')"><i class="bi bi-pencil me-1"></i>แก้ไข</button>`
     : '';
   const statusBtn = `<button class="status-badge ${sc}" onclick="openStatusModal('${key}','${r.id}')">${status}</button>`;
   const comments = commentCount(r.note || '');
@@ -2101,6 +2113,10 @@ function buildCard(key, r) {
     if (r.type)       mp.push(`<i class="bi bi-lightning-charge me-1"></i>${r.type}`);
     meta  = mp.join('<span class="mx-2">·</span>');
     extra = r.price ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.price)}</span>` : '';
+    if (r.status === 'Assigned' && r.assigned_start) {
+      const endPart = r.assigned_end ? ` – ${escapeHtml(formatDateDisplay(r.assigned_end))}` : '';
+      extra += `<div><span class="assigned-range"><i class="bi bi-calendar-range me-1"></i>${escapeHtml(formatDateDisplay(r.assigned_start))}${endPart}</span></div>`;
+    }
 
   } else if (key === 'duNgan') {
     name     = r.customer || '—';
@@ -2113,34 +2129,81 @@ function buildCard(key, r) {
     if (r.phone) dm.push(`<i class="bi bi-telephone-fill me-1"></i>${r.phone}`);
     if (r.follow_up_date) dm.push(`<i class="bi bi-calendar-check me-1"></i>Follow up ${r.follow_up_date}`);
     meta  = dm.join('<span class="mx-2">·</span>');
-    extra = `<button class="btn btn-sm btn-outline-primary btn-edit-date" onclick="openEditDateModal('${r.id}')"><i class="bi bi-calendar2-week me-1"></i>นัดหมาย</button>`;
+    extra = `<button class="btn btn-sm btn-outline-primary btn-edit-date" onclick="openEditDateModal('${r.id}')"><i class="bi bi-calendar2-week me-1"></i>นัดหมาย</button>` +
+            `<button class="btn btn-sm btn-outline-secondary btn-map ms-1" onclick="openEditDuNganModal('${r.id}')"><i class="bi bi-pencil me-1"></i>แก้ไข</button>`;
 
   } else if (key === 'langPaeng') {
     name   = r.customer || '—';
     const lp = [];
     if (r.report_date)      lp.push(`<i class="bi bi-calendar-plus me-1"></i>แจ้ง ${r.report_date}`);
-    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${r.appointment_date}${r.appointment_time ? ' ' + r.appointment_time : ''}`);
+    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${r.appointment_date}${r.appointment_time ? ` <i class="bi bi-clock me-1 ms-1"></i>${r.appointment_time} น.` : ''}`);
     detail = lp.join('&nbsp;&nbsp;');
     meta   = r.technician ? `<i class="bi bi-person-fill me-1"></i>${r.technician}` : '';
     cardDate = r.appointment_date || r.report_date || '';
-    extra  = '';
+    const lpParts = [];
+    if (r.price) lpParts.push(`<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.price)}</span>`);
+    if (r.kwp)   lpParts.push(`<span class="amount-badge"><i class="bi bi-lightning-charge me-1"></i>${escapeHtml(String(r.kwp))} kWp</span>`);
+    extra = lpParts.join(' ');
 
   } else if (key === 'som') {
     name   = r.item     || '—';
     detail = r.customer ? `<i class="bi bi-person-fill me-1"></i>${r.customer}` : '';
     const sp = [];
     if (r.report_date)  sp.push(`<i class="bi bi-bell me-1"></i>แจ้ง ${r.report_date}`);
-    if (r.site_date)    sp.push(`<i class="bi bi-tools me-1"></i>เข้างาน ${r.site_date}`);
+    if (r.site_date)    sp.push(`<i class="bi bi-tools me-1"></i>เข้างาน ${r.site_date}${r.site_time ? ` ${r.site_time} น.` : ''}`);
     if (r.return_date)  sp.push(`<i class="bi bi-check2-circle me-1"></i>ส่งคืน ${r.return_date}`);
     meta  = sp.join('&nbsp;&nbsp;');
     cardDate = r.report_date || '';
     extra = '';
+    if (r.status === 'Assigned' && r.assigned_start) {
+      const endPart = r.assigned_end ? ` – ${escapeHtml(formatDateDisplay(r.assigned_end))}` : '';
+      extra += `<div><span class="assigned-range"><i class="bi bi-calendar-range me-1"></i>${escapeHtml(formatDateDisplay(r.assigned_start))}${endPart}</span></div>`;
+    }
 
   } else if (key === 'bil') {
     name   = r.customer || '—';
     detail = r.date ? `<i class="bi bi-calendar3 me-1"></i>${r.date}` : '';
-    meta   = '';
-    extra  = r.amount ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.amount)}</span>` : '';
+    const etaxMeta = [];
+    if (r.etax_first_name || r.etax_last_name) etaxMeta.push(`<i class="bi bi-person-vcard me-1"></i>${escapeHtml((r.etax_first_name + ' ' + r.etax_last_name).trim())}`);
+    if (r.etax_tax_id)  etaxMeta.push(`<i class="bi bi-card-text me-1"></i>${escapeHtml(r.etax_tax_id)}`);
+    if (r.etax_date)    etaxMeta.push(`<i class="bi bi-file-earmark-text me-1"></i>E-Tax ${escapeHtml(r.etax_date)}`);
+    meta  = etaxMeta.join('<span class="mx-2">·</span>');
+    extra = r.amount ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.amount)}</span>` : '';
+  } else if (key === 'permit') {
+    name   = r.customer || '—';
+    detail = r.site_name ? `<i class="bi bi-building me-1"></i>${escapeHtml(r.site_name)}` : '';
+    cardDate = r.created_at ? formatDateDisplay(String(r.created_at).slice(0,10)) : '';
+    const infoParts = [];
+    if (r.utility)    infoParts.push(`<span class="permit-util-badge">${escapeHtml(r.utility)}</span>`);
+    if (r.meter_type) infoParts.push(`<span class="permit-meter-badge">${escapeHtml(r.meter_type)}</span>`);
+    if (r.pv_kwp)     infoParts.push(`<span class="permit-meter-badge">${escapeHtml(String(r.pv_kwp))} kWp</span>`);
+    meta = infoParts.join(' ');
+    const refParts = [];
+    if (r.ca_no)      refParts.push(`CA: ${escapeHtml(r.ca_no)}`);
+    if (r.request_no) refParts.push(`คำขอ: ${escapeHtml(r.request_no)}`);
+    if (refParts.length) extra += `<div class="permit-info-row"><i class="bi bi-hash me-1"></i>${refParts.join('  ·  ')}</div>`;
+    const phaseStep = PERMIT_PHASES.findIndex(p => p.label === r.phase) + 1;
+    const phaseBtn = `<button class="permit-phase-btn" onclick="openPhaseModal('${r.id}')"><span class="phase-step">${phaseStep}</span><i class="bi bi-chevron-right" style="font-size:9px;"></i>${escapeHtml(r.phase)}</button>`;
+    extra += `<div class="mt-1 mb-1">${phaseBtn}</div>`;
+    const commentCount2 = (r._logs || []).filter(l => l.action === 'COMMENT').length;
+    const commentBtn2 = `<button class="btn btn-sm btn-outline-secondary btn-comment" onclick="openCommentModal('${key}','${r.id}')"><i class="bi bi-chat-dots me-1"></i>Log${commentCount2 ? ` ${commentCount2}` : ''}</button>`;
+    const sc2 = statusClass(key, r.status);
+    const statusBtn2 = `<button class="status-badge ${sc2}" onclick="openStatusModal('${key}','${r.id}')">${escapeHtml(r.status)}</button>`;
+    return `
+    <article class="card job-card permit-card status-${sc2}">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <div class="card-customer">${escapeHtml(name)}</div>
+          <div class="card-date">${escapeHtml(cardDate)}</div>
+        </div>
+        ${detail ? `<div class="card-detail">${detail}</div>` : ''}
+        ${meta   ? `<div class="card-meta d-flex gap-1 flex-wrap">${meta}</div>` : ''}
+        ${extra}
+        <div class="d-flex gap-2 flex-wrap mt-2 align-items-center">
+          ${statusBtn2}${commentBtn2}<button class="btn btn-sm btn-outline-secondary btn-map" onclick="openEditPermitModal('${r.id}')"><i class="bi bi-pencil me-1"></i>แก้ไข</button>
+        </div>
+      </div>
+    </article>`;
   }
   extra += commentSummaryHtml(r.note || '');
 
@@ -2157,7 +2220,7 @@ function buildCard(key, r) {
       ${meta   ? `<div class="card-meta">${meta}</div>` : ''}
       ${extra}
       <div class="d-flex gap-2 flex-wrap mt-2 align-items-center">
-        ${statusBtn}${commentBtn}${mapsBtn}
+        ${statusBtn}${commentBtn}${mapsBtn}${editNganBtn}
         <div class="ms-auto">${updatedBy}</div>
       </div>
     </div>
@@ -2168,22 +2231,23 @@ function buildCard(key, r) {
 function updateStats() {
   const pend = (k, ss) => allData[k].filter(r => ss.includes(r.status)).length;
   const td   = todayStr();
-  document.getElementById('s-ngan').textContent      = pend('ngan', ['Waiting','In Progress']);
+  document.getElementById('s-ngan').textContent      = pend('ngan', ['Waiting','Assigned','In Progress']);
   document.getElementById('s-langPaeng').textContent  = pend('langPaeng', ['รอนัด','นัดแล้ว']);
-  document.getElementById('s-som').textContent        = pend('som', ['รอส่ง','ส่งซ่อมแล้ว']);
+  document.getElementById('s-som').textContent        = pend('som', ['รอส่ง','Assigned','ส่งซ่อมแล้ว']);
   document.getElementById('s-bil').textContent        = pend('bil', ['รอออกบิล','ออกบิลแล้ว']);
   document.getElementById('s-duNgan').textContent     = allData['duNgan'].filter(r => r.date === td && r.status !== 'ดูงานแล้ว').length;
+  document.getElementById('s-permit').textContent     = pend('permit', ['Waiting','In Progress','Need Fix']);
 }
 
 function updateBadges() {
   const pend = (k, ss) => allData[k].filter(r => ss.includes(r.status)).length;
   const set  = (id, n) => { const el=document.getElementById(id); el.textContent=n>0?n:''; el.style.display=n>0?'inline':'none'; };
-  set('b-ngan',      pend('ngan',['Waiting','In Progress']));
+  set('b-ngan',      pend('ngan',['Waiting','Assigned','In Progress']));
   set('b-duNgan',    pend('duNgan',['รอดูงาน','รอนัดหมาย']));
   set('b-langPaeng', pend('langPaeng',['รอนัด','นัดแล้ว']));
-  set('b-som',       pend('som',['รอส่ง','ส่งซ่อมแล้ว']));
+  set('b-som',       pend('som',['รอส่ง','Assigned','ส่งซ่อมแล้ว']));
   set('b-bil',       pend('bil',['รอออกบิล','ออกบิลแล้ว']));
-  set('b-permit',    permitData.filter(r => r.phase !== 'CLOSED' || r.status !== 'DONE').length);
+  set('b-permit',    pend('permit',['Waiting','In Progress','Need Fix']));
 }
 
 // ── Tab Switch ────────────────────────────────────────
@@ -2192,10 +2256,35 @@ function switchTab(key) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-'+key).classList.add('active');
   document.querySelector(`.nav-btn[data-tab="${key}"]`).classList.add('active');
+  // Scroll so today-divider is near top of list
+  requestAnimationFrame(() => {
+    const anchor = document.getElementById('today-anchor');
+    if (anchor) anchor.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  });
 }
 
 // ── Filter ────────────────────────────────────────────
 function setFilter(key, val, el) {
+  if (filters[key] instanceof Set) {
+    const scroll = el.closest('.filter-scroll');
+    const allChip = scroll.querySelector('[data-filter-all]');
+    if (val === 'all') {
+      filters[key] = new Set();
+      scroll.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      if (allChip) allChip.classList.add('active');
+    } else {
+      if (filters[key].has(val)) {
+        filters[key].delete(val);
+        el.classList.remove('active');
+      } else {
+        filters[key].add(val);
+        el.classList.add('active');
+      }
+      if (allChip) allChip.classList.toggle('active', filters[key].size === 0);
+    }
+    renderTab(key);
+    return;
+  }
   filters[key] = val;
   el.closest('.filter-scroll').querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
@@ -2229,7 +2318,13 @@ function pickStatus(status) {
   if (!pendingUpdate) return;
   const { tabKey, id } = pendingUpdate;
   closeStatusModal();
-  callUpdate(tabKey, id, status);
+  if (status === 'Assigned' && (tabKey === 'ngan' || tabKey === 'som')) {
+    openAssignedModal(tabKey, id);
+  } else if (tabKey === 'permit') {
+    callUpdatePermitStatus(id, status);
+  } else {
+    callUpdate(tabKey, id, status);
+  }
 }
 
 // ── Edit Date/Time Modal (duNgan) ─────────────────────
@@ -2302,6 +2397,615 @@ async function submitEditDate() {
   }
 }
 
+// ── Permit update helpers ─────────────────────────────
+async function callUpdatePermitStatus(id, displayLabel) {
+  const dbKey = PERMIT_STATUS_MAP[displayLabel];
+  if (!dbKey) return;
+  const user    = localStorage.getItem('hiSolarUser') || 'ไม่ระบุ';
+  const record  = allData.permit.find(r => r.id === id);
+  const fromKey = record?._statusKey || '';
+
+  const { error } = await sb.from('hi_solar_permits')
+    .update({ status: dbKey, updated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) { showToast(formatSupabaseError(error, 'อัปเดตสถานะ'), 'danger'); return; }
+
+  const now = new Date().toISOString();
+  await sb.from('hi_solar_permit_logs').insert({
+    permit_id: id, action: 'STATUS_CHANGE', actor: user,
+    from_status: fromKey, to_status: dbKey,
+    metadata: {}, created_at: now,
+  });
+  if (record) {
+    record.status    = displayLabel;
+    record._statusKey = dbKey;
+    const logEntry = { id: now, permit_id: id, action: 'STATUS_CHANGE', actor: user, from_status: fromKey, to_status: dbKey, metadata: {}, created_at: now };
+    record._logs = [...(record._logs || []), logEntry];
+  }
+  renderTab('permit');
+  updateStats();
+  updateBadges();
+  showToast(`สถานะ: ${displayLabel}`, 'success');
+}
+
+async function callUpdatePermitPhase(id, displayLabel) {
+  const dbKey = PERMIT_PHASE_MAP[displayLabel];
+  if (!dbKey) return;
+  const user    = localStorage.getItem('hiSolarUser') || 'ไม่ระบุ';
+  const record  = allData.permit.find(r => r.id === id);
+  const fromKey = record?._phaseKey || '';
+
+  const { error } = await sb.from('hi_solar_permits')
+    .update({ phase: dbKey, updated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) { showToast(formatSupabaseError(error, 'อัปเดต Phase'), 'danger'); return; }
+
+  const now = new Date().toISOString();
+  await sb.from('hi_solar_permit_logs').insert({
+    permit_id: id, action: 'PHASE_CHANGE', actor: user,
+    from_phase: fromKey, to_phase: dbKey,
+    metadata: {}, created_at: now,
+  });
+  if (record) {
+    record.phase    = displayLabel;
+    record._phaseKey = dbKey;
+    const logEntry = { id: now, permit_id: id, action: 'PHASE_CHANGE', actor: user, from_phase: fromKey, to_phase: dbKey, metadata: {}, created_at: now };
+    record._logs = [...(record._logs || []), logEntry];
+  }
+  renderTab('permit');
+  showToast(`Phase: ${displayLabel}`, 'success');
+}
+
+// ── Edit LangPaeng ────────────────────────────────────
+let pendingEditLangPaeng = null;
+
+function openEditLangPaengModal(id) {
+  const r = allData['langPaeng'].find(x => x.id === id);
+  if (!r) return;
+  pendingEditLangPaeng = { id };
+  document.getElementById('elCustomer').value        = r.customer         || '';
+  document.getElementById('elPhone').value           = r.phone            || '';
+  document.getElementById('elMapsUrl').value         = r.maps_url         || '';
+  document.getElementById('elReportDate').value      = displayDateToInputDate(r.report_date);
+  document.getElementById('elAppointmentDate').value = displayDateToInputDate(r.appointment_date);
+  document.getElementById('elAppointmentTime').value = r.appointment_time || '';
+  document.getElementById('elTechnician').innerHTML  = teamOptionsHtml(r.technician || '');
+  document.getElementById('elPrice').value           = r.price  ?? '';
+  document.getElementById('elKwp').value             = r.kwp    ?? '';
+  document.getElementById('editLangPaengModal').classList.add('show');
+}
+function closeEditLangPaengModal() {
+  document.getElementById('editLangPaengModal').classList.remove('show');
+  pendingEditLangPaeng = null;
+}
+async function submitEditLangPaeng() {
+  if (!pendingEditLangPaeng) return;
+  const { id } = pendingEditLangPaeng;
+  const customer    = document.getElementById('elCustomer').value.trim();
+  const phone       = document.getElementById('elPhone').value.trim();
+  const mapsUrl     = document.getElementById('elMapsUrl').value.trim();
+  const reportDate  = document.getElementById('elReportDate').value;
+  const apptDate    = document.getElementById('elAppointmentDate').value;
+  const apptTime    = document.getElementById('elAppointmentTime').value;
+  const technician  = document.getElementById('elTechnician').value;
+  const priceVal    = document.getElementById('elPrice').value;
+  const kwpVal      = document.getElementById('elKwp').value;
+  if (!customer) { showToast('กรุณาระบุชื่อลูกค้า', 'danger'); return; }
+  const btn = document.getElementById('editLangPaengSubmitBtn');
+  const orig = btn.innerHTML; btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
+  try {
+    const r = allData['langPaeng'].find(x => x.id === id);
+    const newRaw = { ...(r?._rawData || {}) };
+    newRaw['ลูกค้า'] = customer; newRaw['เบอร์โทร'] = phone;
+    newRaw['Maps'] = mapsUrl; newRaw['วันที่แจ้ง'] = reportDate;
+    newRaw['วันที่ดำเนินการ'] = apptDate; newRaw['เวลานัด'] = apptTime; newRaw['ช่าง'] = technician;
+    newRaw['ค่าดำเนินการ'] = priceVal; newRaw['kWp'] = kwpVal;
+    const { error } = await sb.from('hi_solar_jobs').update({
+      customer_name: customer, phone: phone || null, maps_url: mapsUrl || null,
+      job_date: reportDate || null, appointment_date: apptDate || null,
+      job_time: apptTime ? `${apptTime}:00` : null,
+      technician: technician || null,
+      price: priceVal ? Number(priceVal) : null,
+      raw_data: newRaw, updated_at: new Date().toISOString(),
+    }).eq('id', id);
+    if (error) throw error;
+    if (r) {
+      r.customer = customer; r.phone = phone; r.maps_url = mapsUrl;
+      r.report_date = formatDateDisplay(reportDate);
+      r.appointment_date = formatDateDisplay(apptDate);
+      r.appointment_time = formatTimeDisplay(apptTime);
+      r.technician = technician;
+      r.price = priceVal; r.kwp = kwpVal;
+      r._rawData = newRaw;
+    }
+    closeEditLangPaengModal(); renderTab('langPaeng');
+    if (calView !== 'list') renderCalendar();
+    showToast('บันทึกข้อมูลแล้ว', 'success');
+  } catch (e) { showToast(formatSupabaseError(e, 'แก้ไขข้อมูล'), 'danger'); }
+  finally { btn.disabled = false; btn.innerHTML = orig; }
+}
+
+// ── Edit Som ──────────────────────────────────────────
+let pendingEditSom = null;
+
+function openEditSomModal(id) {
+  const r = allData['som'].find(x => x.id === id);
+  if (!r) return;
+  pendingEditSom = { id };
+  document.getElementById('esItem').value       = r.item        || '';
+  document.getElementById('esCustomer').value   = r.customer    || '';
+  document.getElementById('esPhone').value      = r.phone       || '';
+  document.getElementById('esMapsUrl').value    = r.maps_url    || '';
+  document.getElementById('esReportDate').value = displayDateToInputDate(r.report_date);
+  document.getElementById('esSiteDate').value   = displayDateToInputDate(r.site_date);
+  document.getElementById('esSiteTime').value   = r.site_time   || '';
+  document.getElementById('esReturnDate').value = displayDateToInputDate(r.return_date);
+  document.getElementById('editSomModal').classList.add('show');
+}
+function closeEditSomModal() {
+  document.getElementById('editSomModal').classList.remove('show');
+  pendingEditSom = null;
+}
+async function submitEditSom() {
+  if (!pendingEditSom) return;
+  const { id } = pendingEditSom;
+  const item       = document.getElementById('esItem').value.trim();
+  const customer   = document.getElementById('esCustomer').value.trim();
+  const phone      = document.getElementById('esPhone').value.trim();
+  const mapsUrl    = document.getElementById('esMapsUrl').value.trim();
+  const reportDate = document.getElementById('esReportDate').value;
+  const siteDate   = document.getElementById('esSiteDate').value;
+  const siteTime   = document.getElementById('esSiteTime').value;
+  const returnDate = document.getElementById('esReturnDate').value;
+  if (!item) { showToast('กรุณาระบุรายการ', 'danger'); return; }
+  const btn = document.getElementById('editSomSubmitBtn');
+  const orig = btn.innerHTML; btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
+  try {
+    const r = allData['som'].find(x => x.id === id);
+    const newRaw = { ...(r?._rawData || {}) };
+    newRaw['รายการ'] = item; newRaw['ลูกค้า'] = customer;
+    newRaw['เบอร์โทร'] = phone; newRaw['วันที่แจ้ง'] = reportDate;
+    newRaw['Maps'] = mapsUrl;
+    newRaw['วันที่เข้างาน'] = siteDate; newRaw['วันที่ส่งคืน'] = returnDate;
+    newRaw['เวลาเข้างาน'] = siteTime;
+    const { error } = await sb.from('hi_solar_jobs').update({
+      title: item, customer_name: customer || null, phone: phone || null, maps_url: mapsUrl || null,
+      job_date: reportDate || null, job_time: siteTime ? `${siteTime}:00` : null, sent_date: siteDate || null,
+      received_date: returnDate || null, raw_data: newRaw, updated_at: new Date().toISOString(),
+    }).eq('id', id);
+    if (error) throw error;
+    if (r) {
+      r.item = item; r.customer = customer; r.phone = phone; r.maps_url = mapsUrl;
+      r.report_date = formatDateDisplay(reportDate);
+      r.site_date = formatDateDisplay(siteDate);
+      r.site_time = formatTimeDisplay(siteTime);
+      r.return_date = formatDateDisplay(returnDate);
+      r._rawData = newRaw;
+    }
+    closeEditSomModal(); renderTab('som');
+    if (calView !== 'list') renderCalendar();
+    showToast('บันทึกข้อมูลแล้ว', 'success');
+  } catch (e) { showToast(formatSupabaseError(e, 'แก้ไขข้อมูล'), 'danger'); }
+  finally { btn.disabled = false; btn.innerHTML = orig; }
+}
+
+// ── Edit Bil ──────────────────────────────────────────
+let pendingEditBil = null;
+
+function openEditBilModal(id) {
+  const r = allData['bil'].find(x => x.id === id);
+  if (!r) return;
+  pendingEditBil = { id };
+  document.getElementById('ebCustomer').value  = r.customer        || '';
+  document.getElementById('ebAmount').value    = r.amount          ?? '';
+  document.getElementById('ebDate').value      = displayDateToInputDate(r.date);
+  document.getElementById('ebFirstName').value = r.etax_first_name || '';
+  document.getElementById('ebLastName').value  = r.etax_last_name  || '';
+  document.getElementById('ebTaxId').value     = r.etax_tax_id     || '';
+  document.getElementById('ebAddress').value   = r.etax_address    || '';
+  document.getElementById('ebEmail').value     = r.etax_email      || '';
+  document.getElementById('ebEtaxPhone').value = r.etax_phone      || '';
+  document.getElementById('ebEtaxDate').value  = displayDateToInputDate(r.etax_date);
+  document.getElementById('editBilModal').classList.add('show');
+}
+function closeEditBilModal() {
+  document.getElementById('editBilModal').classList.remove('show');
+  pendingEditBil = null;
+}
+async function submitEditBil() {
+  if (!pendingEditBil) return;
+  const { id } = pendingEditBil;
+  const customer  = document.getElementById('ebCustomer').value.trim();
+  const amount    = document.getElementById('ebAmount').value;
+  const dateVal   = document.getElementById('ebDate').value;
+  const firstName = document.getElementById('ebFirstName').value.trim();
+  const lastName  = document.getElementById('ebLastName').value.trim();
+  const taxId     = document.getElementById('ebTaxId').value.trim();
+  const address   = document.getElementById('ebAddress').value.trim();
+  const email     = document.getElementById('ebEmail').value.trim();
+  const etaxPhone = document.getElementById('ebEtaxPhone').value.trim();
+  const etaxDate  = document.getElementById('ebEtaxDate').value;
+  if (!customer) { showToast('กรุณาระบุชื่อลูกค้า', 'danger'); return; }
+  const btn = document.getElementById('editBilSubmitBtn');
+  const orig = btn.innerHTML; btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
+  try {
+    const r = allData['bil'].find(x => x.id === id);
+    const newRaw = { ...(r?._rawData || {}) };
+    newRaw['ลูกค้า']              = customer;
+    newRaw['ยอด']                 = amount;
+    newRaw['วันที่']              = dateVal;
+    newRaw['ชื่อ']                = firstName;
+    newRaw['นามสกุล']             = lastName;
+    newRaw['หมายเลขผู้เสียภาษี'] = taxId;
+    newRaw['ที่อยู่']             = address;
+    newRaw['Email']               = email;
+    newRaw['เบอร์โทรศัพท์']      = etaxPhone;
+    newRaw['วันที่ออก E-Tax']     = etaxDate;
+    const { error } = await sb.from('hi_solar_jobs').update({
+      customer_name: customer, amount: amount ? Number(amount) : null,
+      job_date: dateVal || null, raw_data: newRaw, updated_at: new Date().toISOString(),
+    }).eq('id', id);
+    if (error) throw error;
+    if (r) {
+      r.customer        = customer;    r.amount    = amount;
+      r.date            = formatDateDisplay(dateVal);
+      r.etax_first_name = firstName;   r.etax_last_name = lastName;
+      r.etax_tax_id     = taxId;       r.etax_address   = address;
+      r.etax_email      = email;       r.etax_phone     = etaxPhone;
+      r.etax_date       = formatDateDisplay(etaxDate);
+      r._rawData = newRaw;
+    }
+    closeEditBilModal(); renderTab('bil');
+    showToast('บันทึกข้อมูลแล้ว', 'success');
+  } catch (e) { showToast(formatSupabaseError(e, 'แก้ไขข้อมูล'), 'danger'); }
+  finally { btn.disabled = false; btn.innerHTML = orig; }
+}
+
+// ── Edit DuNgan ───────────────────────────────────────
+let pendingEditDuNgan = null;
+
+function openEditDuNganModal(id) {
+  const r = allData['duNgan'].find(x => x.id === id);
+  if (!r) return;
+  pendingEditDuNgan = { id };
+  document.getElementById('edDate').value    = displayDateToInputDate(r.date);
+  document.getElementById('edTime').value    = r.time     || '';
+  document.getElementById('edCustomer').value = r.customer || '';
+  document.getElementById('edPhone').value   = r.phone    || '';
+  document.getElementById('edMapsUrl').value = r.maps_url || '';
+  document.getElementById('editDuNganModal').classList.add('show');
+}
+
+function closeEditDuNganModal() {
+  document.getElementById('editDuNganModal').classList.remove('show');
+  pendingEditDuNgan = null;
+}
+
+async function submitEditDuNgan() {
+  if (!pendingEditDuNgan) return;
+  const { id } = pendingEditDuNgan;
+  const dateVal    = document.getElementById('edDate').value;
+  const timeVal    = document.getElementById('edTime').value;
+  const customer   = document.getElementById('edCustomer').value.trim();
+  const phone      = document.getElementById('edPhone').value.trim();
+  const mapsUrl    = document.getElementById('edMapsUrl').value.trim();
+
+  if (!dateVal)   { showToast('กรุณาเลือกวันที่', 'danger'); return; }
+  if (!customer)  { showToast('กรุณาระบุชื่อลูกค้า', 'danger'); return; }
+
+  const btn = document.getElementById('editDuNganSubmitBtn');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
+
+  try {
+    const r = allData['duNgan'].find(x => x.id === id);
+    const newRaw = { ...(r?._rawData || {}) };
+    newRaw['วันที่']   = dateVal;
+    newRaw['เวลา']     = timeVal;
+    newRaw['ลูกค้า']   = customer;
+    newRaw['เบอร์โทร'] = phone;
+    newRaw['Maps']     = mapsUrl;
+
+    const payload = {
+      customer_name: customer,
+      phone:         phone || null,
+      maps_url:      mapsUrl || null,
+      job_date:      dateVal,
+      job_time:      timeVal ? `${timeVal}:00` : null,
+      raw_data:      newRaw,
+      updated_at:    new Date().toISOString(),
+    };
+    const { error } = await sb.from('hi_solar_jobs').update(payload).eq('id', id);
+    if (error) throw error;
+
+    if (r) {
+      r.customer  = customer;
+      r.phone     = phone;
+      r.maps_url  = mapsUrl;
+      r.date      = formatDateDisplay(dateVal);
+      r.time      = timeVal;
+      r._rawData  = newRaw;
+    }
+    closeEditDuNganModal();
+    renderTab('duNgan');
+    if (calView !== 'list') renderCalendar();
+    showToast('บันทึกข้อมูลแล้ว', 'success');
+  } catch (e) {
+    showToast(formatSupabaseError(e, 'แก้ไขข้อมูล'), 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
+// ── Edit Permit ───────────────────────────────────────
+let pendingEditPermit = null;
+
+function openEditPermitModal(id) {
+  const r = allData.permit.find(p => p.id === id);
+  if (!r) return;
+  pendingEditPermit = { id };
+  document.getElementById('epCustomer').value      = r.customer      || '';
+  document.getElementById('epPhone').value         = r.phone         || '';
+  document.getElementById('epSiteName').value      = r.site_name     || '';
+  document.getElementById('epAddress').value       = r.address       || '';
+  document.getElementById('epCaNo').value          = r.ca_no         || '';
+  document.getElementById('epPvKwp').value         = r.pv_kwp        ?? '';
+  document.getElementById('epInverterBrand').value = r.inverter_brand || '';
+  document.getElementById('epRequestNo').value     = r.request_no    || '';
+  document.getElementById('editPermitModal').classList.add('show');
+}
+
+function closeEditPermitModal() {
+  document.getElementById('editPermitModal').classList.remove('show');
+  pendingEditPermit = null;
+}
+
+async function submitEditPermit() {
+  if (!pendingEditPermit) return;
+  const { id } = pendingEditPermit;
+  const customer      = document.getElementById('epCustomer').value.trim();
+  const phone         = document.getElementById('epPhone').value.trim();
+  const site_name     = document.getElementById('epSiteName').value.trim();
+  const address       = document.getElementById('epAddress').value.trim();
+  const ca_no         = document.getElementById('epCaNo').value.trim();
+  const pv_kwp_str    = document.getElementById('epPvKwp').value;
+  const inverter_brand= document.getElementById('epInverterBrand').value.trim();
+  const request_no    = document.getElementById('epRequestNo').value.trim();
+
+  if (!customer)  { showToast('กรุณาระบุชื่อลูกค้า', 'danger'); return; }
+  if (!site_name) { showToast('กรุณาระบุชื่อสถานที่', 'danger'); return; }
+
+  const btn = document.getElementById('editPermitSubmitBtn');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
+
+  try {
+    const payload = {
+      customer_name:  customer,
+      phone:          phone || null,
+      site_name:      site_name,
+      site_address:   address || null,
+      ca_no:          ca_no || null,
+      pv_kwp:         pv_kwp_str !== '' ? parseFloat(pv_kwp_str) : null,
+      inverter_brand: inverter_brand || null,
+      application_no: request_no || null,
+      updated_at:     new Date().toISOString(),
+    };
+    const { error } = await sb.from('hi_solar_permits').update(payload).eq('id', id);
+    if (error) throw error;
+
+    const r = allData.permit.find(p => p.id === id);
+    if (r) {
+      r.customer       = customer;
+      r.phone          = phone;
+      r.site_name      = site_name;
+      r.address        = address;
+      r.ca_no          = ca_no;
+      r.pv_kwp         = pv_kwp_str !== '' ? parseFloat(pv_kwp_str) : '';
+      r.inverter_brand = inverter_brand;
+      r.request_no     = request_no;
+    }
+    closeEditPermitModal();
+    renderTab('permit');
+    showToast('บันทึกข้อมูลแล้ว', 'success');
+  } catch (e) {
+    showToast(formatSupabaseError(e, 'แก้ไขข้อมูล'), 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = orig;
+  }
+}
+
+// ── Phase Modal ───────────────────────────────────────
+let pendingPhase = null;
+
+function openPhaseModal(id) {
+  const record = allData.permit.find(r => r.id === id);
+  if (!record) return;
+  pendingPhase = { id };
+  document.getElementById('phaseModalTitle').textContent = `${escapeHtml(record.customer || record.site_name || 'งาน')} — เปลี่ยน Phase`;
+  const current = record.phase;
+  document.getElementById('phaseOptions').innerHTML = PERMIT_PHASES.map((p, i) => {
+    const isCurrent = p.label === current;
+    const isBefore  = PERMIT_PHASES.findIndex(x => x.label === current) > i;
+    const cls       = isBefore ? 'ph-done' : '';
+    return `<button class="sheet-opt phase ${cls}${isCurrent ? ' active' : ''}" onclick="pickPhase('${escapeHtml(p.label)}')">
+      <span style="font-size:11px;font-weight:700;color:inherit;opacity:.6;">${i+1}.</span>
+      ${escapeHtml(p.label)}${isCurrent ? ' ✓' : ''}
+    </button>`;
+  }).join('');
+  document.getElementById('phaseModal').classList.add('show');
+}
+
+function closePhaseModal() {
+  document.getElementById('phaseModal').classList.remove('show');
+  pendingPhase = null;
+}
+
+function pickPhase(label) {
+  if (!pendingPhase) return;
+  const { id } = pendingPhase;
+  closePhaseModal();
+  callUpdatePermitPhase(id, label);
+}
+
+// ── Edit Ngan ─────────────────────────────────────────
+let pendingEditNgan = null;
+
+function openEditNganModal(id) {
+  const record = allData['ngan'].find(r => r.id === id);
+  if (!record) return;
+  pendingEditNgan = { id };
+  document.getElementById('editNganMapsUrl').value = record.maps_url || '';
+  document.getElementById('editNganDate').value     = displayDateToInputDate(record.date);
+  document.getElementById('editNganTime').value     = record.time || '';
+  document.getElementById('editNganType').value     = record.type || '';
+  document.getElementById('editNganPrice').value    = record.price || '';
+  const techEl = document.getElementById('editNganTechnician');
+  techEl.innerHTML = teamOptionsHtml(record.technician || '');
+  document.getElementById('editNganModal').classList.add('show');
+}
+
+function closeEditNganModal() {
+  document.getElementById('editNganModal').classList.remove('show');
+  pendingEditNgan = null;
+}
+
+async function submitEditNgan() {
+  if (!pendingEditNgan) return;
+  const { id } = pendingEditNgan;
+  const mapsUrl   = document.getElementById('editNganMapsUrl').value.trim();
+  const dateVal   = document.getElementById('editNganDate').value;
+  const timeVal   = document.getElementById('editNganTime').value;
+  const techVal   = document.getElementById('editNganTechnician').value;
+  const typeVal   = document.getElementById('editNganType').value.trim();
+  const priceVal  = document.getElementById('editNganPrice').value;
+
+  const btn = document.getElementById('editNganSubmitBtn');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
+
+  try {
+    const record = allData['ngan'].find(r => r.id === id);
+    const newRaw = { ...(record?._rawData || {}) };
+    newRaw['Maps']      = mapsUrl;
+    newRaw['วันที่']    = dateVal ? formatDateDisplay(dateVal) : (newRaw['วันที่'] || '');
+    newRaw['เวลา']      = timeVal;
+    newRaw['ช่าง']      = techVal;
+    newRaw['ประเภท']    = typeVal;
+    newRaw['ราคา']      = priceVal;
+
+    const updatePayload = {
+      maps_url:   mapsUrl,
+      job_date:   dateVal || null,
+      job_time:   timeVal ? `${timeVal}:00` : null,
+      technician: techVal,
+      job_type:   typeVal,
+      price:      priceVal ? Number(priceVal) : null,
+      raw_data:   newRaw,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from('hi_solar_jobs').update(updatePayload).eq('id', id);
+    if (error) throw error;
+
+    if (record) {
+      record.maps_url   = mapsUrl;
+      record.date       = dateVal ? formatDateDisplay(dateVal) : record.date;
+      record.time       = timeVal;
+      record.technician = techVal;
+      record.type       = typeVal;
+      record.price      = priceVal;
+      record._rawData   = newRaw;
+    }
+    closeEditNganModal();
+    renderTab('ngan');
+    showToast('บันทึกข้อมูลงานแล้ว', 'success');
+  } catch (e) {
+    console.error('submitEditNgan failed', e);
+    showToast(formatSupabaseError(e, 'แก้ไขงาน'), 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+}
+
+// ── Assigned Schedule ─────────────────────────────────
+let pendingAssigned = null;
+
+function openAssignedModal(tabKey, id) {
+  const record = allData[tabKey]?.find(r => r.id === id);
+  if (!record) return;
+  pendingAssigned = { tabKey, id };
+  document.getElementById('assignedStart').value = record.assigned_start || '';
+  document.getElementById('assignedEnd').value   = record.assigned_end   || '';
+  const techEl = document.getElementById('assignedTechnician');
+  techEl.innerHTML = teamOptionsHtml(record.technician || localStorage.getItem('hiSolarUser') || '');
+  document.getElementById('assignedModal').classList.add('show');
+}
+
+function closeAssignedModal() {
+  document.getElementById('assignedModal').classList.remove('show');
+  pendingAssigned = null;
+}
+
+async function submitAssigned() {
+  if (!pendingAssigned) return;
+  const { tabKey, id } = pendingAssigned;
+  const startVal = document.getElementById('assignedStart').value;
+  const endVal   = document.getElementById('assignedEnd').value;
+  const techVal  = document.getElementById('assignedTechnician').value;
+
+  if (!startVal) { showToast('กรุณาเลือกวันที่เริ่มงาน', 'danger'); return; }
+
+  const btn = document.getElementById('assignedSubmitBtn');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
+
+  try {
+    const record = allData[tabKey]?.find(r => r.id === id);
+    const newRaw = { ...(record?._rawData || {}) };
+    newRaw['วันที่เริ่มงาน']    = startVal;
+    newRaw['วันที่สิ้นสุดงาน'] = endVal;
+    if (techVal) newRaw['ช่าง'] = techVal;
+
+    const updatePayload = {
+      status:     'Assigned',
+      raw_data:   newRaw,
+      updated_at: new Date().toISOString(),
+    };
+    if (techVal) updatePayload.technician = techVal;
+    const { error } = await sb.from('hi_solar_jobs').update(updatePayload).eq('id', id);
+    if (error) throw error;
+
+    if (record) {
+      record.status         = 'Assigned';
+      record.assigned_start = startVal;
+      record.assigned_end   = endVal;
+      if (techVal) record.technician = techVal;
+      record._rawData = newRaw;
+    }
+    closeAssignedModal();
+    renderTab(tabKey);
+    updateStats();
+    updateBadges();
+    showToast('อัปเดตสถานะ: Assigned', 'success');
+  } catch (e) {
+    console.error('submitAssigned failed', e);
+    showToast(formatSupabaseError(e, 'บันทึก Assigned'), 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+}
+
 // ── Toast ─────────────────────────────────────────────
 function showToast(msg, type='success') {
   const colors = { success:'#16a34a', danger:'#ef4444', info:'#3b82f6' };
@@ -2331,7 +3035,6 @@ function initCommentInput() {
   const hasAnonKey = /^(eyJ|sb_publishable_)/.test(SUPABASE_ANON_KEY);
   renderTeamOptions(localStorage.getItem('hiSolarUser') || '');
   renderAddForms();
-  renderPermitFormFields();
   initCommentInput();
   if (!hasSupabaseUrl || !hasAnonKey) {
     document.getElementById('configBanner').style.display = 'block';
@@ -2346,10 +3049,15 @@ function initCommentInput() {
   }
 
   sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  setupRealtime();
 
-  // Always show login popup so each team member selects their name every session
-  document.getElementById('loading').style.display = 'none';
+  const name = localStorage.getItem('hiSolarUser');
+  if (name) {
+    document.getElementById('nameModal').style.display = 'none';
+    document.getElementById('userChip').textContent = '👤 ' + name;
+    loadData();
+  } else {
+    document.getElementById('loading').style.display = 'none';
+  }
 })();
 </script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
