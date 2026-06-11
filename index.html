@@ -270,6 +270,54 @@
     .cal-week-event.progress { background: var(--hs-blue-l); color: #1e40af; }
     .cal-week-event.done     { background: #f1f5f9; color: #64748b; }
     .cal-week-event.cancel   { background: var(--hs-red-l); color: #b91c1c; }
+
+    /* Calendar legend */
+    .cal-legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 10.5px; color: #64748b; margin-bottom: 8px; }
+    .cal-legend i.lg { width: 16px; height: 9px; border-radius: 3px; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
+    /* Multi-day bars — type colors (shared week + month) */
+    .t-ngan.cal-bar, .t-ngan.m2-bar { background: #1e40af; color: #fff; }
+    .t-som.cal-bar,  .t-som.m2-bar  { background: #d97706; color: #fff; }
+    .t-du.cal-bar,   .t-du.m2-bar   { background: #0ea5e9; color: #fff; }
+    .t-lang.cal-bar, .t-lang.m2-bar { background: #10b981; color: #fff; }
+    .t-ngan.cal-pill, .t-ngan.m2-pill { background: #dbeafe; color: #1e40af; }
+    .t-som.cal-pill,  .t-som.m2-pill  { background: #fef3c7; color: #92400e; }
+    .t-du.cal-pill,   .t-du.m2-pill   { background: #e0f2fe; color: #075985; }
+    .t-lang.cal-pill, .t-lang.m2-pill { background: #d1fae5; color: #065f46; }
+    .cut-l { border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; margin-left: 0 !important; }
+    .cut-r { border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; margin-right: 0 !important; }
+
+    /* Week view — lane bars */
+    .cal-week-wrap { min-width: 420px; }
+    .cal-week-head { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .cal-week-hcell { cursor: pointer; }
+    .cal-week-bars {
+      display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 4px; padding-top: 4px; min-height: 40px;
+      background: repeating-linear-gradient(to right, transparent 0, transparent calc(100%/7 - .5px), #eef2f6 calc(100%/7 - .5px), #eef2f6 calc(100%/7));
+    }
+    .cal-week-bars .cal-bar, .cal-week-bars .cal-pill {
+      height: 22px; line-height: 22px; margin: 0 2px; border-radius: 5px; font-size: 10px; font-weight: 500;
+      padding: 0 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer;
+    }
+    .cal-week-empty { grid-column: 1 / 8; text-align: center; font-size: 11px; color: #94a3b8; padding: 12px 0; }
+
+    /* Month view — lane bars */
+    .cal-month2-dow { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 10px; color: #94a3b8; font-weight: 500; padding: 2px 0; }
+    .cal-month2-week { border-top: .5px solid #e2e8f0; }
+    .cal-month2-nums { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .cal-m2-num { font-size: 11px; font-weight: 500; color: #374151; text-align: center; padding: 3px 0 2px; cursor: pointer; }
+    .cal-m2-num.other { color: #cbd5e1; }
+    .cal-m2-num.sel { background: #e0f2fe; }
+    .cal-m2-num span.today { background: var(--hs-primary); color: #fff; border-radius: 50%; display: inline-block; width: 20px; height: 20px; line-height: 20px; }
+    .cal-month2-bars {
+      display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 2px; padding-bottom: 3px;
+      background: repeating-linear-gradient(to right, transparent 0, transparent calc(100%/7 - .5px), #eef2f6 calc(100%/7 - .5px), #eef2f6 calc(100%/7));
+    }
+    .cal-month2-bars .m2-bar, .cal-month2-bars .m2-pill {
+      height: 15px; line-height: 15px; margin: 0 1.5px; border-radius: 3px; font-size: 9px; font-weight: 500;
+      padding: 0 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer;
+    }
+    .cal-month2-bars .m2-more { font-size: 9px; color: #94a3b8; padding-left: 3px; cursor: pointer; align-self: center; }
   </style>
   <link rel="stylesheet" href="./hi-solar-theme-reference.css">
 </head>
@@ -658,6 +706,8 @@ const ADD_FORM_CONFIG = {
     { name:'maps_url', label:'Maps', type:'url' },
     { name:'date', label:'วันที่นัด', type:'date' },
     { name:'time', label:'เวลานัด', type:'time' },
+    { name:'start_date', label:'วันเริ่มงาน', type:'date' },
+    { name:'end_date', label:'วันสิ้นสุดงาน', type:'date' },
     { name:'type', label:'ประเภท' },
     { name:'technician', label:'ช่าง', type:'team' },
     { name:'price', label:'ราคา', type:'number' },
@@ -948,6 +998,8 @@ function mapJobRow(job, comments) {
     phone: pickRaw(raw, 'เบอร์โทร', job.phone || ''),
     date: pickRaw(raw, 'วันที่', formatDateDisplay(job.job_date)),
     time: pickRaw(raw, 'เวลา', formatTimeDisplay(job.job_time)),
+    start_date: pickRaw(raw, 'วันที่เริ่ม', ''),
+    end_date: pickRaw(raw, 'วันที่สิ้นสุด', ''),
     created_date: pickRaw(raw, 'วันที่สร้าง', formatDateDisplay(job.created_date)),
     appointment_date: pickRaw(raw, 'วันที่ดำเนินการ', pickRaw(raw, 'วันที่นัด', formatDateDisplay(job.appointment_date))),
     appointment_time: pickRaw(raw, 'เวลานัด', ''),
@@ -1062,6 +1114,8 @@ function buildInsertPayload(tabKey, data) {
     raw['Maps'] = data.maps_url || '';
     raw['วันที่'] = data.date || '';
     raw['เวลา'] = data.time || '';
+    raw['วันที่เริ่ม'] = data.start_date || '';
+    raw['วันที่สิ้นสุด'] = data.end_date || '';
     raw['ประเภท'] = data.type || '';
     raw['ช่าง'] = data.technician || '';
     raw['ราคา'] = data.price || '';
@@ -1373,27 +1427,60 @@ function todayKey() { return dateKey(new Date()); }
 
 function parseDisplayDate(str) {
   if (!str) return null;
-  const m = String(str).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (!m) return null;
-  const d = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
-  return isNaN(d) ? null : d;
+  const s = String(str).trim();
+  let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) { const d = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1])); return isNaN(d) ? null : d; }
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) { const d = new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3])); return isNaN(d) ? null : d; }
+  return null;
+}
+function stripTime(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+
+// Color + render style per job type for the calendar
+const TYPE_STYLE = {
+  ngan:      { cls: 't-ngan', bar: true  },
+  som:       { cls: 't-som',  bar: true  },
+  duNgan:    { cls: 't-du',   bar: false },
+  langPaeng: { cls: 't-lang', bar: false },
+};
+
+function calLegendHtml() {
+  return `<div class="cal-legend">
+    <span><i class="lg" style="background:#1e40af"></i>งาน</span>
+    <span><i class="lg" style="background:#d97706"></i>ซ่อม</span>
+    <span><i class="lg" style="background:#0ea5e9"></i>ดูงาน</span>
+    <span><i class="lg" style="background:#10b981"></i>ล้างแผง</span>
+  </div>`;
+}
+
+// Jobs whose date range covers a given day key (dk strings sort chronologically)
+function jobsOnDay(jobs, dk) {
+  return jobs.filter(j => dk >= j.startDk && dk <= j.endDk);
 }
 
 function getAllJobsWithDates() {
   const result = [];
-  const dateField = {
-    ngan:      j => j.date,
-    duNgan:    j => j.date,
-    langPaeng: j => j.appointment_date || j.report_date,
-    som:       j => j.report_date || j.site_date,
+  // Each type maps to a [start, end] range. Single-point types use start === end.
+  //  งาน  : วันเริ่ม → วันสิ้นสุด (fallback วันที่นัด)
+  //  ซ่อม : วันเข้างาน → วันส่งคืน (fallback วันที่แจ้ง)
+  //  ดูงาน/ล้างแผง : วันนัดหมายวันเดียว
+  const rangeField = {
+    ngan:      j => [j.start_date || j.date, j.end_date || j.start_date || j.date],
+    som:       j => [j.site_date || j.report_date, j.return_date || j.site_date || j.report_date],
+    duNgan:    j => { const d = j.date; return [d, d]; },
+    langPaeng: j => { const d = j.appointment_date || j.report_date; return [d, d]; },
   };
   Object.keys(allData).forEach(tabKey => {
-    const fn = dateField[tabKey];
+    const fn = rangeField[tabKey];
     if (!fn) return;
     allData[tabKey].forEach(job => {
-      const d = parseDisplayDate(fn(job));
-      if (!d) return;
-      result.push({ tabKey, job, date: d, dk: dateKey(d) });
+      const [s, e] = fn(job);
+      const start = parseDisplayDate(s);
+      if (!start) return;
+      let end = parseDisplayDate(e) || start;
+      if (end < start) end = start;
+      const startDk = dateKey(start), endDk = dateKey(end);
+      result.push({ tabKey, job, start, end, startDk, endDk, dk: startDk, span: endDk !== startDk });
     });
   });
   return result;
@@ -1534,36 +1621,74 @@ function renderMonthView() {
   const month = calDate.getMonth();
   document.getElementById('calNavTitle').textContent = `${MONTH_TH[month]} ${year+543}`;
 
-  const jobs      = getAllJobsWithDates();
-  const byDay     = {};
-  jobs.forEach(j => { (byDay[j.dk] ||= []).push(j); });
+  const jobs     = getAllJobsWithDates();
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMon= new Date(year, month+1, 0).getDate();
+  const today    = todayKey();
+  const selDk    = calSelectedDate;
+  const MAX_LANES = 3;
 
-  const firstDow   = new Date(year, month, 1).getDay();
-  const daysInMon  = new Date(year, month+1, 0).getDate();
-  const today      = todayKey();
-  const selDk      = calSelectedDate;
+  // Build full grid of day cells (leading/trailing days included to fill whole weeks)
+  const gridStart = new Date(year, month, 1 - firstDow);
+  const totalCells = Math.ceil((firstDow + daysInMon) / 7) * 7;
+  const cells = [];
+  for (let i = 0; i < totalCells; i++) { const d = new Date(gridStart); d.setDate(gridStart.getDate()+i); cells.push(d); }
 
-  let html = '<div class="cal-month-grid">';
-  DOW_TH.forEach(d => { html += `<div class="cal-dow">${d}</div>`; });
-  for (let i = 0; i < firstDow; i++) html += '<div class="cal-day other-month"></div>';
-  for (let d = 1; d <= daysInMon; d++) {
-    const dk       = dateKey(new Date(year, month, d));
-    const isToday  = dk === today;
-    const isSel    = dk === selDk;
-    const dayJobs  = byDay[dk] || [];
-    const dots     = dayJobs.slice(0,5).map(j =>
-      `<div class="cal-dot ${statusClass(j.tabKey, j.job.status)}"></div>`).join('');
-    html += `
-    <div class="cal-day${isToday?' today':''}${isSel?' selected':''}" onclick="calDayClick('${dk}')">
-      <div class="cal-day-num">${d}</div>
-      ${dots ? `<div class="cal-dots">${dots}</div>` : ''}
-    </div>`;
+  let html = calLegendHtml() + '<div class="cal-month2">';
+  html += '<div class="cal-month2-dow">' + DOW_TH.map(d => `<div>${d}</div>`).join('') + '</div>';
+
+  for (let w = 0; w * 7 < cells.length; w++) {
+    const wdays   = cells.slice(w*7, w*7+7);
+    const wStartDk = dateKey(wdays[0]), wEndDk = dateKey(wdays[6]);
+
+    html += '<div class="cal-month2-week"><div class="cal-month2-nums">';
+    wdays.forEach(d => {
+      const dk = dateKey(d), inMon = d.getMonth() === month;
+      const isToday = dk === today, isSel = dk === selDk;
+      html += `<div class="cal-m2-num${inMon?'':' other'}${isSel?' sel':''}" onclick="calDayClick('${dk}')"><span class="${isToday?'today':''}">${d.getDate()}</span></div>`;
+    });
+    html += '</div>';
+
+    // Lay out bars for jobs intersecting this week, cutting ranges at week edges
+    const wjobs = jobs.filter(j => j.startDk <= wEndDk && j.endDk >= wStartDk);
+    const items = wjobs.map(j => {
+      const sc = Math.round((stripTime(j.start) - wdays[0]) / 86400000);
+      const ec = Math.round((stripTime(j.end)   - wdays[0]) / 86400000);
+      return { j, sc: Math.max(0, sc), ec: Math.min(6, ec), contLeft: j.startDk < wStartDk, contRight: j.endDk > wEndDk };
+    }).sort((a,b) => a.sc - b.sc || (b.ec - b.sc) - (a.ec - a.sc));
+
+    const lanes = [];
+    items.forEach(it => {
+      let l = 0;
+      while (true) {
+        const occ = lanes[l] || [];
+        if (occ.every(o => it.sc > o.ec || it.ec < o.sc)) { (lanes[l] ||= []).push(it); it.lane = l; break; }
+        l++;
+      }
+    });
+
+    const hiddenByCol = {};
+    items.filter(it => it.lane >= MAX_LANES).forEach(it => {
+      for (let c = it.sc; c <= it.ec; c++) hiddenByCol[c] = (hiddenByCol[c] || 0) + 1;
+    });
+
+    html += `<div class="cal-month2-bars" style="grid-template-rows:repeat(${MAX_LANES},15px) 12px">`;
+    items.filter(it => it.lane < MAX_LANES).forEach(it => {
+      const st   = TYPE_STYLE[it.j.tabKey];
+      const name = it.j.job.customer || it.j.job.item || '—';
+      const cls  = (st.bar ? 'm2-bar ' : 'm2-pill ') + st.cls + (it.contLeft?' cut-l':'') + (it.contRight?' cut-r':'');
+      html += `<div class="${cls}" style="grid-column:${it.sc+1}/${it.ec+2};grid-row:${it.lane+1}" onclick="event.stopPropagation();openCommentModal('${it.j.tabKey}','${it.j.job.id}')" title="${escapeHtml(name)}">${escapeHtml(name)}</div>`;
+    });
+    Object.keys(hiddenByCol).forEach(c => {
+      html += `<div class="m2-more" style="grid-column:${(+c)+1}/${(+c)+2};grid-row:${MAX_LANES+1}" onclick="calDayClick('${dateKey(wdays[+c])}')">+${hiddenByCol[c]}</div>`;
+    });
+    html += '</div></div>';
   }
   html += '</div>';
 
-  // Selected day events
-  const selJobs = byDay[selDk] || [];
+  // Selected day events — include any job whose range covers the day
   if (selDk) {
+    const selJobs = jobsOnDay(jobs, selDk);
     const label = selDk === today ? 'วันนี้' : formatCalShort(selDk);
     html += `<div class="cal-day-header"><i class="bi bi-calendar-event me-1 text-primary"></i>${label}`;
     html += selJobs.length ? ` — ${selJobs.length} งาน` : ' — ไม่มีงาน';
@@ -1576,36 +1701,65 @@ function renderMonthView() {
 
 function renderWeekView() {
   const dow  = calDate.getDay();
-  const sun  = new Date(calDate); sun.setDate(calDate.getDate() - dow);
+  const sun  = new Date(calDate.getFullYear(), calDate.getMonth(), calDate.getDate() - dow);
   const days = Array.from({length:7}, (_, i) => { const d = new Date(sun); d.setDate(sun.getDate()+i); return d; });
+  const wStartDk = dateKey(days[0]), wEndDk = dateKey(days[6]);
 
   document.getElementById('calNavTitle').textContent =
-    `${formatCalShort(dateKey(days[0]))} – ${formatCalShort(dateKey(days[6]))}`;
+    `${formatCalShort(wStartDk)} – ${formatCalShort(wEndDk)}`;
 
-  const jobs  = getAllJobsWithDates();
-  const byDay = {};
-  jobs.forEach(j => { (byDay[j.dk] ||= []).push(j); });
+  const jobs  = getAllJobsWithDates().filter(j => j.startDk <= wEndDk && j.endDk >= wStartDk);
   const today = todayKey();
 
-  let html = '<div class="cal-week-scroll"><div class="cal-week-grid">';
+  // Header row: weekday + date
+  let head = '<div class="cal-week-head">';
   days.forEach(d => {
-    const dk      = dateKey(d);
-    const isToday = dk === today;
-    const dayJobs = byDay[dk] || [];
-    html += `<div class="cal-week-col">
+    const dk = dateKey(d), isToday = dk === today;
+    head += `<div class="cal-week-hcell" onclick="calGoDay('${dk}')">
       <div class="cal-week-dow">${DOW_TH[d.getDay()]}</div>
       <div class="cal-week-date${isToday?' today':''}">${d.getDate()}</div>
-      ${dayJobs.map(j => {
-        const sc   = statusClass(j.tabKey, j.job.status);
-        const name = (j.job.customer || j.job.item || '—').slice(0, 10);
-        return `<div class="cal-week-event ${sc}" onclick="openCommentModal('${j.tabKey}','${j.job.id}')" title="${escapeHtml(j.job.customer||j.job.item||'')}">
-          ${escapeHtml(name)}
-        </div>`;
-      }).join('')}
     </div>`;
   });
-  html += '</div></div>';
-  document.getElementById('calContent').innerHTML = html;
+  head += '</div>';
+
+  // Lane packing — cut each job range to the visible week
+  const items = jobs.map(j => {
+    const sc = Math.round((stripTime(j.start) - days[0]) / 86400000);
+    const ec = Math.round((stripTime(j.end)   - days[0]) / 86400000);
+    return { j, sc: Math.max(0, sc), ec: Math.min(6, ec), contLeft: j.startDk < wStartDk, contRight: j.endDk > wEndDk };
+  }).sort((a,b) => a.sc - b.sc || (b.ec - b.sc) - (a.ec - a.sc));
+
+  const lanes = [];
+  items.forEach(it => {
+    let l = 0;
+    while (true) {
+      const occ = lanes[l] || [];
+      if (occ.every(o => it.sc > o.ec || it.ec < o.sc)) { (lanes[l] ||= []).push(it); it.lane = l; break; }
+      l++;
+    }
+  });
+
+  let bars = `<div class="cal-week-bars" style="grid-template-rows:repeat(${Math.max(1, lanes.length)},26px)">`;
+  items.forEach(it => {
+    const st   = TYPE_STYLE[it.j.tabKey];
+    const name = it.j.job.customer || it.j.job.item || '—';
+    const cls  = (st.bar ? 'cal-bar ' : 'cal-pill ') + st.cls + (it.contLeft?' cut-l':'') + (it.contRight?' cut-r':'');
+    const lArrow = it.contLeft  ? '<i class="bi bi-chevron-left"></i> ' : '';
+    const rArrow = it.contRight ? ' <i class="bi bi-chevron-right"></i>' : '';
+    bars += `<div class="${cls}" style="grid-column:${it.sc+1}/${it.ec+2};grid-row:${it.lane+1}" onclick="openCommentModal('${it.j.tabKey}','${it.j.job.id}')" title="${escapeHtml(name)}">${lArrow}${escapeHtml(name)}${rArrow}</div>`;
+  });
+  if (!items.length) bars += '<div class="cal-week-empty">ไม่มีงานในสัปดาห์นี้</div>';
+  bars += '</div>';
+
+  document.getElementById('calContent').innerHTML =
+    calLegendHtml() + `<div class="cal-week-scroll"><div class="cal-week-wrap">${head}${bars}</div></div>`;
+}
+
+// Jump to day view for a given day key
+function calGoDay(dk) {
+  const m = dk.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) calDate = new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+  setCalView('day');
 }
 
 function renderDayView() {
@@ -1614,7 +1768,7 @@ function renderDayView() {
   document.getElementById('calNavTitle').textContent = formatCalFull(dk);
 
   const jobs    = getAllJobsWithDates();
-  const dayJobs = jobs.filter(j => j.dk === dk);
+  const dayJobs = jobsOnDay(jobs, dk);
 
   let html = '';
   if (!dayJobs.length) {
