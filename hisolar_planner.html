@@ -867,9 +867,17 @@
       <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ยี่ห้อ Inverter</label>
       <input class="form-control" type="text" id="epInverterBrand">
     </div>
-    <div class="mb-3">
+    <div class="mb-2">
       <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เลขคำขอ</label>
       <input class="form-control" type="text" id="epRequestNo">
+    </div>
+    <div class="mb-3">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ลิงก์ Google Drive โครงการ</label>
+      <input class="form-control" type="url" id="epDriveFolderUrl" placeholder="https://drive.google.com/drive/folders/...">
+      <div class="form-text" style="font-size:11px;">
+        วางลิงก์โฟลเดอร์โครงการนี้ (สร้างไว้ใต้
+        <a href="https://drive.google.com/drive/folders/17IdnBMhPSnnqKz39XG-tk06gN9HrQbZs" target="_blank" rel="noopener">โฟลเดอร์กลางของทีม</a>)
+      </div>
     </div>
     <div class="d-flex gap-2">
       <button class="btn btn-primary flex-fill fw-semibold" id="editPermitSubmitBtn" onclick="submitEditPermit()">
@@ -1244,6 +1252,7 @@ function mapPermitRow(p, logs) {
     pv_kwp:         p.pv_kwp ?? '',
     inverter_brand: p.inverter_brand || '',
     request_no:     p.application_no || '',
+    drive_folder_url: p.drive_folder_url || '',
     phase:          PERMIT_PHASE_LABEL[p.phase] || p.phase || 'เตรียมเอกสาร',
     _phaseKey:      p.phase || 'PRECHECK',
     status:         PERMIT_STATUS_LABEL[p.status] || p.status || 'Waiting',
@@ -2396,6 +2405,7 @@ function buildCard(key, r) {
     const commentBtn2 = `<button class="btn btn-sm btn-outline-secondary btn-comment" onclick="openCommentModal('${key}','${r.id}')"><i class="bi bi-chat-dots me-1"></i>Log${commentCount2 ? ` ${commentCount2}` : ''}</button>`;
     const sc2 = statusClass(key, r.status);
     const statusBtn2 = `<button class="status-badge ${sc2}" onclick="openStatusModal('${key}','${r.id}')">${escapeHtml(r.status)}</button>`;
+    const driveBtn2 = r.drive_folder_url ? `<a href="${escapeHtml(r.drive_folder_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="btn btn-sm btn-outline-secondary btn-map"><i class="bi bi-folder2-open me-1"></i>Drive</a>` : '';
     return `
     <article class="card job-card permit-card status-${sc2}">
       <div class="card-body">
@@ -2407,7 +2417,7 @@ function buildCard(key, r) {
         ${meta   ? `<div class="card-meta d-flex gap-1 flex-wrap">${meta}</div>` : ''}
         ${extra}
         <div class="d-flex gap-2 flex-wrap mt-2 align-items-center">
-          ${statusBtn2}${commentBtn2}<button class="btn btn-sm btn-outline-secondary btn-map" onclick="openEditPermitModal('${r.id}')"><i class="bi bi-pencil me-1"></i>แก้ไข</button>
+          ${statusBtn2}${commentBtn2}${driveBtn2}<button class="btn btn-sm btn-outline-secondary btn-map" onclick="openEditPermitModal('${r.id}')"><i class="bi bi-pencil me-1"></i>แก้ไข</button>
         </div>
       </div>
     </article>`;
@@ -3019,6 +3029,7 @@ function openEditPermitModal(id) {
   document.getElementById('epPvKwp').value         = r.pv_kwp        ?? '';
   document.getElementById('epInverterBrand').value = r.inverter_brand || '';
   document.getElementById('epRequestNo').value     = r.request_no    || '';
+  document.getElementById('epDriveFolderUrl').value = r.drive_folder_url || '';
   document.getElementById('editPermitModal').classList.add('show');
 }
 
@@ -3038,6 +3049,7 @@ async function submitEditPermit() {
   const pv_kwp_str    = document.getElementById('epPvKwp').value;
   const inverter_brand= document.getElementById('epInverterBrand').value.trim();
   const request_no    = document.getElementById('epRequestNo').value.trim();
+  const drive_folder_url = document.getElementById('epDriveFolderUrl').value.trim();
 
   if (!customer)  { showToast('กรุณาระบุชื่อลูกค้า', 'danger'); return; }
   if (!site_name) { showToast('กรุณาระบุชื่อสถานที่', 'danger'); return; }
@@ -3057,6 +3069,7 @@ async function submitEditPermit() {
       pv_kwp:         pv_kwp_str !== '' ? parseFloat(pv_kwp_str) : null,
       inverter_brand: inverter_brand || null,
       application_no: request_no || null,
+      drive_folder_url: drive_folder_url || null,
       updated_at:     new Date().toISOString(),
     };
     const { error } = await sb.from('hi_solar_permits').update(payload).eq('id', id);
@@ -3072,6 +3085,7 @@ async function submitEditPermit() {
       r.pv_kwp         = pv_kwp_str !== '' ? parseFloat(pv_kwp_str) : '';
       r.inverter_brand = inverter_brand;
       r.request_no     = request_no;
+      r.drive_folder_url = drive_folder_url;
     }
     closeEditPermitModal();
     renderTab('permit');
