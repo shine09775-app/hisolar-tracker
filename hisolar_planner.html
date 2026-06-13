@@ -84,6 +84,18 @@
     .filter-chip { flex-shrink: 0; border-radius: 20px !important; font-size: 12px; padding: 4px 14px; white-space: nowrap; }
     .filter-chip.active { background-color: var(--hs-primary) !important; border-color: var(--hs-primary) !important; color: #fff !important; }
 
+    /* Extra filter bar (keyword + date range) */
+    .filter-toolbar { display: flex; justify-content: flex-end; margin: -4px 0 8px; }
+    .filter-toggle-btn { border-radius: 20px !important; font-size: 12px; padding: 4px 12px; }
+    .filter-toggle-btn.active { background-color: var(--hs-primary) !important; border-color: var(--hs-primary) !important; color: #fff !important; }
+    .filter-extra { display: none; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; padding: 10px; background: #f1f5f9; border-radius: 12px; }
+    .filter-extra.show { display: flex; }
+    .filter-extra .filter-keyword { flex: 1 1 180px; min-width: 140px; font-size: 13px; }
+    .filter-date-range { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .filter-date-range input[type="date"] { font-size: 12px; padding: 4px 6px; width: 130px; }
+    .filter-date-range .filter-date-sep { font-size: 12px; color: #64748b; }
+    .filter-extra .filter-clear-btn { border-radius: 20px !important; font-size: 12px; padding: 4px 12px; white-space: nowrap; }
+
     /* Cards */
     .job-card { border: none !important; border-left: 4px solid var(--hs-primary) !important; border-radius: 12px !important; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08) !important; }
     .job-card.status-waiting  { border-left-color: var(--hs-amber) !important; }
@@ -449,6 +461,7 @@
         <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('ngan','Waiting',this)">🟡 Waiting</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('ngan','Done',this)">🟢 Done</button>
       </div>
+      <div id="filterExtraHost-ngan"></div>
       <div id="list-ngan"></div>
     </div>
 
@@ -466,6 +479,7 @@
         <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('duNgan','รอนัดหมาย',this)">🔵 รอนัดหมาย</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('duNgan','ดูงานแล้ว',this)">🟢 ดูงานแล้ว</button>
       </div>
+      <div id="filterExtraHost-duNgan"></div>
       <div id="list-duNgan"></div>
     </div>
 
@@ -483,6 +497,7 @@
         <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('langPaeng','นัดแล้ว',this)">🔵 นัดแล้ว</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('langPaeng','เสร็จแล้ว',this)">🟢 เสร็จแล้ว</button>
       </div>
+      <div id="filterExtraHost-langPaeng"></div>
       <div id="list-langPaeng"></div>
     </div>
 
@@ -501,6 +516,7 @@
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','ส่งซ่อมแล้ว',this)">🔵 ส่งซ่อมแล้ว</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','ดำเนินการแล้วเสร็จ',this)">🟢 ดำเนินการแล้วเสร็จ</button>
       </div>
+      <div id="filterExtraHost-som"></div>
       <div id="list-som"></div>
     </div>
 
@@ -518,6 +534,7 @@
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('bil','ออกบิลแล้ว',this)">🔵 ออกบิลแล้ว</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('bil','รับชำระแล้ว',this)">🟢 รับชำระแล้ว</button>
       </div>
+      <div id="filterExtraHost-bil"></div>
       <div id="list-bil"></div>
     </div>
 
@@ -537,6 +554,7 @@
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('permit','Done',this)">🟢 Done</button>
         <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('permit','Reject',this)">🔴 Reject</button>
       </div>
+      <div id="filterExtraHost-permit"></div>
       <div id="list-permit"></div>
     </div>
 
@@ -1070,6 +1088,8 @@ const ADD_FORM_CONFIG = {
 // ── State ─────────────────────────────────────────────
 let allData       = { ngan:[], duNgan:[], langPaeng:[], som:[], bil:[], permit:[] };
 let filters       = { ngan: new Set(['Assigned','In Progress','Waiting']), duNgan: new Set(['รอดูงาน','รอนัดหมาย']), langPaeng: new Set(['รอนัด','นัดแล้ว']), som: new Set(['รอส่ง','Assigned']), bil:'all', permit:'all' };
+let extraFilters  = {};
+TAB_KEYS.forEach(k => extraFilters[k] = { keyword:'', dateFrom:'', dateTo:'' });
 let pendingUpdate = null;
 let pendingComment = null;
 
@@ -2200,12 +2220,42 @@ function getNganStatusOrder(status) {
   return 99;
 }
 
+// ── Extra filters: keyword + date range ────────────────
+function rowMatchesKeyword(r, keyword) {
+  if (!keyword) return true;
+  const kw = keyword.toLowerCase();
+  return Object.values(r).some(v => {
+    if (v == null || typeof v === 'object') return false;
+    return String(v).toLowerCase().includes(kw);
+  });
+}
+
+function rowMatchesDateRange(key, r, dateFrom, dateTo) {
+  if (!dateFrom && !dateTo) return true;
+  const d = getTabSortDate(key, r);
+  if (!d) return false;
+  const dd = stripTime(d);
+  if (dateFrom) {
+    const from = parseDisplayDate(dateFrom);
+    if (from && dd < stripTime(from)) return false;
+  }
+  if (dateTo) {
+    const to = parseDisplayDate(dateTo);
+    if (to && dd > stripTime(to)) return false;
+  }
+  return true;
+}
+
 function renderTab(key) {
   const el   = document.getElementById('list-' + key);
+  const ef   = extraFilters[key];
   const rows = allData[key].filter(r => {
     const f = filters[key];
-    if (f instanceof Set) return f.size === 0 || f.has(r.status || STATUS_CONFIG[key][0]);
-    return f === 'all' || r.status === f;
+    let statusMatch;
+    if (f instanceof Set) statusMatch = f.size === 0 || f.has(r.status || STATUS_CONFIG[key][0]);
+    else statusMatch = f === 'all' || r.status === f;
+    if (!statusMatch) return false;
+    return rowMatchesKeyword(r, ef.keyword) && rowMatchesDateRange(key, r, ef.dateFrom, ef.dateTo);
   });
   if (!rows.length) {
     el.innerHTML = `<div class="empty-state"><i class="bi bi-check2-circle text-success"></i><div class="mt-2 small">ไม่มีรายการ</div></div>`;
@@ -2445,6 +2495,61 @@ function setFilter(key, val, el) {
   filters[key] = val;
   el.closest('.filter-scroll').querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
+  renderTab(key);
+}
+
+// ── Extra filter bar (keyword + date range) ────────────
+function filterExtraTemplate(key) {
+  return `
+    <div class="filter-toolbar">
+      <button class="btn btn-sm btn-outline-secondary filter-toggle-btn" id="filterToggleBtn-${key}" onclick="toggleFilterExtra('${key}')">
+        <i class="bi bi-search me-1"></i>ค้นหา / ช่วงวันที่
+      </button>
+    </div>
+    <div class="filter-extra" id="filterExtra-${key}">
+      <input type="text" class="form-control form-control-sm filter-keyword" id="filterKeyword-${key}"
+             placeholder="พิมพ์ชื่อ, เบอร์โทร, รายละเอียด, เลขที่อ้างอิง..." oninput="setExtraKeyword('${key}', this.value)">
+      <div class="filter-date-range">
+        <input type="date" class="form-control form-control-sm" id="filterDateFrom-${key}" onchange="setExtraDate('${key}','dateFrom',this.value)">
+        <span class="filter-date-sep">ถึง</span>
+        <input type="date" class="form-control form-control-sm" id="filterDateTo-${key}" onchange="setExtraDate('${key}','dateTo',this.value)">
+      </div>
+      <button class="btn btn-sm btn-outline-secondary filter-clear-btn" onclick="clearExtraFilters('${key}')">
+        <i class="bi bi-x-circle me-1"></i>ล้างตัวกรอง
+      </button>
+    </div>`;
+}
+
+function initFilterExtras() {
+  TAB_KEYS.forEach(key => {
+    const host = document.getElementById('filterExtraHost-' + key);
+    if (host) host.innerHTML = filterExtraTemplate(key);
+  });
+}
+
+function toggleFilterExtra(key) {
+  document.getElementById('filterExtra-' + key)?.classList.toggle('show');
+  document.getElementById('filterToggleBtn-' + key)?.classList.toggle('active');
+}
+
+function setExtraKeyword(key, value) {
+  extraFilters[key].keyword = value;
+  renderTab(key);
+}
+
+function setExtraDate(key, field, value) {
+  extraFilters[key][field] = value;
+  renderTab(key);
+}
+
+function clearExtraFilters(key) {
+  extraFilters[key] = { keyword:'', dateFrom:'', dateTo:'' };
+  const kEl = document.getElementById('filterKeyword-' + key);
+  const fEl = document.getElementById('filterDateFrom-' + key);
+  const tEl = document.getElementById('filterDateTo-' + key);
+  if (kEl) kEl.value = '';
+  if (fEl) fEl.value = '';
+  if (tEl) tEl.value = '';
   renderTab(key);
 }
 
@@ -3192,6 +3297,7 @@ function initCommentInput() {
   const hasAnonKey = /^(eyJ|sb_publishable_)/.test(SUPABASE_ANON_KEY);
   renderTeamOptions(localStorage.getItem('hiSolarUser') || '');
   renderAddForms();
+  initFilterExtras();
   initCommentInput();
   if (!hasSupabaseUrl || !hasAnonKey) {
     document.getElementById('configBanner').style.display = 'block';
