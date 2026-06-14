@@ -2768,17 +2768,20 @@ async function submitEditLangPaeng() {
   btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
   try {
     const r = allData['langPaeng'].find(x => x.id === id);
+    const newStatus = (apptDate && r?.status === 'รอนัด') ? 'นัดแล้ว' : r?.status;
     const newRaw = { ...(r?._rawData || {}) };
     newRaw['ลูกค้า'] = customer; newRaw['เบอร์โทร'] = phone;
     newRaw['Maps'] = mapsUrl; newRaw['วันที่แจ้ง'] = reportDate;
     newRaw['วันที่ดำเนินการ'] = apptDate; newRaw['เวลานัด'] = apptTime; newRaw['ช่าง'] = technician;
     newRaw['ค่าดำเนินการ'] = priceVal; newRaw['kWp'] = kwpVal;
+    newRaw['สถานะ'] = newStatus;
     const { error } = await sb.from('hi_solar_jobs').update({
       customer_name: customer, phone: phone || null, maps_url: mapsUrl || null,
       job_date: reportDate || null, appointment_date: apptDate || null,
       job_time: apptTime ? `${apptTime}:00` : null,
       technician: technician || null,
       price: priceVal ? Number(priceVal) : null,
+      status: newStatus,
       raw_data: newRaw, updated_at: new Date().toISOString(),
     }).eq('id', id);
     if (error) throw error;
@@ -2789,6 +2792,7 @@ async function submitEditLangPaeng() {
       r.appointment_time = formatTimeDisplay(apptTime);
       r.technician = technician;
       r.price = priceVal; r.kwp = kwpVal;
+      r.status = newStatus;
       r._rawData = newRaw;
     }
     closeEditLangPaengModal(); renderTab('langPaeng');

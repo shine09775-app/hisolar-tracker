@@ -1,8 +1,14 @@
 /**
  * Hi Solar — Daily LINE Reminder (Supabase version)
  *
- * ดึงงานจาก Supabase ที่วันนี้อยู่ในช่วง วันที่เริ่มงาน – วันที่สิ้นสุดงาน
- * แล้วส่งแจ้งเตือนไป LINE กลุ่ม
+ * ดึงงานจาก Supabase ของทุกกลุ่ม (งาน / ดูงาน / ล้างแผง / ซ่อม)
+ * ที่ "วันนี้" ตรงกับเงื่อนไขของแต่ละกลุ่ม แล้วส่งแจ้งเตือนไป LINE กลุ่มเดียว
+ * เป็นข้อความเดียว — กลุ่มไหนไม่มีงานจะข้ามหัวข้อนั้นไป
+ *
+ *   🔧 งาน      — status = Assigned   และวันนี้อยู่ในช่วงวันที่เริ่มงาน–วันที่สิ้นสุดงาน
+ *   📍 ดูงาน    — status = รอนัดหมาย  และวันที่นัด (job_date) = วันนี้
+ *   💧 ล้างแผง  — status = นัดแล้ว    และวันที่ดำเนินการ (appointment_date) = วันนี้
+ *   🔩 ซ่อม     — status = Assigned   และวันนี้อยู่ในช่วงวันที่เริ่มงาน–วันที่สิ้นสุดงาน
  *
  * GitHub Secrets ที่ต้องตั้ง:
  *   SUPABASE_URL        — https://xxxx.supabase.co
@@ -50,14 +56,17 @@ function formatDateShort(dateStr) {
   return `${d.getUTCDate()} ${MONTHS_TH[d.getUTCMonth()]}`;
 }
 
+function formatTimeShort(timeStr) {
+  if (!timeStr) return '';
+  return String(timeStr).slice(0, 5);
+}
+
 // ── Supabase Fetch ────────────────────────────────────────────────────────────
 
-async function fetchTodayJobs(today) {
-  /**
-   * ดึงงานทั้งหมดที่มี วันที่เริ่มงาน/สิ้นสุดงาน แล้ว filter client-side
-   * เพราะ JSONB text extraction ผ่าน PostgREST URL อาจมีปัญหา encoding
-   */
-  const url = `${SUPABASE_URL}/rest/v1/hi_solar_jobs?select=id,customer_name,detail,technician,maps_url,status,raw_data&order=synced_at.desc&limit=500`;
+async function fetchJobs() {
+  const url = `${SUPABASE_URL}/rest/v1/hi_solar_jobs`
+    + `?select=id,sheet_key,customer_name,title,detail,phone,job_date,job_time,appointment_date,technician,maps_url,status,raw_data`
+    + `&order=synced_at.desc&limit=1000`;
 
   const res = await fetch(url, {
     headers: {
@@ -68,55 +77,166 @@ async function fetchTodayJobs(today) {
 
   if (!res.ok) throw new Error(`Supabase fetch failed: ${res.status} ${await res.text()}`);
 
-  const jobs = await res.json();
-
-  // Filter: วันที่เริ่มงาน <= today <= วันที่สิ้นสุดงาน
-  return jobs.filter(job => {
-    const start = job.raw_data?.['วันที่เริ่มงาน'];
-    const end   = job.raw_data?.['วันที่สิ้นสุดงาน'];
-    if (!start || !end) return false;
-    return start <= today && today <= end;
-  });
+  return res.json();
 }
 
-// ── Message Builder ───────────────────────────────────────────────────────────
+// ── Grouping ──────────────────────────────────────────────────────────────────
 
-function buildMessage(jobs, today) {
-  const dateLabel = formatThaiDate(today);
-  const header    = `☀️ Hi Solar — งานวันนี้\n${dateLabel}`;
+function groupJobsForToday(jobs, today) {
+  const groups = { ngan: [], duNgan: [], langPaeng: [], som: [] };
 
-  if (!jobs.length) {
-    return `${header}\n\n✅ ไม่มีงานในวันนี้`;
-  }
+  jobs.forEach(job => {
+    const raw = job.raw_data || {};
 
-  const lines = [header, ''];
+    if (job.sheet_key === 'ngan' || job.sheet_key === 'som') {
+      if (job.status !== 'Assigned') return;
+      const start = raw['วันที่เริ่มงาน'];
+      const end   = raw['วันที่สิ้นสุดงาน'];
+      if (!start || !end) return;
+      if (start <= today && today <= end) groups[job.sheet_key].push(job);
+      return;
+    }
+
+    if (job.sheet_key === 'duNgan') {
+      if (job.status !== 'รอนัดหมาย') return;
+      if (job.job_date === today) groups.duNgan.push(job);
+      return;
+    }
+
+    if (job.sheet_key === 'langPaeng') {
+      if (job.status !== 'นัดแล้ว') return;
+      if (job.appointment_date === today) groups.langPaeng.push(job);
+      return;
+    }
+  });
+
+  return groups;
+}
+
+// ── Section Builders ─────────────────────────────────────────────────────────
+
+function buildNganLines(jobs) {
+  const lines = [`🔧 งาน (${jobs.length})`, ''];
 
   jobs.forEach((job, i) => {
-    const name     = job.customer_name || '(ไม่ระบุลูกค้า)';
-    const detail   = job.detail || job.raw_data?.['รายละเอียด'] || '';
-    const tech     = job.technician || job.raw_data?.['ช่าง'] || '';
-    const phone    = job.raw_data?.['เบอร์โทร'] || '';
-    const maps     = job.maps_url || job.raw_data?.['Maps'] || '';
-    const timeStr  = job.raw_data?.['เวลา'] || '';
-    const start    = job.raw_data?.['วันที่เริ่มงาน'] || '';
-    const end      = job.raw_data?.['วันที่สิ้นสุดงาน'] || '';
-
-    // ช่วงวันที่
+    const raw    = job.raw_data || {};
+    const name   = job.customer_name || raw['ลูกค้า'] || '(ไม่ระบุลูกค้า)';
+    const detail = job.detail || raw['รายละเอียด'] || '';
+    const tech   = job.technician || raw['ช่าง'] || '';
+    const phone  = job.phone || raw['เบอร์โทร'] || '';
+    const maps   = job.maps_url || raw['Maps'] || '';
+    const start  = raw['วันที่เริ่มงาน'] || '';
+    const end    = raw['วันที่สิ้นสุดงาน'] || '';
     const dateRange = start === end
       ? formatDateShort(start)
       : `${formatDateShort(start)} – ${formatDateShort(end)}`;
 
-    lines.push(`${i + 1}. 🔧 ${name}`);
-    if (timeStr) lines.push(`   🕐 ${timeStr}  📅 ${dateRange}`);
-    else         lines.push(`   📅 ${dateRange}`);
-    if (detail)  lines.push(`   📝 ${detail.slice(0, 80)}`);
-    if (tech)    lines.push(`   👷 ${tech}`);
-    if (phone)   lines.push(`   📞 ${phone}`);
-    if (maps)    lines.push(`   📍 ${maps}`);
+    lines.push(`${i + 1}. ${name}`);
+    lines.push(`   📅 ${dateRange}`);
+    if (detail) lines.push(`   📝 ${detail.slice(0, 80)}`);
+    if (tech)   lines.push(`   👷 ${tech}`);
+    if (phone)  lines.push(`   📞 ${phone}`);
+    if (maps)   lines.push(`   📍 ${maps}`);
     lines.push('');
   });
 
-  lines.push(`รวม ${jobs.length} งาน — Hi Solar Tracker: https://hi-solar-tracker.vercel.app`);
+  return lines;
+}
+
+function buildDuNganLines(jobs) {
+  const lines = [`📍 ดูงาน (${jobs.length})`, ''];
+
+  jobs.forEach((job, i) => {
+    const raw   = job.raw_data || {};
+    const name  = job.customer_name || raw['ลูกค้า'] || '(ไม่ระบุลูกค้า)';
+    const phone = job.phone || raw['เบอร์โทร'] || '';
+    const maps  = job.maps_url || raw['Maps'] || '';
+    const time  = formatTimeShort(job.job_time) || raw['เวลา'] || '';
+    const note  = job.raw_data?.['หมายเหตุ'] || '';
+
+    lines.push(`${i + 1}. ${name}`);
+    if (time)  lines.push(`   🕐 ${time} น.`);
+    if (phone) lines.push(`   📞 ${phone}`);
+    if (maps)  lines.push(`   📍 ${maps}`);
+    if (note)  lines.push(`   📝 ${note.slice(0, 80)}`);
+    lines.push('');
+  });
+
+  return lines;
+}
+
+function buildLangPaengLines(jobs) {
+  const lines = [`💧 ล้างแผง (${jobs.length})`, ''];
+
+  jobs.forEach((job, i) => {
+    const raw   = job.raw_data || {};
+    const name  = job.customer_name || raw['ลูกค้า'] || '(ไม่ระบุลูกค้า)';
+    const phone = job.phone || raw['เบอร์โทร'] || '';
+    const maps  = job.maps_url || raw['Maps'] || '';
+    const tech  = job.technician || raw['ช่าง'] || '';
+    const time  = formatTimeShort(job.job_time) || raw['เวลานัด'] || '';
+
+    lines.push(`${i + 1}. ${name}`);
+    if (time)  lines.push(`   🕐 ${time} น.`);
+    if (tech)  lines.push(`   👷 ${tech}`);
+    if (phone) lines.push(`   📞 ${phone}`);
+    if (maps)  lines.push(`   📍 ${maps}`);
+    lines.push('');
+  });
+
+  return lines;
+}
+
+function buildSomLines(jobs) {
+  const lines = [`🔩 ซ่อม (${jobs.length})`, ''];
+
+  jobs.forEach((job, i) => {
+    const raw      = job.raw_data || {};
+    const name     = job.title || raw['รายการ'] || job.customer_name || raw['ลูกค้า'] || '(ไม่ระบุรายการ)';
+    const customer = job.customer_name || raw['ลูกค้า'] || '';
+    const phone    = job.phone || raw['เบอร์โทร'] || '';
+    const maps     = job.maps_url || raw['Maps'] || '';
+    const tech     = job.technician || raw['ช่าง'] || '';
+    const start    = raw['วันที่เริ่มงาน'] || '';
+    const end      = raw['วันที่สิ้นสุดงาน'] || '';
+    const dateRange = start === end
+      ? formatDateShort(start)
+      : `${formatDateShort(start)} – ${formatDateShort(end)}`;
+
+    lines.push(`${i + 1}. ${name}`);
+    if (customer && customer !== name) lines.push(`   👤 ${customer}`);
+    lines.push(`   📅 ${dateRange}`);
+    if (tech)  lines.push(`   👷 ${tech}`);
+    if (phone) lines.push(`   📞 ${phone}`);
+    if (maps)  lines.push(`   📍 ${maps}`);
+    lines.push('');
+  });
+
+  return lines;
+}
+
+// ── Message Builder ───────────────────────────────────────────────────────────
+
+function buildMessage(groups, today) {
+  const dateLabel = formatThaiDate(today);
+  const header    = `☀️ Hi Solar — งานวันนี้\n${dateLabel}`;
+
+  const sections = [
+    { jobs: groups.ngan,      build: buildNganLines },
+    { jobs: groups.duNgan,    build: buildDuNganLines },
+    { jobs: groups.langPaeng, build: buildLangPaengLines },
+    { jobs: groups.som,       build: buildSomLines },
+  ].filter(s => s.jobs.length > 0);
+
+  if (!sections.length) {
+    return `${header}\n\n✅ ไม่มีงานในวันนี้`;
+  }
+
+  const lines = [header, ''];
+  sections.forEach(s => lines.push(...s.build(s.jobs)));
+
+  const totalCount = groups.ngan.length + groups.duNgan.length + groups.langPaeng.length + groups.som.length;
+  lines.push(`รวม ${totalCount} งาน — Hi Solar Tracker: https://hi-solar-tracker.vercel.app`);
   return lines.join('\n');
 }
 
@@ -151,10 +271,11 @@ async function main() {
   console.log(`Target date: ${today} (${formatThaiDate(today)})`);
 
   console.log('Fetching jobs from Supabase...');
-  const jobs = await fetchTodayJobs(today);
-  console.log(`Jobs for today: ${jobs.length}`);
+  const jobs   = await fetchJobs();
+  const groups = groupJobsForToday(jobs, today);
+  console.log(`Jobs for today: งาน=${groups.ngan.length} ดูงาน=${groups.duNgan.length} ล้างแผง=${groups.langPaeng.length} ซ่อม=${groups.som.length}`);
 
-  const message = buildMessage(jobs, today);
+  const message = buildMessage(groups, today);
   console.log('\n── Message Preview ──────────────────────────');
   console.log(message);
   console.log('─────────────────────────────────────────────\n');
