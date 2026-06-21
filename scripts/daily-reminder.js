@@ -5,10 +5,11 @@
  * ที่ "วันนี้" ตรงกับเงื่อนไขของแต่ละกลุ่ม แล้วส่งแจ้งเตือนไป LINE กลุ่มเดียว
  * เป็นข้อความเดียว — กลุ่มไหนไม่มีงานจะข้ามหัวข้อนั้นไป
  *
- *   🔧 งาน      — status = Assigned   และวันนี้อยู่ในช่วงวันที่เริ่มงาน–วันที่สิ้นสุดงาน
- *   📍 ดูงาน    — status = รอนัดหมาย  และวันที่นัด (job_date) = วันนี้
- *   💧 ล้างแผง  — status = นัดแล้ว    และวันที่ดำเนินการ (appointment_date) = วันนี้
- *   🔩 ซ่อม     — status = Assigned   และวันนี้อยู่ในช่วงวันที่เริ่มงาน–วันที่สิ้นสุดงาน
+ *   🔧 งาน         — status = Assigned   และวันนี้อยู่ในช่วงวันที่เริ่มงาน–วันที่สิ้นสุดงาน
+ *   📍 ดูงาน       — status = รอนัดหมาย  และวันที่นัด (job_date) = วันนี้
+ *   💧 ล้างแผง     — status = นัดแล้ว    และวันที่ดำเนินการ (appointment_date) = วันนี้
+ *   🔩 ซ่อม        — status = Assigned   และวันนี้อยู่ในช่วงวันที่เริ่มงาน–วันที่สิ้นสุดงาน
+ *   📋 ขออนุญาติ   — status NOT IN (DONE, REJECTED) จาก hi_solar_permits
  *
  * GitHub Secrets ที่ต้องตั้ง:
  *   SUPABASE_URL        — https://xxxx.supabase.co
@@ -76,6 +77,25 @@ async function fetchJobs() {
   });
 
   if (!res.ok) throw new Error(`Supabase fetch failed: ${res.status} ${await res.text()}`);
+
+  return res.json();
+}
+
+async function fetchActivePermits() {
+  // ดึงใบขออนุญาติที่ยังไม่เสร็จ (ยกเว้น DONE และ REJECTED)
+  const url = `${SUPABASE_URL}/rest/v1/hi_solar_permits`
+    + `?select=id,customer_name,site_name,utility_provider,meter_phase,pv_kwp,status,phase`
+    + `&status=not.in.(DONE,REJECTED)`
+    + `&order=created_at.asc&limit=200`;
+
+  const res = await fetch(url, {
+    headers: {
+      'apikey':        SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+    },
+  });
+
+  if (!res.ok) throw new Error(`Supabase fetch permits failed: ${res.status} ${await res.text()}`);
 
   return res.json();
 }
@@ -215,28 +235,65 @@ function buildSomLines(jobs) {
   return lines;
 }
 
+const PHASE_LABEL = {
+  PRECHECK:   'เตรียมเอกสาร',
+  DOCS:       'ส่งเอกสาร',
+  SUBMITTED:  'ยื่นเอกสาร',
+  COMMENT:    'รับคำแนะนำ/แก้ไข',
+  CONTRACT:   'ชำระเงิน',
+  INSPECTION: 'นัดตรวจ',
+  APPROVED:   'อนุมัติ',
+  CLOSED:     'ออกเอกสารขนานไฟฟ้า',
+};
+
+function buildPermitLines(permits) {
+  const lines = [`📋 ขออนุญาติ (${permits.length} งาน)`, ''];
+
+  permits.forEach((p, i) => {
+    const name    = p.customer_name || '(ไม่ระบุลูกค้า)';
+    const site    = p.site_name     || '';
+    const phase   = PHASE_LABEL[p.phase] || p.phase || '';
+    const meter   = p.meter_phase === '3P' ? '3 เฟส' : p.meter_phase === '1P' ? '1 เฟส' : (p.meter_phase || '');
+    const kwp     = p.pv_kwp != null ? `${p.pv_kwp} kWp` : '';
+
+    lines.push(`${i + 1}. ${name}`);
+    if (site)  lines.push(`   📌 ${site}`);
+    const specs = [meter, kwp].filter(Boolean).join(' | ');
+    if (specs) lines.push(`   ⚡ ${specs}`);
+    if (phase) lines.push(`   🔄 ${phase}`);
+    lines.push('');
+  });
+
+  return lines;
+}
+
 // ── Message Builder ───────────────────────────────────────────────────────────
 
-function buildMessage(groups, today) {
+function buildMessage(groups, permits, today) {
   const dateLabel = formatThaiDate(today);
   const header    = `☀️ Hi Solar — งานวันนี้\n${dateLabel}`;
 
   const sections = [
-    { jobs: groups.ngan,      build: buildNganLines },
-    { jobs: groups.duNgan,    build: buildDuNganLines },
-    { jobs: groups.langPaeng, build: buildLangPaengLines },
-    { jobs: groups.som,       build: buildSomLines },
-  ].filter(s => s.jobs.length > 0);
+    { items: groups.ngan,      build: buildNganLines },
+    { items: groups.duNgan,    build: buildDuNganLines },
+    { items: groups.langPaeng, build: buildLangPaengLines },
+    { items: groups.som,       build: buildSomLines },
+    { items: permits,          build: buildPermitLines },
+  ].filter(s => s.items.length > 0);
 
   if (!sections.length) {
     return `${header}\n\n✅ ไม่มีงานในวันนี้`;
   }
 
   const lines = [header, ''];
-  sections.forEach(s => lines.push(...s.build(s.jobs)));
+  sections.forEach(s => lines.push(...s.build(s.items)));
 
-  const totalCount = groups.ngan.length + groups.duNgan.length + groups.langPaeng.length + groups.som.length;
-  lines.push(`รวม ${totalCount} งาน — Hi Solar Tracker: https://hi-solar-tracker.vercel.app`);
+  const jobCount    = groups.ngan.length + groups.duNgan.length + groups.langPaeng.length + groups.som.length;
+  const permitCount = permits.length;
+  const parts = [];
+  if (jobCount)    parts.push(`${jobCount} งาน`);
+  if (permitCount) parts.push(`ขออนุญาติ ${permitCount} งาน`);
+  lines.push(`รวม ${parts.join(' | ')} — Hi Solar Tracker: https://hi-solar-tracker.vercel.app`);
   return lines.join('\n');
 }
 
@@ -271,11 +328,12 @@ async function main() {
   console.log(`Target date: ${today} (${formatThaiDate(today)})`);
 
   console.log('Fetching jobs from Supabase...');
-  const jobs   = await fetchJobs();
+  const [jobs, permits] = await Promise.all([fetchJobs(), fetchActivePermits()]);
   const groups = groupJobsForToday(jobs, today);
   console.log(`Jobs for today: งาน=${groups.ngan.length} ดูงาน=${groups.duNgan.length} ล้างแผง=${groups.langPaeng.length} ซ่อม=${groups.som.length}`);
+  console.log(`Permits pending: ${permits.length}`);
 
-  const message = buildMessage(groups, today);
+  const message = buildMessage(groups, permits, today);
   console.log('\n── Message Preview ──────────────────────────');
   console.log(message);
   console.log('─────────────────────────────────────────────\n');
