@@ -2,6 +2,9 @@
   "name": "hisolar-tracker",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "test": "node --test --test-concurrency=1 --test-isolation=none"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4"
   }

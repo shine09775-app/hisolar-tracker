@@ -91,20 +91,21 @@
     .brand-sub { font-size: 11px; color: rgba(255, 255, 255, 0.8); }
 
     .header-actions { display: flex; align-items: center; gap: 8px; }
-    .live-chip,
-    .user-chip {
-      border: none;
-      border-radius: 999px;
-      font-size: 12px;
-      padding: 6px 12px;
-    }
     .live-chip {
       display: none;
       align-items: center;
       gap: 6px;
       background: rgba(255, 255, 255, 0.14);
       color: #ecfeff;
+      border: none;
+      border-radius: 999px;
+      font-size: 12px;
+      padding: 6px 12px;
     }
+    .live-chip.is-visible { display: inline-flex; }
+    .live-chip.state-live { background: rgba(22,163,74,.18); }
+    .live-chip.state-reconnecting { background: rgba(245,158,11,.18); }
+    .live-chip.state-offline { background: rgba(239,68,68,.18); }
     .live-dot {
       width: 8px;
       height: 8px;
@@ -112,11 +113,28 @@
       background: #86efac;
       animation: pulse 1.6s infinite;
     }
-    .user-chip {
+    .live-chip.state-reconnecting .live-dot { background: #fbbf24; }
+    .live-chip.state-offline .live-dot { background: #fca5a5; animation: none; }
+    .auth-profile {
+      display: flex; align-items: center; gap: 8px;
+      min-width: 0; padding: 4px 10px; border-radius: 16px;
       background: rgba(255, 255, 255, 0.18);
-      color: #fff;
-      cursor: pointer;
-      font-weight: 500;
+    }
+    .auth-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      object-fit: cover; border: 1px solid rgba(255,255,255,.32);
+      background: rgba(255,255,255,.18); flex-shrink: 0;
+    }
+    .auth-meta { min-width: 0; line-height: 1.15; }
+    .auth-name {
+      color: #fff; font-size: 12px; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;
+    }
+    .auth-role { color: rgba(255,255,255,.78); font-size: 10px; }
+    .logout-btn {
+      border: none; border-radius: 14px;
+      padding: 7px 10px; font-size: 11px; font-weight: 600;
+      color: var(--hs-primary); background: rgba(255,255,255,.94);
     }
 
     @keyframes pulse {
@@ -580,13 +598,25 @@
     }
 
     .btn-comment,
-    .btn-map {
+    .btn-map,
+    .btn-call {
       border-radius: 999px !important;
       font-size: 12px;
       padding: 5px 12px;
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
       border-color: #cbd5e1 !important;
       color: #334155 !important;
       background: rgba(255, 255, 255, 0.84) !important;
+    }
+    .btn-call {
+      color: #166534 !important;
+      border-color: #86efac !important;
+      background: #f0fdf4 !important;
     }
 
     .empty-state {
@@ -674,6 +704,17 @@
       padding: 10px 11px;
       margin-bottom: 8px;
     }
+    .comment-bubble.comment-rich { display: flex; gap: 10px; align-items: flex-start; }
+    .comment-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      object-fit: cover; background: #cbd5e1; flex-shrink: 0;
+      border: 1px solid rgba(148,163,184,.25);
+    }
+    .comment-avatar.comment-avatar--placeholder {
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #475569; font-size: 14px;
+    }
+    .comment-main { min-width: 0; flex: 1; }
     .comment-meta {
       font-size: 11px;
       color: #64748b;
@@ -764,24 +805,14 @@
 
 <div id="loading">
   <div class="spinner-border text-success" style="width:2.4rem;height:2.4rem;" role="status"></div>
-  <div style="font-size:14px;color:#475569;">กำลังเชื่อมต่อข้อมูล...</div>
+  <div id="loadingText" style="font-size:14px;color:#475569;">กำลังตรวจสอบสิทธิ์การเข้าใช้งาน...</div>
 </div>
 
-<div class="name-overlay" id="nameModal">
-  <div class="name-box">
-    <div class="name-box__icon"><i class="bi bi-people-fill"></i></div>
-    <div class="name-box__title">JDK Viewer</div>
-    <div class="name-box__text">เลือกชื่อผู้ใช้งานสำหรับเข้าดูข้อมูลและเพิ่ม comment</div>
-    <select id="nameInput" class="form-select mb-3" onkeydown="if(event.key==='Enter')saveName()">
-      <option value="">-- เลือกผู้ใช้งาน --</option>
-    </select>
-    <button class="btn btn-primary w-100 fw-semibold" onclick="saveName()">
-      <i class="bi bi-box-arrow-in-right me-1"></i>เข้าใช้งาน
-    </button>
-  </div>
+<div class="name-overlay" id="authGate" style="display:none;">
+  <div class="name-box" id="authGatePanel"></div>
 </div>
 
-<div id="app">
+<div id="app" style="display:none;">
   <div class="viewer-navbar">
     <div class="brand-wrap">
       <div class="brand-icon"><i class="bi bi-binoculars-fill"></i></div>
@@ -792,9 +823,16 @@
     <div class="header-actions">
       <div class="live-chip" id="rtIndicator">
         <span class="live-dot"></span>
-        <span>Live</span>
+        <span id="rtIndicatorLabel">Offline</span>
       </div>
-      <button class="user-chip" id="userChip" onclick="changeName()">—</button>
+      <div class="auth-profile">
+        <img id="authAvatar" class="auth-avatar" alt="LINE profile" style="display:none;">
+        <div class="auth-meta">
+          <div class="auth-name" id="authName">—</div>
+          <div class="auth-role" id="authRole">—</div>
+        </div>
+      </div>
+      <button type="button" class="logout-btn" id="logoutBtn">ออกจากระบบ</button>
     </div>
   </div>
 
@@ -924,13 +962,11 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="./line-auth-client.js"></script>
+<script src="./job-ui-helpers.js"></script>
 <script>
 const SUPABASE_URL = 'https://hlswbazcojsnfibirkzl.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_Kxzef_y7E3VAmhYvH4eS3g_o3fG7JLn';
-const VIEWER_USERS = ['Yam', 'Mike', 'Team1', 'Team2', 'Team3', 'Team4'];
-
-const { createClient } = window.supabase;
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Kxzef_y7E3VAmhYvH4eS3g_o3fG7JLn';
 
 const TAB_KEYS = ['ngan', 'langPaeng', 'som'];
 const TAB_NAMES = {
@@ -958,8 +994,6 @@ const MONTH_SHORT = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.
   'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 
 let sb = null;
-let realtimeReady = false;
-let realtimeReloadTimer = null;
 let allData = { ngan: [], langPaeng: [], som: [] };
 let filters = {
   ngan: new Set(FILTER_DEFAULTS.ngan),
@@ -970,8 +1004,13 @@ let pendingComment = null;
 let calView = 'list';
 let calDate = new Date();
 let calSelectedDate = null;
+let currentAuth = null;
+let realtimeController = null;
+
+const JOB_UI = window.JobUiHelpers || {};
 
 function escapeHtml(value) {
+  if (typeof JOB_UI.escapeHtml === 'function') return JOB_UI.escapeHtml(value);
   return String(value || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -980,16 +1019,16 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function viewerOptionsHtml(selected = '') {
-  return [
-    '<option value="">-- เลือกผู้ใช้งาน --</option>',
-    ...VIEWER_USERS.map(name => `<option value="${name}"${name === selected ? ' selected' : ''}>${name}</option>`),
-  ].join('');
+function getCurrentUserName() {
+  return currentAuth?.user?.displayName || 'ไม่ระบุ';
 }
 
-function renderViewerOptions(selected = '') {
-  const el = document.getElementById('nameInput');
-  if (el) el.innerHTML = viewerOptionsHtml(selected);
+function getCurrentUserPicture() {
+  return currentAuth?.user?.pictureUrl || '';
+}
+
+function getCurrentUserId() {
+  return currentAuth?.user?.id || null;
 }
 
 function formatDateDisplay(value) {
@@ -1045,33 +1084,119 @@ function combineNoteAndComments(note, comments) {
   const base = String(note || '').trim();
   if (base) lines.push(base);
   (comments || []).forEach(comment => {
-    const line = `[${formatCommentDateTime(comment.commented_at || comment.created_at)}] ${comment.author || 'ไม่ระบุ'}: ${comment.message || ''}`;
+    const line = `[${formatCommentDateTime(comment.commented_at || comment.created_at)}] ${getCommentAuthorName(comment)}: ${comment.message || ''}`;
     lines.push(line.trim());
   });
   return lines.filter(Boolean).join('\n');
 }
 
-function parseCommentLog(note) {
+function getCommentAuthorName(comment) {
+  if (typeof JOB_UI.getCommentAuthorName === 'function') return JOB_UI.getCommentAuthorName(comment);
+  if (comment?.actor_user_id) return comment?.author_name_snapshot || comment?.author || 'ไม่ระบุ';
+  return comment?.author || comment?.author_name_snapshot || 'ไม่ระบุ';
+}
+
+function getCommentAuthorPicture(comment) {
+  if (typeof JOB_UI.getCommentAuthorPicture === 'function') return JOB_UI.getCommentAuthorPicture(comment);
+  return comment?.actor_user_id ? (comment?.author_picture_url_snapshot || '') : '';
+}
+
+function getCommentOrganizationLabel(comment) {
+  if (typeof JOB_UI.getCommentOrganizationLabel === 'function') return JOB_UI.getCommentOrganizationLabel(comment);
+  return '';
+}
+
+function buildTelHref(value) {
+  if (typeof JOB_UI.buildTelHref === 'function') return JOB_UI.buildTelHref(value);
+  return null;
+}
+
+function isAllowedMapsHostname(url) {
+  const hostname = String(url?.hostname || '').toLowerCase();
+  const pathname = String(url?.pathname || '').toLowerCase();
+  if (hostname === 'maps.app.goo.gl') return true;
+  if (/^maps\.google\./.test(hostname)) return true;
+  if (/^(www\.)?google\./.test(hostname) && pathname.startsWith('/maps')) return true;
+  return false;
+}
+
+function sanitizeMapsUrlFallback(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  let url;
+  try {
+    url = new URL(raw);
+  } catch (_error) {
+    return null;
+  }
+
+  if (url.protocol !== 'https:') return null;
+  if (!isAllowedMapsHostname(url)) return null;
+
+  url.username = '';
+  url.password = '';
+  return url.toString();
+}
+
+function sanitizeMapsUrl(value) {
+  if (typeof JOB_UI.sanitizeMapsUrl === 'function') return JOB_UI.sanitizeMapsUrl(value);
+  return sanitizeMapsUrlFallback(value);
+}
+
+function buildPhoneMeta(phone) {
+  const raw = String(phone || '').trim();
+  return raw ? `<i class="bi bi-telephone-fill me-1"></i>${escapeHtml(raw)}` : '';
+}
+
+function buildCallActionButton(phone, options = {}) {
+  const telHref = buildTelHref(phone);
+  if (!telHref) return '';
+  const onclickAttr = options.stopPropagation ? ' onclick="event.stopPropagation()"' : '';
+  return `<a class="btn btn-sm btn-outline-success btn-call" href="${escapeHtml(telHref)}"${onclickAttr}><i class="bi bi-telephone-fill me-1"></i>โทร</a>`;
+}
+
+function buildMapsActionButton(rawUrl, options = {}) {
+  const safeUrl = sanitizeMapsUrl(rawUrl);
+  if (!safeUrl) return '';
+  const onclickAttr = options.stopPropagation ? ' onclick="event.stopPropagation()"' : '';
+  return `<a class="btn btn-sm btn-outline-secondary btn-map" href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer"${onclickAttr}><i class="bi bi-geo-alt-fill me-1"></i>แผนที่</a>`;
+}
+
+function parseCommentLog(source, fallbackNote = '') {
+  if (Array.isArray(source) && source.length) {
+    return source
+      .map(comment => ({
+        dateTime: formatCommentDateTime(comment.commented_at || comment.created_at),
+        author: getCommentAuthorName(comment),
+        organization: getCommentOrganizationLabel(comment),
+        pictureUrl: getCommentAuthorPicture(comment),
+        text: comment.message || '',
+      }))
+      .filter(comment => comment.text);
+  }
+
+  const note = typeof source === 'string' ? source : fallbackNote;
   return String(note || '')
     .split(/\r?\n/)
     .map(line => line.trim())
     .filter(Boolean)
     .map(line => {
       const match = line.match(/^\[(.+?)\]\s*([^:]+):\s*(.*)$/);
-      if (match) return { dateTime: match[1], author: match[2], text: match[3] };
-      return { dateTime: '', author: 'บันทึกเดิม', text: line };
+      if (match) return { dateTime: match[1], author: match[2], organization: '', pictureUrl: '', text: match[3] };
+      return { dateTime: '', author: 'บันทึกเดิม', organization: '', pictureUrl: '', text: line };
     });
 }
 
-function commentCount(note) {
-  return parseCommentLog(note).length;
+function commentCount(source, fallbackNote = '') {
+  return parseCommentLog(source, fallbackNote).length;
 }
 
-function commentSummaryHtml(note) {
-  const comments = parseCommentLog(note);
+function commentSummaryHtml(source, fallbackNote = '') {
+  const comments = parseCommentLog(source, fallbackNote);
   if (!comments.length) return '';
   const last = comments[comments.length - 1];
-  const meta = [last.dateTime, last.author].filter(Boolean).join(' · ');
+  const meta = [last.author, last.organization, last.dateTime].filter(Boolean).join(' · ');
   return `
     <div class="comment-preview">
       <i class="bi bi-chat-left-text me-1"></i>${meta ? `<strong>${escapeHtml(meta)}:</strong> ` : ''}${escapeHtml(last.text)}
@@ -1079,8 +1204,8 @@ function commentSummaryHtml(note) {
   `;
 }
 
-function renderCommentLog(note) {
-  const comments = parseCommentLog(note);
+function renderCommentLog(source, fallbackNote = '') {
+  const comments = parseCommentLog(source, fallbackNote);
   const el = document.getElementById('commentLog');
   if (!el) return;
   if (!comments.length) {
@@ -1088,9 +1213,14 @@ function renderCommentLog(note) {
     return;
   }
   el.innerHTML = comments.map(comment => `
-    <div class="comment-bubble">
-      <div class="comment-meta">${escapeHtml([comment.dateTime, comment.author].filter(Boolean).join(' · '))}</div>
-      <div class="comment-text">${escapeHtml(comment.text)}</div>
+    <div class="comment-bubble comment-rich">
+      ${comment.pictureUrl
+        ? `<img class="comment-avatar" src="${escapeHtml(comment.pictureUrl)}" alt="${escapeHtml(comment.author)}">`
+        : `<span class="comment-avatar comment-avatar--placeholder"><i class="bi bi-person-fill"></i></span>`}
+      <div class="comment-main">
+        <div class="comment-meta">${escapeHtml([comment.author, comment.organization, comment.dateTime].filter(Boolean).join(' · '))}</div>
+        <div class="comment-text">${escapeHtml(comment.text)}</div>
+      </div>
     </div>
   `).join('');
   el.scrollTop = el.scrollHeight;
@@ -1176,26 +1306,161 @@ function mapJobRow(job, comments) {
   };
 }
 
-function setLoading(visible) {
-  document.getElementById('loading').style.display = visible ? 'flex' : 'none';
+function setLoading(visible, message = '') {
+  const loadingEl = document.getElementById('loading');
+  if (loadingEl) loadingEl.style.display = visible ? 'flex' : 'none';
+  if (message) {
+    const textEl = document.getElementById('loadingText');
+    if (textEl) textEl.textContent = message;
+  }
 }
 
 function saveName() {
-  const value = (document.getElementById('nameInput').value || '').trim();
-  if (!VIEWER_USERS.includes(value)) {
-    alert('กรุณาเลือกผู้ใช้งาน');
-    return;
-  }
-  localStorage.setItem('hiSolarJdkViewerUser', value);
-  document.getElementById('userChip').textContent = `👤 ${value}`;
-  document.getElementById('nameModal').style.display = 'none';
-  if (sb) loadData();
+  return;
 }
 
 function changeName() {
-  const current = localStorage.getItem('hiSolarJdkViewerUser') || '';
-  renderViewerOptions(current);
-  document.getElementById('nameModal').style.display = 'flex';
+  return;
+}
+
+function setAppVisible(visible) {
+  const appEl = document.getElementById('app');
+  if (appEl) appEl.style.display = visible ? '' : 'none';
+}
+
+function showAuthGate(options) {
+  const gate = document.getElementById('authGate');
+  const panel = document.getElementById('authGatePanel');
+  if (!gate || !panel) return;
+  gate.style.display = 'flex';
+  window.HiSolarAuth.renderAuthPanel(panel, options);
+}
+
+function hideAuthGate() {
+  const gate = document.getElementById('authGate');
+  if (gate) gate.style.display = 'none';
+}
+
+function isSessionExpiredError(error) {
+  const text = String(error?.message || error?.payload?.error || '').toLowerCase();
+  return error?.status === 401 || /session expired|authentication required|http 401/.test(text);
+}
+
+function isAccessDeniedError(error) {
+  const text = String(error?.message || error?.payload?.error || '').toLowerCase();
+  return error?.status === 403 || /membership is not approved|http 403/.test(text);
+}
+
+function applyAuthenticatedIdentity(auth) {
+  currentAuth = auth;
+  window.HiSolarAuth.applyUserSummary({
+    user: auth?.user || {},
+    membership: auth?.membership || {},
+    pictureEl: 'authAvatar',
+    nameEl: 'authName',
+    roleEl: 'authRole',
+  });
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.onclick = async () => {
+      await teardownJdkAuthSession('logout');
+      await window.HiSolarAuth.logout('/JDK.html');
+    };
+  }
+}
+
+function setRealtimeIndicatorState(state = 'offline') {
+  const indicator = document.getElementById('rtIndicator');
+  const label = document.getElementById('rtIndicatorLabel');
+  if (!indicator || !label) return;
+  const normalized = state === 'live' || state === 'reconnecting' ? state : 'offline';
+  indicator.classList.remove('state-live', 'state-reconnecting', 'state-offline');
+  indicator.classList.add('is-visible', `state-${normalized}`);
+  label.textContent = normalized === 'live' ? 'Live' : normalized === 'reconnecting' ? 'Reconnecting' : 'Offline';
+}
+
+async function teardownJdkAuthSession(reason = 'cleanup') {
+  if (realtimeController) {
+    const controller = realtimeController;
+    realtimeController = null;
+    await controller.stop();
+  }
+  await window.HiSolarAuth.destroySupabaseApp('jdk', {
+    clearToken: true,
+    reason,
+  });
+  sb = null;
+  setRealtimeIndicatorState('offline');
+}
+
+async function handleJdkRealtimeAuthFailure(error) {
+  await teardownJdkAuthSession('auth_failure');
+  if (isSessionExpiredError(error)) {
+    renderJdkAuthState('expired');
+    return;
+  }
+  if (isAccessDeniedError(error)) {
+    renderJdkAuthState('denied');
+    return;
+  }
+  renderJdkAuthState('network', error?.message || '');
+}
+
+function startJdkLogin() {
+  window.HiSolarAuth.startLineLogin('jdk', '/JDK.html');
+}
+
+function renderJdkAuthState(mode, detail = '') {
+  setRealtimeIndicatorState('offline');
+  const states = {
+    login: {
+      icon: 'bi bi-line',
+      title: 'เข้าสู่ระบบสำหรับทีมงาน JDK',
+      text: 'ใช้บัญชี LINE ที่ได้รับสิทธิ์ในระบบ JDK เพื่อดูงานและเพิ่ม comment',
+      actions: [
+        { id: 'login', label: 'เข้าสู่ระบบด้วย LINE', className: 'btn btn-primary', onClick: startJdkLogin },
+      ],
+    },
+    pending: {
+      icon: 'bi bi-hourglass-split',
+      title: 'รออนุมัติการเข้าใช้งาน',
+      text: 'ระบบรับคำขอเข้าใช้งานของบัญชี LINE นี้แล้ว แต่ยังรอผู้ดูแลอนุมัติสำหรับ JDK',
+      actions: [
+        { id: 'retry', label: 'เข้าสู่ระบบอีกครั้ง', className: 'btn btn-primary', onClick: startJdkLogin },
+      ],
+    },
+    denied: {
+      icon: 'bi bi-shield-lock',
+      title: 'ไม่มีสิทธิ์เข้าใช้งาน JDK',
+      text: 'บัญชี LINE นี้ยังไม่มี membership สำหรับหน้า JDK',
+      actions: [
+        { id: 'retry', label: 'ลองเข้าสู่ระบบอีกครั้ง', className: 'btn btn-primary', onClick: startJdkLogin },
+        { id: 'logout', label: 'ล้าง session', className: 'btn btn-outline-secondary', onClick: () => window.HiSolarAuth.logout('/JDK.html') },
+      ],
+    },
+    expired: {
+      icon: 'bi bi-clock-history',
+      title: 'Session หมดอายุ',
+      text: 'กรุณาเข้าสู่ระบบใหม่ก่อนใช้งานหน้า JDK',
+      actions: [
+        { id: 'relogin', label: 'เข้าสู่ระบบด้วย LINE', className: 'btn btn-primary', onClick: startJdkLogin },
+      ],
+    },
+    network: {
+      icon: 'bi bi-wifi-off',
+      title: 'เชื่อมต่อระบบไม่ได้',
+      text: 'ยังไม่สามารถตรวจสอบสิทธิ์หรือโหลดข้อมูล JDK ได้ในขณะนี้',
+      detail,
+      actions: [
+        { id: 'reload', label: 'ลองใหม่', className: 'btn btn-primary', onClick: () => window.location.reload() },
+        { id: 'login', label: 'เข้าสู่ระบบด้วย LINE', className: 'btn btn-outline-secondary', onClick: startJdkLogin },
+      ],
+    },
+  };
+
+  setAppVisible(false);
+  setLoading(false);
+  showAuthGate(states[mode] || states.login);
 }
 
 function switchTab(tabKey) {
@@ -1259,12 +1524,11 @@ function getNganStatusOrder(status) {
 
 function buildCard(tabKey, row) {
   const sc = statusClass(tabKey, row.status);
-  const comments = commentCount(row.note || '');
+  const comments = commentCount(row._comments || [], row._noteBase || row.note || '');
   const statusBadge = `<span class="status-badge ${sc}">${escapeHtml(displayStatus(tabKey, row.status) || '-')}</span>`;
   const commentBadge = comments ? `<span class="info-badge"><i class="bi bi-chat-left-dots"></i>${comments} comment</span>` : '';
-  const mapsBtn = row.maps_url
-    ? `<a class="btn btn-sm btn-outline-secondary btn-map" href="${escapeHtml(row.maps_url)}" target="_blank" rel="noopener"><i class="bi bi-geo-alt-fill me-1"></i>แผนที่</a>`
-    : '';
+  const mapsBtn = buildMapsActionButton(row.maps_url);
+  const callBtn = buildCallActionButton(row.phone);
 
   let title = '';
   let titleHtml = '';
@@ -1284,7 +1548,7 @@ function buildCard(tabKey, row) {
     if (row.date) parts.push(`<i class="bi bi-calendar3 me-1"></i>${escapeHtml(row.date)}${row.time ? ` ${escapeHtml(row.time)} น.` : ''}`);
     if (row.technician) parts.push(`<i class="bi bi-person-fill me-1"></i>${escapeHtml(row.technician)}`);
     if (row.type) parts.push(`<i class="bi bi-lightning-charge me-1"></i>${escapeHtml(row.type)}`);
-    if (row.phone) parts.push(`<i class="bi bi-telephone-fill me-1"></i><a href="tel:${escapeHtml(row.phone)}">${escapeHtml(row.phone)}</a>`);
+    if (row.phone) parts.push(buildPhoneMeta(row.phone));
     meta = parts.join('<span class="mx-2">·</span>');
     if (row.status === 'Assigned' && row.assigned_start) {
       const range = row.assigned_end ? `${escapeHtml(row.assigned_start)} - ${escapeHtml(row.assigned_end)}` : escapeHtml(row.assigned_start);
@@ -1301,7 +1565,7 @@ function buildCard(tabKey, row) {
     detailHtml = detail;
     const metaParts = [];
     if (row.technician) metaParts.push(`<i class="bi bi-person-fill me-1"></i>${escapeHtml(row.technician)}`);
-    if (row.phone) metaParts.push(`<i class="bi bi-telephone-fill me-1"></i><a href="tel:${escapeHtml(row.phone)}">${escapeHtml(row.phone)}</a>`);
+    if (row.phone) metaParts.push(buildPhoneMeta(row.phone));
     meta = metaParts.join('<span class="mx-2">·</span>');
     if (row.kwp) extra += `<div class="info-badge"><i class="bi bi-lightning-charge-fill"></i>${escapeHtml(row.kwp)} kWp</div>`;
   } else if (tabKey === 'som') {
@@ -1314,11 +1578,11 @@ function buildCard(tabKey, row) {
     if (row.report_date) metaParts.push(`<i class="bi bi-bell me-1"></i>แจ้ง ${escapeHtml(row.report_date)}`);
     if (row.site_date) metaParts.push(`<i class="bi bi-tools me-1"></i>เข้างาน ${escapeHtml(row.site_date)}${row.site_time ? ` ${escapeHtml(row.site_time)} น.` : ''}`);
     if (row.return_date) metaParts.push(`<i class="bi bi-check2-circle me-1"></i>ส่งคืน ${escapeHtml(row.return_date)}`);
-    if (row.phone) metaParts.push(`<i class="bi bi-telephone-fill me-1"></i><a href="tel:${escapeHtml(row.phone)}">${escapeHtml(row.phone)}</a>`);
+    if (row.phone) metaParts.push(buildPhoneMeta(row.phone));
     meta = metaParts.join('<span class="mx-2">·</span>');
   }
 
-  extra += commentSummaryHtml(row.note || '');
+  extra += commentSummaryHtml(row._comments || [], row._noteBase || row.note || '');
 
   return `
     <article class="card job-card status-${sc}">
@@ -1332,10 +1596,11 @@ function buildCard(tabKey, row) {
         ${statusBadge}${commentBadge}
         ${extra}
         <div class="card-actions">
+          ${callBtn}
+          ${mapsBtn}
           <button class="btn btn-sm btn-outline-secondary btn-comment" type="button" onclick="openCommentModal('${tabKey}','${row.id}')">
             <i class="bi bi-chat-dots me-1"></i>Comment
           </button>
-          ${mapsBtn}
         </div>
       </div>
     </article>
@@ -1468,6 +1733,7 @@ function formatCalFull(dayKeyValue) {
 function buildCalEventCard(item) {
   const { tabKey, job } = item;
   const sc = statusClass(tabKey, job.status);
+  const commentTotal = commentCount(job._comments || [], job._noteBase || job.note || '');
   const tabChip = `<span class="cal-event-tab ${tabKey}">${TAB_NAMES[tabKey]}</span>`;
   const statusBadge = `<span class="status-badge ${sc}">${escapeHtml(displayStatus(tabKey, job.status) || '-')}</span>`;
 
@@ -1484,6 +1750,7 @@ function buildCalEventCard(item) {
     if (job.date) parts.push(`<i class="bi bi-calendar3 me-1"></i>${escapeHtml(job.date)}${job.time ? ` ${escapeHtml(job.time)} น.` : ''}`);
     if (job.technician) parts.push(`<i class="bi bi-person-fill me-1"></i>${escapeHtml(job.technician)}`);
     if (job.type) parts.push(`<i class="bi bi-lightning-charge me-1"></i>${escapeHtml(job.type)}`);
+    if (job.phone) parts.push(buildPhoneMeta(job.phone));
     meta = parts.join('<span class="mx-2">·</span>');
   } else if (tabKey === 'langPaeng') {
     title = job.customer || '—';
@@ -1492,7 +1759,10 @@ function buildCalEventCard(item) {
     if (job.report_date) parts.push(`<i class="bi bi-calendar-plus me-1"></i>แจ้ง ${escapeHtml(job.report_date)}`);
     if (job.appointment_date) parts.push(`<i class="bi bi-calendar-check me-1"></i>ดำเนินการ ${escapeHtml(job.appointment_date)}`);
     detail = parts.join('&nbsp;&nbsp;');
-    meta = job.technician ? `<i class="bi bi-person-fill me-1"></i>${escapeHtml(job.technician)}` : '';
+    const metaParts = [];
+    if (job.technician) metaParts.push(`<i class="bi bi-person-fill me-1"></i>${escapeHtml(job.technician)}`);
+    if (job.phone) metaParts.push(buildPhoneMeta(job.phone));
+    meta = metaParts.join('<span class="mx-2">·</span>');
   } else if (tabKey === 'som') {
     title = job.item || job.customer || '—';
     if (item.somEventType === 'site' && job.site_date) {
@@ -1507,8 +1777,13 @@ function buildCalEventCard(item) {
     if (job.report_date) parts.push(`<i class="bi bi-bell me-1"></i>แจ้ง ${escapeHtml(job.report_date)}`);
     if (job.site_date) parts.push(`<i class="bi bi-tools me-1"></i>เข้างาน ${escapeHtml(job.site_date)}${job.site_time ? ` ${escapeHtml(job.site_time)} น.` : ''}`);
     if (job.return_date) parts.push(`<i class="bi bi-check2-circle me-1"></i>ส่งคืน ${escapeHtml(job.return_date)}`);
+    if (job.phone) parts.push(buildPhoneMeta(job.phone));
     meta = parts.join('<span class="mx-2">·</span>');
   }
+
+  const callBtn = buildCallActionButton(job.phone, { stopPropagation: true });
+  const mapsBtn = buildMapsActionButton(job.maps_url, { stopPropagation: true });
+  const commentBtn = `<button class="btn btn-sm btn-outline-secondary btn-comment" type="button" onclick="event.stopPropagation();openCommentModal('${tabKey}','${job.id}')"><i class="bi bi-chat-dots me-1"></i>Comment${commentTotal ? ` ${commentTotal}` : ''}</button>`;
 
   return `
     <article class="cal-event-card ${sc}" onclick="openCommentModal('${tabKey}','${job.id}')">
@@ -1522,7 +1797,12 @@ function buildCalEventCard(item) {
       <div class="cal-event-title">${escapeHtml(title)}</div>
       ${detail ? `<div class="card-detail mt-1 mb-1">${detail}</div>` : ''}
       ${meta ? `<div class="cal-event-meta">${meta}</div>` : ''}
-      ${commentSummaryHtml(job.note || '')}
+      ${commentSummaryHtml(job._comments || [], job._noteBase || job.note || '')}
+      <div class="card-actions">
+        ${callBtn}
+        ${mapsBtn}
+        ${commentBtn}
+      </div>
     </article>
   `;
 }
@@ -1767,9 +2047,11 @@ function updateStats() {
   document.getElementById('s-som').textContent = getVisibleRows('som').length;
 }
 
-async function loadData() {
+async function loadData(options = {}) {
   if (!sb) return;
-  setLoading(true);
+  if (!options.silent) {
+    setLoading(true, 'กำลังโหลดข้อมูล...');
+  }
   try {
     const [jobsRes, commentsRes] = await Promise.all([
       sb.from('hi_solar_jobs').select('*').in('sheet_key', TAB_KEYS).order('sheet_row'),
@@ -1794,26 +2076,38 @@ async function loadData() {
     updateStats();
   } catch (error) {
     console.error('loadData failed', error);
+    if (isSessionExpiredError(error)) {
+      await handleJdkRealtimeAuthFailure(error);
+      return false;
+    }
+    if (isAccessDeniedError(error)) {
+      await handleJdkRealtimeAuthFailure(error);
+      return false;
+    }
+    if (options.throwOnError) throw error;
     showToast(`โหลดข้อมูลไม่สำเร็จ: ${error.message || error}`, 'danger');
   } finally {
-    setLoading(false);
+    if (!options.silent) {
+      setLoading(false);
+    }
   }
+  return true;
 }
 
 function setupRealtime() {
-  if (!sb || realtimeReady) return;
-  realtimeReady = true;
-
-  ['hi_solar_jobs', 'hi_solar_job_comments'].forEach(tableName => {
-    sb.channel(`jdk_rt_${tableName}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: tableName }, () => {
-        clearTimeout(realtimeReloadTimer);
-        realtimeReloadTimer = setTimeout(() => loadData(), 250);
-      })
-      .subscribe(status => {
-        document.getElementById('rtIndicator').style.display = status === 'SUBSCRIBED' ? 'flex' : 'none';
-      });
+  if (!sb || !currentAuth || realtimeController) return;
+  realtimeController = window.HiSolarAuth.createRealtimeController({
+    app: 'jdk',
+    channelPrefix: 'jdk_rt',
+    client: sb,
+    debounceMs: 250,
+    tableNames: ['hi_solar_jobs', 'hi_solar_job_comments'],
+    onReloadRequested: () => loadData({ silent: true }),
+    onStateChange: state => setRealtimeIndicatorState(state),
+    onAuthFailure: error => handleJdkRealtimeAuthFailure(error),
   });
+  setRealtimeIndicatorState('reconnecting');
+  void realtimeController.start();
 }
 
 function openCommentModal(tabKey, id) {
@@ -1822,7 +2116,7 @@ function openCommentModal(tabKey, id) {
   pendingComment = { tabKey, id };
   document.getElementById('commentModalTitle').textContent = `${TAB_NAMES[tabKey]} — ${item.customer || item.item || 'รายการ'}`;
   document.getElementById('commentInput').value = '';
-  renderCommentLog(item.note || '');
+  renderCommentLog(item._comments || [], item._noteBase || item.note || '');
   document.getElementById('commentModal').classList.add('show');
   setTimeout(() => document.getElementById('commentInput')?.focus(), 50);
 }
@@ -1841,13 +2135,6 @@ async function submitComment() {
     return;
   }
 
-  const user = localStorage.getItem('hiSolarJdkViewerUser') || '';
-  if (!VIEWER_USERS.includes(user)) {
-    alert('กรุณาเลือกผู้ใช้งานก่อน');
-    changeName();
-    return;
-  }
-
   const button = document.getElementById('commentSubmitBtn');
   const original = button.innerHTML;
   button.disabled = true;
@@ -1857,7 +2144,7 @@ async function submitComment() {
     const commentedAt = new Date().toISOString();
     const { data, error } = await sb.from('hi_solar_job_comments').insert({
       job_id: pendingComment.id,
-      author: user,
+      author: '',
       message,
       source: 'jdk-viewer',
       commented_at: commentedAt,
@@ -1869,7 +2156,7 @@ async function submitComment() {
     if (item) {
       item._comments = [...(item._comments || []), data];
       item.note = combineNoteAndComments(item._noteBase || '', item._comments);
-      renderCommentLog(item.note || '');
+      renderCommentLog(item._comments || [], item._noteBase || item.note || '');
       renderTab(pendingComment.tabKey);
     }
 
@@ -1923,34 +2210,57 @@ function initCommentInput() {
   });
 }
 
-(function init() {
+(async function init() {
   const hasSupabaseUrl = /^https:\/\/[a-z0-9]+\.supabase\.co$/i.test(SUPABASE_URL);
-  const hasAnonKey = /^(eyJ|sb_publishable_)/.test(SUPABASE_ANON_KEY);
-  const savedUser = localStorage.getItem('hiSolarJdkViewerUser') || '';
+  const hasPublishableKey = /^(eyJ|sb_publishable_)/.test(SUPABASE_PUBLISHABLE_KEY);
+  const approval = window.HiSolarAuth.getQueryParam('approval');
+  const reason = window.HiSolarAuth.getQueryParam('reason');
 
-  renderViewerOptions(savedUser);
   initCommentInput();
+  setAppVisible(false);
+  hideAuthGate();
+  setLoading(true, 'กำลังตรวจสอบสิทธิ์การเข้าใช้งาน...');
 
-  if (!hasSupabaseUrl || !hasAnonKey) {
-    document.getElementById('configBanner').style.display = 'block';
-    setLoading(false);
-    if (savedUser) {
-      document.getElementById('userChip').textContent = `👤 ${savedUser}`;
-      document.getElementById('nameModal').style.display = 'none';
+  try {
+    const auth = await window.HiSolarAuth.fetchAuthMe('jdk');
+    applyAuthenticatedIdentity(auth);
+
+    if (!hasSupabaseUrl || !hasPublishableKey) {
+      document.getElementById('configBanner').style.display = 'block';
+      renderAll();
+      updateStats();
+      setAppVisible(true);
+      hideAuthGate();
+      return;
     }
-    renderAll();
-    updateStats();
+
+    await window.HiSolarAuth.ensureSupabaseClientLoaded();
+    await window.HiSolarAuth.refreshSupabaseToken('jdk', { forceRefresh: true, reason: 'prime' });
+    sb = window.HiSolarAuth.createSupabaseClient('jdk', SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const loaded = await loadData({ throwOnError: true });
+    if (!loaded) return;
+    setupRealtime();
+    setAppVisible(true);
+    hideAuthGate();
     return;
-  }
-
-  sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  setupRealtime();
-
-  if (savedUser && VIEWER_USERS.includes(savedUser)) {
-    document.getElementById('userChip').textContent = `👤 ${savedUser}`;
-    document.getElementById('nameModal').style.display = 'none';
-    loadData();
-  } else {
+  } catch (error) {
+    if (isAccessDeniedError(error) || reason === 'access_denied') {
+      renderJdkAuthState('denied');
+      return;
+    }
+    if (error?.status === 401) {
+      if (approval === 'pending') {
+        renderJdkAuthState('pending');
+      } else if (reason === 'session_expired') {
+        renderJdkAuthState('expired');
+      } else {
+        renderJdkAuthState('login');
+      }
+      return;
+    }
+    console.error('jdk bootstrap failed', error);
+    renderJdkAuthState('network', error?.message || '');
+  } finally {
     setLoading(false);
   }
 })();

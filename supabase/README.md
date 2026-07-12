@@ -24,7 +24,29 @@ This creates:
 - `commented_at`
 - `created_at`
 
-The schema allows the website anon key to read, insert, and update `hi_solar_jobs` for internal team usage, and allows anon users to insert comments when the author is one of `Shine`, `Wassan`, `Wave`, `OT`, `Lui`, or `Aoom`.
+`supabase/schema.sql` is the legacy base schema. For the LINE-authenticated tracker you must also run:
+
+```sql
+-- copy/paste supabase/line-auth-foundation.sql
+```
+
+and then the shared LINE identity migration:
+
+```sql
+-- copy/paste supabase/line-auth-provider-identity.sql
+```
+
+and then the authenticated RLS app-scoping migration:
+
+```sql
+-- copy/paste supabase/line-auth-org-scope.sql
+```
+
+and only after authenticated browser flows are verified in production:
+
+```sql
+-- copy/paste supabase/line-auth-cutover.sql
+```
 
 ## 2. Set Apps Script secrets
 
@@ -35,14 +57,16 @@ In Google Apps Script, set these in **Project Settings > Script Properties**:
 
 Do not put the service role key in `index.html`.
 
-For the website, put only these public values in `index.html`:
+For the website, put only these public values in the frontend:
 
 ```js
 const SUPABASE_URL = 'https://xxxx.supabase.co';
-const SUPABASE_ANON_KEY = 'your anon public key';
+const SUPABASE_PUBLISHABLE_KEY = 'your publishable key';
 ```
 
 Never put `SUPABASE_SERVICE_ROLE_KEY` in `index.html`.
+
+Browser queries must use a short-lived authenticated JWT from `/api/auth/token`. Do not rely on anon read/write policies after cutover.
 
 You can also reload the Google Sheet and use:
 
@@ -88,4 +112,3 @@ Comments in `à¸«à¸¡à¸²à¸¢à¹€à¸«à¸•à¸¸` are imported in
 ```
 
 Legacy notes that do not match this format stay in `hi_solar_jobs.note`.
-

@@ -1,2512 +1,292 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Hi Solar">
-  <title>Hi Solar — Job Tracker</title>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hi Solar Login</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     :root {
-      --hs-primary:   #16a34a;
-      --hs-primary-d: #15803d;
-      --hs-primary-l: #dcfce7;
-      --hs-amber:     #f59e0b;
-      --hs-amber-l:   #fef3c7;
-      --hs-blue:      #3b82f6;
-      --hs-blue-l:    #dbeafe;
-      --hs-red:       #ef4444;
-      --hs-red-l:     #fee2e2;
-      --nav-h:        62px;
-      --bs-primary:        #16a34a;
-      --bs-primary-rgb:    22,163,74;
+      --hs-green: #14532d;
+      --hs-green-soft: #1f7a46;
+      --hs-gold: #f59e0b;
+      --hs-ink: #0f172a;
+      --hs-surface: rgba(255, 255, 255, 0.92);
+      --hs-border: rgba(15, 23, 42, 0.08);
     }
-    * { font-family: 'Kanit', system-ui, sans-serif; }
-    body { background: #f1f5f9; }
 
-    .btn-primary { background-color: var(--hs-primary); border-color: var(--hs-primary); }
-    .btn-primary:hover { background-color: var(--hs-primary-d); border-color: var(--hs-primary-d); }
-    .text-primary { color: var(--hs-primary) !important; }
-
-    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #f1f5f9; }
-    @media (min-width: 576px) { #app { box-shadow: 0 0 40px rgba(0,0,0,.15); } }
-
-    /* Navbar */
-    .hs-navbar {
-      background: var(--hs-primary); padding: 12px 16px;
-      position: sticky; top: 0; z-index: 90;
-      display: flex; align-items: center; justify-content: space-between;
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Prompt", sans-serif;
+      color: var(--hs-ink);
+      background:
+        radial-gradient(circle at top right, rgba(245, 158, 11, 0.22), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(20, 83, 45, 0.18), transparent 34%),
+        linear-gradient(145deg, #f8fafc 0%, #eef6f0 48%, #fff8eb 100%);
     }
-    .hs-navbar .brand { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 17px; font-weight: 700; }
-    .hs-navbar .brand i { color: #fbbf24; font-size: 20px; }
-    .hs-navbar .user-chip {
-      background: rgba(255,255,255,.2); color: #fff; border: none;
-      border-radius: 20px; padding: 4px 12px; font-size: 12px; cursor: pointer;
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
     }
-    .hs-navbar .rt-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: #86efac; display: inline-block; margin-right: 4px;
-      animation: pulse 2s infinite;
+
+    .login-card {
+      width: min(100%, 460px);
+      background: var(--hs-surface);
+      border: 1px solid var(--hs-border);
+      border-radius: 24px;
+      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.12);
+      backdrop-filter: blur(16px);
+      padding: 28px 24px 24px;
     }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-    /* Stats */
-    .stats-strip { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 10px 0 8px; }
-    .stat-item { text-align: center; }
-    .stat-item .num { font-size: 21px; font-weight: 700; color: var(--hs-primary); line-height: 1; }
-    .stat-item .lbl { font-size: 10px; color: #64748b; margin-top: 2px; }
-
-    /* Section */
-    .section-title { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
-    .accent-bar { width: 36px; height: 3px; background: var(--hs-primary); border-radius: 2px; margin-bottom: 12px; }
-
-    /* Content */
-    .main-content { padding: 14px 14px calc(var(--nav-h) + 16px); }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-
-    /* Filter chips */
-    .filter-scroll { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 2px; }
-    .filter-scroll::-webkit-scrollbar { display: none; }
-    .filter-chip { flex-shrink: 0; border-radius: 20px !important; font-size: 12px; padding: 4px 14px; white-space: nowrap; }
-    .filter-chip.active { background-color: var(--hs-primary) !important; border-color: var(--hs-primary) !important; color: #fff !important; }
-
-    /* Cards */
-    .job-card { border: none !important; border-left: 4px solid var(--hs-primary) !important; border-radius: 12px !important; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08) !important; }
-    .job-card.status-waiting  { border-left-color: var(--hs-amber) !important; }
-    .job-card.status-progress { border-left-color: var(--hs-blue) !important; }
-    .job-card.status-done     { border-left-color: #94a3b8 !important; opacity: .78; }
-    .job-card.status-cancel   { border-left-color: var(--hs-red) !important; opacity: .65; }
-    .job-card .card-body { padding: 12px 14px; }
-    .card-customer { font-size: 15px; font-weight: 600; line-height: 1.3; }
-    .card-date { font-size: 11px; color: #94a3b8; flex-shrink: 0; }
-    .card-detail { font-size: 13px; color: #475569; margin: 4px 0; line-height: 1.4; }
-    .card-meta { font-size: 12px; color: #64748b; margin-bottom: 6px; }
-
-    /* Status badges */
-    .status-badge { border: none; border-radius: 20px; padding: 4px 13px; font-size: 12px; font-weight: 600; cursor: pointer; }
-    .status-badge.waiting  { background: var(--hs-amber-l); color: #92400e; }
-    .status-badge.progress { background: var(--hs-blue-l);  color: #1e40af; }
-    .status-badge.done     { background: var(--hs-primary-l); color: var(--hs-primary-d); }
-    .status-badge.cancel   { background: var(--hs-red-l);   color: #b91c1c; }
-    .amount-badge { display: inline-block; background: var(--hs-primary-l); color: var(--hs-primary-d); border-radius: 6px; padding: 2px 10px; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
-    .btn-map, .btn-comment { border-radius: 20px !important; font-size: 12px; padding: 4px 12px; color: #475569; border-color: #cbd5e1; }
-    .btn-edit-date { border-radius: 20px !important; font-size: 12px; padding: 4px 12px; margin-bottom: 6px; }
-    .comment-preview { background: #f8fafc; border-radius: 8px; padding: 6px 8px; margin-top: 7px; color: #64748b; font-size: 12px; line-height: 1.35; }
-    .comment-log { max-height: 42vh; overflow-y: auto; margin-bottom: 12px; padding-right: 2px; }
-    .comment-bubble { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 9px 10px; margin-bottom: 8px; }
-    .comment-meta { color: #64748b; font-size: 11px; margin-bottom: 3px; font-weight: 500; }
-    .comment-text { color: #1e293b; font-size: 13px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
-    .comment-input { border-radius: 8px; min-height: 88px; font-size: 13px; }
-    .comment-box { display: flex; flex-direction: column; max-height: min(82vh, 640px); }
-    .comment-box .sheet-title, .comment-box .comment-input, .comment-actions { flex-shrink: 0; }
-    .comment-box .comment-log { flex: 1; min-height: 120px; max-height: none; }
-    .comment-actions { display: flex; gap: 8px; }
-    .add-panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
-    .add-toggle { width: 100%; border: none; background: #fff; color: #1e293b; display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; font-size: 15px; font-weight: 600; }
-    .add-toggle i:last-child { transition: transform .2s; }
-    .add-panel.open .add-toggle i:last-child { transform: rotate(180deg); }
-    .add-body { display: none; padding: 0 14px 14px; border-top: 1px solid #e2e8f0; }
-    .add-panel.open .add-body { display: block; }
-    .add-grid { display: grid; gap: 10px; margin-top: 12px; }
-    .bulk-link { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 12px; padding: 10px 12px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; color: #166534; text-decoration: none; font-size: 13px; }
-    .bulk-link:hover { background: #f8fafc; color: #166534; }
-    .form-note { font-size: 11px; color: #64748b; margin-top: 4px; }
-    .permit-tools { display: grid; gap: 10px; margin-bottom: 12px; }
-    .permit-select-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .mini-badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 600; }
-    .mini-badge.neutral { background: #e2e8f0; color: #334155; }
-    .mini-badge.info { background: var(--hs-blue-l); color: #1e40af; }
-    .mini-badge.warning { background: var(--hs-amber-l); color: #92400e; }
-    .mini-badge.success { background: var(--hs-primary-l); color: var(--hs-primary-d); }
-    .mini-badge.danger { background: var(--hs-red-l); color: #b91c1c; }
-    .permit-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; margin-bottom: 6px; }
-    .permit-subtitle { font-size: 13px; color: #475569; line-height: 1.4; }
-    .permit-meta-grid { display: grid; gap: 4px; font-size: 12px; color: #64748b; }
-    .permit-warning-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-    .permit-sheet .sheet-title { text-align: left; margin-bottom: 0; color: #1e293b; font-weight: 600; }
-    .permit-section-title { font-size: 13px; font-weight: 700; color: #1e293b; margin: 16px 0 8px; }
-    .permit-field-grid { display: grid; gap: 10px; }
-    .permit-check-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-    .permit-check-item { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; font-size: 12px; color: #334155; }
-    .permit-check-item input { margin: 0; }
-    .permit-timeline { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 2px; }
-    .permit-timeline::-webkit-scrollbar { display: none; }
-    .permit-step { flex-shrink: 0; border-radius: 999px; padding: 5px 10px; background: #e2e8f0; color: #64748b; font-size: 11px; font-weight: 600; }
-    .permit-step.done { background: var(--hs-primary-l); color: var(--hs-primary-d); }
-    .permit-step.active { background: var(--hs-primary); color: #fff; }
-    .permit-step.next { background: var(--hs-blue-l); color: #1e40af; }
-    .permit-log-list { max-height: 180px; overflow-y: auto; padding-right: 2px; }
-    .permit-log-item { border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; padding: 9px 10px; margin-bottom: 8px; }
-    .permit-log-meta { color: #64748b; font-size: 11px; margin-bottom: 3px; font-weight: 500; }
-    .permit-log-text { color: #1e293b; font-size: 12px; line-height: 1.45; }
-
-    /* Bottom Nav */
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-      width: 100%; max-width: 480px; height: var(--nav-h);
-      background: #fff; border-top: 1px solid #e2e8f0;
-      display: flex; z-index: 90; box-shadow: 0 -2px 10px rgba(0,0,0,.07);
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
     }
-    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: none; background: none; color: #94a3b8; font-size: 10px; font-weight: 500; cursor: pointer; position: relative; padding: 0; }
-    .nav-btn i { font-size: 21px; }
-    .nav-btn.active { color: var(--hs-primary); }
-    .nav-badge { position: absolute; top: 5px; right: calc(50% - 18px); background: var(--hs-amber); color: #fff; font-size: 9px; font-weight: 700; border-radius: 8px; padding: 1px 4px; min-width: 14px; text-align: center; }
 
-    /* Bottom Sheet */
-    .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: flex-end; justify-content: center; z-index: 200; }
-    .sheet-overlay.show { display: flex; }
-    .sheet-box { background: #fff; border-radius: 20px 20px 0 0; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); width: 100%; max-width: 480px; max-height: min(82vh, 640px); overflow-y: auto; }
-    .sheet-title { text-align: center; font-size: 14px; color: #64748b; margin-bottom: 14px; font-weight: 500; }
-    .sheet-opt { display: block; width: 100%; border: none; border-radius: 10px; padding: 12px 16px; font-size: 15px; font-weight: 500; cursor: pointer; text-align: left; margin-bottom: 8px; }
-    .sheet-opt.waiting  { background: var(--hs-amber-l); color: #92400e; }
-    .sheet-opt.progress { background: var(--hs-blue-l);  color: #1e40af; }
-    .sheet-opt.done     { background: var(--hs-primary-l); color: var(--hs-primary-d); }
-    .sheet-opt.cancel   { background: var(--hs-red-l);   color: #b91c1c; }
-
-    /* Name Modal */
-    .name-overlay { position: fixed; inset: 0; background: linear-gradient(160deg, #ccf0ee 0%, #e8f4fd 50%, #d4edda 100%); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 24px; }
-    .name-box { background: #fff; border-radius: 24px; padding: 36px 28px; width: 100%; max-width: 360px; box-shadow: 0 8px 40px rgba(0,0,0,.10); }
-    .login-title { font-size: 2rem; font-weight: 700; color: var(--hs-primary); margin-bottom: 6px; }
-    .login-sub { color: #64748b; font-size: 14px; margin-bottom: 28px; }
-    .btn-hisolar { background: var(--hs-primary); color: #fff; border: none; width: 100%; padding: 15px; font-size: 16px; font-weight: 700; border-radius: 14px; margin-bottom: 14px; cursor: pointer; }
-    .btn-hisolar:hover { background: var(--hs-primary-d); }
-    .btn-jdk { background: #1e3a8a; color: #fff; border: none; width: 100%; padding: 15px; font-size: 16px; font-weight: 700; border-radius: 14px; cursor: pointer; }
-    .btn-jdk:hover { background: #1e40af; }
-
-    /* Loading */
-    #loading { position: fixed; inset: 0; background: rgba(255,255,255,.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 400; gap: 14px; }
-
-    /* Empty */
-    .empty-state { text-align: center; padding: 48px 16px; color: #94a3b8; }
-    .empty-state i { font-size: 2.5rem; }
-
-    /* Config Banner */
-    .config-banner { background: #7c3aed; color: #fff; text-align: center; padding: 6px 12px; font-size: 12px; }
-    .rt-banner { background: #0f172a; color: #86efac; text-align: center; padding: 4px 12px; font-size: 11px; display: none; }
-
-    /* ── Calendar View ──────────────────────────────── */
-    .cal-toggle-row { display: flex; gap: 5px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0; }
-    .cal-view-btn { flex: 1; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #475569; border-radius: 10px; padding: 6px 4px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 4px; }
-    .cal-view-btn i { font-size: 13px; }
-    .cal-view-btn.active { background: var(--hs-primary); border-color: var(--hs-primary); color: #fff; }
-    .cal-view-btn:hover:not(.active) { background: #f1f5f9; border-color: #cbd5e1; }
-
-    /* Calendar Panel */
-    #calendarPanel { padding: 12px 14px calc(var(--nav-h) + 16px); }
-    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .cal-nav-title { font-size: 15px; font-weight: 600; color: #1e293b; }
-    .cal-nav-btn { border: none; background: #fff; border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.1); font-size: 16px; }
-    .cal-nav-btn:active { background: #f1f5f9; }
-
-    /* Month Grid */
-    .cal-month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 12px; }
-    .cal-dow { text-align: center; font-size: 10px; color: #94a3b8; padding: 4px 0; font-weight: 500; }
-    .cal-day { border-radius: 8px; padding: 3px 2px; min-height: 46px; cursor: pointer; transition: background .1s; }
-    .cal-day:hover { background: #f1f5f9; }
-    .cal-day.today .cal-day-num { background: var(--hs-primary); color: #fff; }
-    .cal-day.selected { background: #e0f2fe; }
-    .cal-day.other-month .cal-day-num { color: #d1d5db; }
-    .cal-day-num { font-size: 11px; font-weight: 500; color: #374151; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto 2px; }
-    .cal-dots { display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; }
-    .cal-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-    .cal-dot.waiting  { background: var(--hs-amber); }
-    .cal-dot.progress { background: var(--hs-blue); }
-    .cal-dot.done     { background: #94a3b8; }
-    .cal-dot.cancel   { background: var(--hs-red); }
-
-    /* Day Events */
-    .cal-events { }
-    .cal-day-header { font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #e2e8f0; }
-    .cal-event-card { background: #fff; border-radius: 10px; border-left: 3px solid var(--hs-primary); padding: 8px 10px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.07); cursor: pointer; }
-    .cal-event-card.waiting  { border-left-color: var(--hs-amber); }
-    .cal-event-card.progress { border-left-color: var(--hs-blue); }
-    .cal-event-card.done     { border-left-color: #94a3b8; opacity: .75; }
-    .cal-event-card.cancel   { border-left-color: var(--hs-red); opacity: .65; }
-    .cal-event-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-    .cal-event-tab { background: var(--hs-primary-l); color: var(--hs-primary-d); border-radius: 4px; padding: 1px 7px; font-size: 10px; font-weight: 600; }
-    .cal-event-tab.duNgan    { background: #dbeafe; color: #1e40af; }
-    .cal-event-tab.langPaeng { background: #d1fae5; color: #065f46; }
-    .cal-event-tab.som       { background: #fef3c7; color: #92400e; }
-    .cal-event-title { font-size: 13px; font-weight: 600; color: #1e293b; }
-    .cal-event-meta  { font-size: 11px; color: #64748b; margin-top: 2px; }
-
-    /* Event Slider */
-    .cal-slider-wrap { position: relative; }
-    .cal-slider-count { font-size: 11px; color: #94a3b8; text-align: right; margin-bottom: 6px; }
-    .cal-slider { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 10px; scroll-padding-left: 0; }
-    .cal-slider::-webkit-scrollbar { height: 3px; }
-    .cal-slider::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    .cal-slider .cal-event-card { flex: 0 0 87%; scroll-snap-align: start; margin-bottom: 0; }
-    .cal-slider-dots { display: flex; justify-content: center; gap: 5px; margin-top: 2px; }
-    .cal-slider-dot { width: 6px; height: 6px; border-radius: 50%; background: #e2e8f0; transition: background .15s; }
-    .cal-slider-dot.active { background: var(--hs-primary); }
-    /* Single job — no slider wrapper */
-    .cal-events-single .cal-event-card { margin-bottom: 8px; }
-
-    /* Vertical scrollable list for multiple jobs */
-    .cal-events-list { max-height: 45vh; overflow-y: auto; padding-right: 2px; }
-    .cal-events-list::-webkit-scrollbar { width: 3px; }
-    .cal-events-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    .cal-events-list .cal-event-card { margin-bottom: 8px; }
-
-    /* Week Grid */
-    .cal-week-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -2px; padding: 0 2px; }
-    .cal-week-grid { display: grid; grid-template-columns: repeat(7, minmax(52px,1fr)); gap: 4px; min-width: 364px; }
-    .cal-week-col { }
-    .cal-week-dow { text-align: center; font-size: 10px; color: #94a3b8; margin-bottom: 4px; }
-    .cal-week-date { text-align: center; font-size: 14px; font-weight: 600; color: #374151; width: 28px; height: 28px; border-radius: 50%; line-height: 28px; margin: 0 auto 6px; }
-    .cal-week-date.today { background: var(--hs-primary); color: #fff; }
-    .cal-week-event { border-radius: 5px; padding: 3px 5px; font-size: 10px; font-weight: 500; margin-bottom: 3px; line-height: 1.3; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .cal-week-event.waiting  { background: var(--hs-amber-l); color: #92400e; }
-    .cal-week-event.progress { background: var(--hs-blue-l); color: #1e40af; }
-    .cal-week-event.done     { background: #f1f5f9; color: #64748b; }
-    .cal-week-event.cancel   { background: var(--hs-red-l); color: #b91c1c; }
-
-    /* Calendar legend */
-    .cal-legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 10.5px; color: #64748b; margin-bottom: 8px; }
-    .cal-legend i.lg { width: 16px; height: 9px; border-radius: 3px; display: inline-block; margin-right: 4px; vertical-align: middle; }
-
-    /* Multi-day bars — type colors (shared week + month) */
-    .t-ngan.cal-bar, .t-ngan.m2-bar { background: #1e40af; color: #fff; }
-    .t-som.cal-bar,  .t-som.m2-bar  { background: #d97706; color: #fff; }
-    .t-du.cal-bar,   .t-du.m2-bar   { background: #0ea5e9; color: #fff; }
-    .t-lang.cal-bar, .t-lang.m2-bar { background: #10b981; color: #fff; }
-    .t-ngan.cal-pill, .t-ngan.m2-pill { background: #dbeafe; color: #1e40af; }
-    .t-som.cal-pill,  .t-som.m2-pill  { background: #fef3c7; color: #92400e; }
-    .t-du.cal-pill,   .t-du.m2-pill   { background: #e0f2fe; color: #075985; }
-    .t-lang.cal-pill, .t-lang.m2-pill { background: #d1fae5; color: #065f46; }
-    .cut-l { border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; margin-left: 0 !important; }
-    .cut-r { border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; margin-right: 0 !important; }
-
-    /* Week view — lane bars */
-    .cal-week-wrap { min-width: 420px; }
-    .cal-week-head { display: grid; grid-template-columns: repeat(7, 1fr); }
-    .cal-week-hcell { cursor: pointer; }
-    .cal-week-bars {
-      display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 4px; padding-top: 4px; min-height: 40px;
-      background: repeating-linear-gradient(to right, transparent 0, transparent calc(100%/7 - .5px), #eef2f6 calc(100%/7 - .5px), #eef2f6 calc(100%/7));
+    .brand-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, rgba(20, 83, 45, 0.95), rgba(31, 122, 70, 0.86));
+      color: #fff;
+      font-size: 1.6rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
     }
-    .cal-week-bars .cal-bar, .cal-week-bars .cal-pill {
-      height: 22px; line-height: 22px; margin: 0 2px; border-radius: 5px; font-size: 10px; font-weight: 500;
-      padding: 0 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer;
-    }
-    .cal-week-empty { grid-column: 1 / 8; text-align: center; font-size: 11px; color: #94a3b8; padding: 12px 0; }
 
-    /* Month view — lane bars */
-    .cal-month2-dow { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 10px; color: #94a3b8; font-weight: 500; padding: 2px 0; }
-    .cal-month2-week { border-top: .5px solid #e2e8f0; }
-    .cal-month2-nums { display: grid; grid-template-columns: repeat(7, 1fr); }
-    .cal-m2-num { font-size: 11px; font-weight: 500; color: #374151; text-align: center; padding: 3px 0 2px; cursor: pointer; }
-    .cal-m2-num.other { color: #cbd5e1; }
-    .cal-m2-num.sel { background: #e0f2fe; }
-    .cal-m2-num span.today { background: var(--hs-primary); color: #fff; border-radius: 50%; display: inline-block; width: 20px; height: 20px; line-height: 20px; }
-    .cal-month2-bars {
-      display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 2px; padding-bottom: 3px;
-      background: repeating-linear-gradient(to right, transparent 0, transparent calc(100%/7 - .5px), #eef2f6 calc(100%/7 - .5px), #eef2f6 calc(100%/7));
+    .brand-title {
+      margin: 0;
+      font-size: 1.45rem;
+      font-weight: 700;
+      line-height: 1.15;
     }
-    .cal-month2-bars .m2-bar, .cal-month2-bars .m2-pill {
-      height: 15px; line-height: 15px; margin: 0 1.5px; border-radius: 3px; font-size: 9px; font-weight: 500;
-      padding: 0 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer;
+
+    .brand-subtitle {
+      color: #475569;
+      font-size: 0.92rem;
+      margin-top: 2px;
     }
-    .cal-month2-bars .m2-more { font-size: 9px; color: #94a3b8; padding-left: 3px; cursor: pointer; align-self: center; }
+
+    .status-panel {
+      border-radius: 18px;
+      padding: 18px;
+      background: rgba(255,255,255,0.75);
+      border: 1px solid rgba(15, 23, 42, 0.06);
+      min-height: 210px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .status-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 16px;
+      font-size: 1.35rem;
+      background: rgba(20, 83, 45, 0.1);
+      color: var(--hs-green);
+    }
+
+    .status-title {
+      font-size: 1.18rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .status-text {
+      color: #475569;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .status-meta {
+      color: #64748b;
+      font-size: 0.85rem;
+      line-height: 1.55;
+      margin-bottom: 18px;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: #64748b;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    .btn-line {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-weight: 600;
+      background: #06c755;
+      color: #fff;
+      box-shadow: 0 14px 30px rgba(6, 199, 85, 0.22);
+    }
+
+    .btn-line:hover {
+      background: #05b64d;
+      color: #fff;
+    }
+
+    .btn-ghost {
+      width: 100%;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 500;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      background: #fff;
+      color: var(--hs-ink);
+    }
+
+    .spinner-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #475569;
+      font-size: 0.95rem;
+    }
   </style>
-  <link rel="stylesheet" href="./hi-solar-theme-reference.css">
 </head>
 <body>
-
-<!-- Loading -->
-<div id="loading">
-  <div class="spinner-border text-success" style="width:2.5rem;height:2.5rem;" role="status"></div>
-  <div style="font-size:14px;color:#475569;">กำลังเชื่อม Supabase...</div>
-</div>
-
-<!-- Name Modal -->
-<div class="name-overlay" id="nameModal">
-  <div class="name-box">
-
-    <!-- Step 1: เลือกเมนู -->
-    <div id="loginStep1">
-      <div class="login-title">Login</div>
-      <div class="login-sub">เลือกเมนูที่ต้องการเข้าใช้งาน</div>
-      <button class="btn-hisolar" onclick="goHiSolar()">Hi Solar</button>
-      <button class="btn-jdk" onclick="goJdk()">JDK</button>
-    </div>
-
-    <!-- Step 2: รหัสผ่าน Hi Solar -->
-    <div id="loginStep2" style="display:none">
-      <button onclick="showLoginStep1()" style="background:none;border:none;color:#64748b;font-size:13px;padding:0;margin-bottom:16px;cursor:pointer;">← ย้อนกลับ</button>
-      <div class="login-title" style="font-size:1.6rem;">Hi Solar</div>
-      <div class="login-sub">กรอกรหัสผ่านเพื่อเข้าใช้งาน</div>
-      <input type="password" id="hiSolarPwd" class="form-control mb-3" placeholder="รหัสผ่าน" style="font-size:16px;padding:12px;" onkeydown="if(event.key==='Enter')validateHiSolar()">
-      <div id="pwdError" style="color:#ef4444;font-size:13px;margin-bottom:10px;display:none;">รหัสผ่านไม่ถูกต้อง</div>
-      <button class="btn-hisolar" onclick="validateHiSolar()">เข้าใช้งาน</button>
-    </div>
-
-  </div>
-</div>
-
-<!-- App -->
-<div id="app">
-
-  <!-- Navbar -->
-  <div class="hs-navbar">
-    <div class="brand">
-      <i class="bi bi-sun-fill"></i>
-      <span class="brand-mark">Hi</span>
-      <span class="brand-name">Solar</span>
-      <span class="brand-sub">Job Tracker</span>
-    </div>
-    <div class="d-flex align-items-center gap-2">
-      <span id="rtIndicator" style="display:none;">
-        <span class="rt-dot"></span>
-        <span style="color:rgba(255,255,255,.7);font-size:11px;">Live</span>
-      </span>
-      <button class="user-chip" id="userChip" onclick="changeName()">Hi Solar</button>
-    </div>
-  </div>
-
-  <!-- Config Banner (แสดงถ้ายังไม่ได้ตั้งค่า) -->
-  <div class="config-banner" id="configBanner" style="display:none">
-    ⚙️ ยังไม่ได้ตั้งค่า Supabase — แก้ SUPABASE_URL และ SUPABASE_ANON_KEY ใน index.html
-  </div>
-
-  <!-- Stats -->
-  <div class="stats-strip">
-    <div class="row g-0 text-center">
-      <div class="col stat-item"><div class="num" id="s-ngan">—</div><div class="lbl">งานค้าง</div></div>
-      <div class="col stat-item"><div class="num" id="s-duNgan">—</div><div class="lbl">ดูงานวันนี้</div></div>
-      <div class="col stat-item"><div class="num" id="s-langPaeng">—</div><div class="lbl">ล้างแผง</div></div>
-      <div class="col stat-item"><div class="num" id="s-som">—</div><div class="lbl">ซ่อม</div></div>
-      <div class="col stat-item"><div class="num" id="s-bil">—</div><div class="lbl">รอบิล</div></div>
-    </div>
-  </div>
-
-  <section class="upload-toolbar" aria-label="Workbook Upload">
-    <div class="upload-toolbar__body">
-      <div class="upload-toolbar__copy">
-        <div class="upload-toolbar__title">อัปโหลดข้อมูลจาก Excel</div>
-        <div class="upload-toolbar__text">ใช้รูปแบบเดียวกับไฟล์ Hisolar-tracker.xlsx แล้ว sync เข้า Supabase แบบ upsert</div>
-      </div>
-      <div class="upload-toolbar__actions">
-        <a class="btn btn-light btn-sm" href="./Hisolar-tracker.xlsx" download>
-          <i class="bi bi-file-earmark-arrow-down me-1"></i>เทมเพลต
-        </a>
-        <button class="btn btn-primary btn-sm" type="button" id="xlsxUploadTrigger" onclick="openWorkbookPicker()">
-          <i class="bi bi-upload me-1"></i>Upload XLSX
-        </button>
-      </div>
-    </div>
-    <div class="upload-toolbar__status" id="xlsxUploadStatus">รองรับชีต งาน, ดูงาน, ล้างแผง, ซ่อม, บิล, ขออนุญาต และจะไม่แตะชีต Log</div>
-    <!-- View Toggle -->
-    <div class="cal-toggle-row">
-      <button class="cal-view-btn active" id="calBtn-list" onclick="setCalView('list')">
-        <i class="bi bi-list-ul"></i>รายการ
-      </button>
-      <button class="cal-view-btn" id="calBtn-day" onclick="setCalView('day')">
-        <i class="bi bi-calendar3-event"></i>วัน
-      </button>
-      <button class="cal-view-btn" id="calBtn-week" onclick="setCalView('week')">
-        <i class="bi bi-calendar3-week"></i>อาทิตย์
-      </button>
-      <button class="cal-view-btn" id="calBtn-month" onclick="setCalView('month')">
-        <i class="bi bi-calendar3"></i>เดือน
-      </button>
-    </div>
-    <input id="xlsxUploadInput" type="file" accept=".xlsx,.xls,.xlsm" hidden onchange="handleWorkbookFile(event)">
-  </section>
-
-  <!-- Calendar Panel -->
-  <div id="calendarPanel" style="display:none">
-    <div class="cal-nav">
-      <button class="cal-nav-btn" onclick="calNavPrev()"><i class="bi bi-chevron-left"></i></button>
-      <div class="cal-nav-title" id="calNavTitle">—</div>
-      <button class="cal-nav-btn" onclick="calNavNext()"><i class="bi bi-chevron-right"></i></button>
-    </div>
-    <div id="calContent"></div>
-  </div>
-
-  <!-- Content -->
-  <div class="main-content" id="mainContent">
-
-    <!-- งาน -->
-    <div class="tab-panel active" id="panel-ngan">
-      <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
-        <h2 class="section-title mb-0"><i class="bi bi-tools me-2 text-primary"></i>งาน</h2>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
-      </div>
-      <div class="accent-bar"></div>
-      <div id="addHost-ngan"></div>
-      <div class="filter-scroll">
-        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('ngan','all',this)">ทั้งหมด</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('ngan','Waiting',this)">🟡 Waiting</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('ngan','In Progress',this)">🔵 In Progress</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('ngan','Done',this)">🟢 Done</button>
-      </div>
-      <div id="list-ngan"></div>
-    </div>
-
-    <!-- ดูงาน -->
-    <div class="tab-panel" id="panel-duNgan">
-      <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
-        <h2 class="section-title mb-0"><i class="bi bi-geo-alt me-2 text-primary"></i>ดูงาน</h2>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
-      </div>
-      <div class="accent-bar"></div>
-      <div id="addHost-duNgan"></div>
-      <div class="filter-scroll">
-        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('duNgan','all',this)">ทั้งหมด</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('duNgan','รอดูงาน',this)">🟡 รอดูงาน</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('duNgan','รอนัดหมาย',this)">🔵 รอนัดหมาย</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('duNgan','ดูงานแล้ว',this)">🟢 ดูงานแล้ว</button>
-      </div>
-      <div id="list-duNgan"></div>
-    </div>
-
-    <!-- ล้างแผง -->
-    <div class="tab-panel" id="panel-langPaeng">
-      <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
-        <h2 class="section-title mb-0"><i class="bi bi-droplet me-2 text-primary"></i>ล้างแผง</h2>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
-      </div>
-      <div class="accent-bar"></div>
-      <div id="addHost-langPaeng"></div>
-      <div class="filter-scroll">
-        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('langPaeng','all',this)">ทั้งหมด</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('langPaeng','รอนัด',this)">🟡 รอนัด</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('langPaeng','นัดแล้ว',this)">🔵 นัดแล้ว</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('langPaeng','เสร็จแล้ว',this)">🟢 เสร็จแล้ว</button>
-      </div>
-      <div id="list-langPaeng"></div>
-    </div>
-
-    <!-- ซ่อม -->
-    <div class="tab-panel" id="panel-som">
-      <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
-        <h2 class="section-title mb-0"><i class="bi bi-wrench-adjustable me-2 text-primary"></i>ซ่อม</h2>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
-      </div>
-      <div class="accent-bar"></div>
-      <div id="addHost-som"></div>
-      <div class="filter-scroll">
-        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('som','all',this)">ทั้งหมด</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','รอส่ง',this)">🟡 รอส่ง</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','ส่งซ่อมแล้ว',this)">🔵 ส่งซ่อมแล้ว</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('som','รับคืนแล้ว',this)">🟢 รับคืนแล้ว</button>
-      </div>
-      <div id="list-som"></div>
-    </div>
-
-    <!-- บิล -->
-    <div class="tab-panel" id="panel-bil">
-      <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
-        <h2 class="section-title mb-0"><i class="bi bi-receipt me-2 text-primary"></i>บิล VAT</h2>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
-      </div>
-      <div class="accent-bar"></div>
-      <div id="addHost-bil"></div>
-      <div class="filter-scroll">
-        <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setFilter('bil','all',this)">ทั้งหมด</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('bil','รอออกบิล',this)">🟡 รอออกบิล</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('bil','ออกบิลแล้ว',this)">🔵 ออกบิลแล้ว</button>
-        <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setFilter('bil','รับชำระแล้ว',this)">🟢 รับชำระแล้ว</button>
-      </div>
-      <div id="list-bil"></div>
-    </div>
-
-    <div class="tab-panel" id="panel-permit">
-      <div class="d-flex align-items-center justify-content-between mt-1 mb-1">
-        <h2 class="section-title mb-0"><i class="bi bi-file-earmark-check me-2 text-primary"></i>ขออนุญาต</h2>
-        <div class="d-flex gap-2">
-          <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="openPermitModal()"><i class="bi bi-plus-lg"></i></button>
-          <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadData()"><i class="bi bi-arrow-clockwise"></i></button>
+  <div class="shell">
+    <main class="login-card">
+      <div class="brand">
+        <div class="brand-icon"><i class="bi bi-sun-fill"></i></div>
+        <div>
+          <h1 class="brand-title">Hi Solar Tracker</h1>
+          <div class="brand-subtitle">ทางเข้าเฉพาะทีมงาน Hi Solar</div>
         </div>
       </div>
-      <div class="accent-bar"></div>
-      <div class="permit-tools">
-        <input class="form-control" id="permitSearchInput" placeholder="ค้นหา ชื่อลูกค้า / สถานที่ / เลขคำขอ" oninput="setPermitSearch(this.value)">
-        <div class="filter-scroll">
-          <button class="btn btn-sm btn-outline-secondary filter-chip active" onclick="setPermitProviderFilter('all',this)">ทั้งหมด</button>
-          <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setPermitProviderFilter('PEA',this)">PEA</button>
-          <button class="btn btn-sm btn-outline-secondary filter-chip" onclick="setPermitProviderFilter('MEA',this)">MEA</button>
+
+      <section class="status-panel" id="statusPanel" aria-live="polite">
+        <div class="spinner-row">
+          <div class="spinner-border spinner-border-sm text-success" role="status" aria-hidden="true"></div>
+          <span>กำลังตรวจสอบสิทธิ์เข้าใช้งาน...</span>
         </div>
-        <div class="permit-select-row">
-          <select class="form-select form-select-sm" id="permitPhaseFilter" onchange="setPermitPhaseFilter(this.value)">
-            <option value="all">ทุกขั้นตอน</option>
-            <option value="PRECHECK">PRECHECK</option>
-            <option value="DOCS">DOCS</option>
-            <option value="SUBMITTED">SUBMITTED</option>
-            <option value="COMMENT">COMMENT</option>
-            <option value="CONTRACT">CONTRACT</option>
-            <option value="INSTALLED">INSTALLED</option>
-            <option value="INSPECTION">INSPECTION</option>
-            <option value="APPROVED">APPROVED</option>
-            <option value="CLOSED">CLOSED</option>
-          </select>
-          <select class="form-select form-select-sm" id="permitStatusFilter" onchange="setPermitStatusFilter(this.value)">
-            <option value="all">ทุกสถานะ</option>
-            <option value="WAITING">WAITING</option>
-            <option value="IN_PROGRESS">IN_PROGRESS</option>
-            <option value="NEED_FIX">NEED_FIX</option>
-            <option value="DONE">DONE</option>
-            <option value="REJECTED">REJECTED</option>
-          </select>
+      </section>
+
+      <div class="footer-note">ระบบจะพาไปยัง LINE Login และตรวจสิทธิ์ก่อนเปิดหน้า planner</div>
+    </main>
+  </div>
+
+  <script src="./line-auth-client.js"></script>
+  <script>
+    const panel = document.getElementById('statusPanel');
+
+    function renderState({ icon, title, text, meta, actions }) {
+      panel.innerHTML = `
+        <div class="status-icon"><i class="${icon}"></i></div>
+        <div class="status-title">${title}</div>
+        <div class="status-text">${text}</div>
+        ${meta ? `<div class="status-meta">${meta}</div>` : ''}
+        <div class="d-grid gap-2">
+          ${(actions || []).map(action => `
+            <button type="button" class="${action.className}" data-action="${action.id}">${action.label}</button>
+          `).join('')}
         </div>
-      </div>
-      <div id="list-permit"></div>
-    </div>
-
-  </div>
-
-  <!-- Bottom Nav -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" data-tab="ngan" onclick="switchTab('ngan')">
-      <span class="nav-badge" id="b-ngan" style="display:none"></span>
-      <i class="bi bi-tools"></i>งาน
-    </button>
-    <button class="nav-btn" data-tab="duNgan" onclick="switchTab('duNgan')">
-      <span class="nav-badge" id="b-duNgan" style="display:none"></span>
-      <i class="bi bi-geo-alt"></i>ดูงาน
-    </button>
-    <button class="nav-btn" data-tab="langPaeng" onclick="switchTab('langPaeng')">
-      <span class="nav-badge" id="b-langPaeng" style="display:none"></span>
-      <i class="bi bi-droplet"></i>ล้างแผง
-    </button>
-    <button class="nav-btn" data-tab="som" onclick="switchTab('som')">
-      <span class="nav-badge" id="b-som" style="display:none"></span>
-      <i class="bi bi-wrench-adjustable"></i>ซ่อม
-    </button>
-    <button class="nav-btn" data-tab="bil" onclick="switchTab('bil')">
-      <span class="nav-badge" id="b-bil" style="display:none"></span>
-      <i class="bi bi-receipt"></i>บิล
-    </button>
-    <button class="nav-btn" data-tab="permit" onclick="switchTab('permit')">
-      <span class="nav-badge" id="b-permit" style="display:none"></span>
-      <i class="bi bi-file-earmark-check"></i>ขออนุญาต
-    </button>
-  </nav>
-
-</div>
-
-<!-- Status Bottom Sheet -->
-<div class="sheet-overlay" id="statusModal" onclick="if(event.target===this)closeStatusModal()">
-  <div class="sheet-box">
-    <div class="sheet-title" id="statusModalTitle">เปลี่ยนสถานะ</div>
-    <div id="statusOptions"></div>
-    <button class="btn btn-light w-100 mt-1" onclick="closeStatusModal()">
-      <i class="bi bi-x me-1"></i> ปิด
-    </button>
-  </div>
-</div>
-
-<!-- Comment Bottom Sheet -->
-<div class="sheet-overlay" id="commentModal" onclick="if(event.target===this)closeCommentModal()">
-  <div class="sheet-box comment-box">
-    <div class="sheet-title" id="commentModalTitle">Comments</div>
-    <div class="comment-log" id="commentLog"></div>
-    <textarea class="form-control comment-input mb-2" id="commentInput" placeholder="พิมพ์ข้อความประสานงาน..."></textarea>
-    <div class="comment-actions">
-      <button class="btn btn-primary flex-fill fw-semibold" id="commentSubmitBtn" onclick="submitComment()">
-        <i class="bi bi-send me-1"></i> ส่ง
-      </button>
-      <button class="btn btn-light flex-fill fw-normal" onclick="closeCommentModal()">ปิด</button>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Date/Time Bottom Sheet -->
-<div class="sheet-overlay" id="editDateModal" onclick="if(event.target===this)closeEditDateModal()">
-  <div class="sheet-box">
-    <div class="sheet-title">📅 แก้ไขวันเวลานัดหมาย</div>
-    <div class="mb-3">
-      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">วันที่นัดหมาย</label>
-      <input class="form-control" type="date" id="editDateInput">
-    </div>
-    <div class="mb-3">
-      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เวลา</label>
-      <input class="form-control" type="time" id="editTimeInput">
-    </div>
-    <div class="d-flex gap-2 mt-2">
-      <button class="btn btn-primary flex-fill fw-semibold" id="editDateSubmitBtn" onclick="submitEditDate()">
-        <i class="bi bi-check2-circle me-1"></i> บันทึก
-      </button>
-      <button class="btn btn-light flex-fill" onclick="closeEditDateModal()">ปิด</button>
-    </div>
-  </div>
-</div>
-
-<div class="sheet-overlay" id="permitModal" onclick="if(event.target===this)closePermitModal()">
-  <div class="sheet-box permit-sheet">
-    <div class="d-flex align-items-center justify-content-between mb-2">
-      <div class="sheet-title" id="permitModalTitle">ขออนุญาต</div>
-      <button class="btn btn-sm btn-light" type="button" onclick="closePermitModal()"><i class="bi bi-x-lg"></i></button>
-    </div>
-    <div class="permit-timeline" id="permitWorkflowSteps"></div>
-    <form id="permitForm" onsubmit="submitPermitForm(event)">
-      <input type="hidden" id="permitId">
-      <div id="permitFormFields"></div>
-      <div class="permit-section-title">ประวัติ</div>
-      <div class="permit-log-list" id="permitLogList"></div>
-      <div class="d-flex gap-2 mt-3">
-        <button class="btn btn-primary flex-fill fw-semibold" id="permitSubmitBtn" type="submit">
-          <i class="bi bi-check2-circle me-1"></i> บันทึก
-        </button>
-        <button class="btn btn-light flex-fill" type="button" onclick="closePermitModal()">ปิด</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Supabase JS (UMD) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-// ╔══════════════════════════════════════════════════════╗
-// ║  ⚙️  SUPABASE CONFIG                                 ║
-// ║  1. ไปที่ supabase.com → Project → Settings → API   ║
-// ║  2. Copy Project URL และ anon public key              ║
-// ╚══════════════════════════════════════════════════════╝
-const SUPABASE_URL      = 'https://hlswbazcojsnfibirkzl.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_Kxzef_y7E3VAmhYvH4eS3g_o3fG7JLn';
-const GOOGLE_SHEET_URL  = '';
-const TEAM_MEMBERS = ['Shine', 'Wassan', 'Wave', 'OT', 'Lui', 'Aoom'];
-
-// ── Init Supabase client ──────────────────────────────
-const { createClient } = window.supabase;
-let sb = null;
-let realtimeReloadTimer = null;
-
-// ── Table map ─────────────────────────────────────────
-const TAB_KEYS = ['ngan', 'duNgan', 'langPaeng', 'som', 'bil'];
-
-const TAB_NAMES = { ngan:'งาน', duNgan:'ดูงาน', langPaeng:'ล้างแผง', som:'ซ่อม', bil:'บิล VAT', permit:'ขออนุญาต' };
-
-const STATUS_CONFIG = {
-  ngan:      ['Waiting', 'In Progress', 'Done'],
-  duNgan:    ['รอดูงาน', 'รอนัดหมาย', 'ดูงานแล้ว'],
-  langPaeng: ['รอนัด', 'นัดแล้ว', 'เสร็จแล้ว'],
-  som:       ['รอส่ง', 'ส่งซ่อมแล้ว', 'รับคืนแล้ว'],
-  bil:       ['รอออกบิล', 'ออกบิลแล้ว', 'รับชำระแล้ว'],
-};
-
-const ADD_FORM_CONFIG = {
-  ngan: [
-    { name:'customer', label:'ลูกค้า', required:true },
-    { name:'phone', label:'เบอร์โทร', type:'tel' },
-    { name:'detail', label:'รายละเอียด', type:'textarea', required:true },
-    { name:'maps_url', label:'Maps', type:'url' },
-    { name:'date', label:'วันที่นัด', type:'date' },
-    { name:'time', label:'เวลานัด', type:'time' },
-    { name:'start_date', label:'วันเริ่มงาน', type:'date' },
-    { name:'end_date', label:'วันสิ้นสุดงาน', type:'date' },
-    { name:'type', label:'ประเภท' },
-    { name:'technician', label:'ช่าง', type:'team' },
-    { name:'price', label:'ราคา', type:'number' },
-    { name:'status', label:'สถานะ', type:'status', value:'Waiting' },
-    { name:'note', label:'หมายเหตุ', type:'textarea' },
-  ],
-  duNgan: [
-    { name:'date', label:'วันที่', type:'date', required:true },
-    { name:'time', label:'เวลา', type:'time' },
-    { name:'customer', label:'ลูกค้า', required:true },
-    { name:'phone', label:'เบอร์โทร', type:'tel' },
-    { name:'maps_url', label:'Maps', type:'url' },
-    { name:'note', label:'หมายเหตุ', type:'textarea' },
-    { name:'follow_up_date', label:'Follow up', type:'date' },
-    { name:'status', label:'สถานะ', type:'status', value:'รอดูงาน' },
-  ],
-  langPaeng: [
-    { name:'customer', label:'ลูกค้า', required:true },
-    { name:'phone', label:'เบอร์โทร', type:'tel' },
-    { name:'maps_url', label:'Maps', type:'url' },
-    { name:'report_date', label:'วันที่ลูกค้าแจ้ง', type:'date' },
-    { name:'appointment_date', label:'วันที่ดำเนินการ', type:'date' },
-    { name:'appointment_time', label:'เวลานัด', type:'time' },
-    { name:'technician', label:'ช่าง', type:'team' },
-    { name:'status', label:'สถานะ', type:'status', value:'รอนัด' },
-    { name:'note', label:'หมายเหตุ', type:'textarea' },
-  ],
-  som: [
-    { name:'item', label:'รายการ', required:true },
-    { name:'customer', label:'ลูกค้า' },
-    { name:'phone', label:'เบอร์โทร', type:'tel' },
-    { name:'report_date', label:'วันที่ได้รับแจ้ง', type:'date' },
-    { name:'site_date', label:'วันที่เข้าไปหน้างาน', type:'date' },
-    { name:'return_date', label:'วันที่ส่งคืนลูกค้า', type:'date' },
-    { name:'status', label:'สถานะ', type:'status', value:'รอส่ง' },
-    { name:'note', label:'หมายเหตุ', type:'textarea' },
-  ],
-  bil: [
-    { name:'customer', label:'ลูกค้า', required:true },
-    { name:'amount', label:'ยอด', type:'number' },
-    { name:'date', label:'วันที่', type:'date' },
-    { name:'status', label:'สถานะ', type:'status', value:'รอออกบิล' },
-    { name:'note', label:'หมายเหตุ', type:'textarea' },
-  ],
-};
-
-const PERMIT_PHASES = ['PRECHECK', 'DOCS', 'SUBMITTED', 'COMMENT', 'CONTRACT', 'INSTALLED', 'INSPECTION', 'APPROVED', 'CLOSED'];
-const PERMIT_STATUSES = ['WAITING', 'IN_PROGRESS', 'NEED_FIX', 'DONE', 'REJECTED'];
-const PERMIT_WORKFLOW_TEMPLATES = Object.freeze({
-  PEA_SELF_USE: ['PRECHECK', 'DOCS', 'SUBMITTED', 'COMMENT', 'CONTRACT', 'INSTALLED', 'INSPECTION', 'APPROVED', 'CLOSED'],
-  MEA_SELF_USE: ['PRECHECK', 'DOCS', 'SUBMITTED', 'COMMENT', 'CONTRACT', 'INSTALLED', 'INSPECTION', 'APPROVED', 'CLOSED'],
-  PEA_HOUSEHOLD_SELL: ['PRECHECK', 'DOCS', 'SUBMITTED', 'COMMENT', 'CONTRACT', 'INSTALLED', 'INSPECTION', 'APPROVED', 'CLOSED'],
-  MEA_HOUSEHOLD_SELL: ['PRECHECK', 'DOCS', 'SUBMITTED', 'COMMENT', 'CONTRACT', 'INSTALLED', 'INSPECTION', 'APPROVED', 'CLOSED'],
-});
-const PERMIT_CHECKLIST_FIELDS = [
-  { name:'id_card', label:'สำเนาบัตรประชาชน' },
-  { name:'house_registration', label:'ทะเบียนบ้าน' },
-  { name:'electricity_bill', label:'บิลไฟ' },
-  { name:'authorization_letter', label:'หนังสือมอบอำนาจ' },
-  { name:'sld', label:'SLD' },
-  { name:'inverter_datasheet', label:'Inverter Datasheet' },
-  { name:'layout', label:'Layout' },
-  { name:'meter_photo', label:'รูปมิเตอร์' },
-  { name:'mdb_photo', label:'รูป MDB' },
-];
-const PERMIT_FORM_SECTIONS = [
-  {
-    title: 'ข้อมูลลูกค้า',
-    fields: [
-      { name:'customer_name', label:'ชื่อลูกค้า', required:true },
-      { name:'phone', label:'เบอร์โทร', type:'tel' },
-      { name:'site_name', label:'ชื่อสถานที่', required:true },
-      { name:'site_address', label:'ที่อยู่ติดตั้ง', type:'textarea' },
-      { name:'utility_provider', label:'หน่วยงาน', type:'select', options:['PEA', 'MEA'], value:'PEA' },
-      { name:'assigned_to', label:'ผู้รับผิดชอบ', type:'team' },
-      { name:'priority', label:'ความสำคัญ', type:'select', options:['LOW', 'MEDIUM', 'HIGH', 'URGENT'], value:'MEDIUM' },
-    ],
-  },
-  {
-    title: 'ข้อมูลระบบ',
-    fields: [
-      { name:'permit_type', label:'Permit Type' },
-      { name:'project_type', label:'Project Type' },
-      { name:'meter_phase', label:'Meter Phase', type:'select', options:['', '1P', '3P'] },
-      { name:'meter_no', label:'เลขมิเตอร์' },
-      { name:'ca_no', label:'CA No.' },
-      { name:'pv_kwp', label:'PV kWp', type:'number', step:'0.01' },
-      { name:'inverter_brand', label:'ยี่ห้อ Inverter' },
-      { name:'inverter_model', label:'รุ่น Inverter' },
-      { name:'inverter_kw', label:'Inverter kW', type:'number', step:'0.01' },
-      { name:'export_mode', label:'Export Mode', type:'select', options:['', 'SELF_USE', 'ZERO_EXPORT', 'SELL_BACK'], value:'SELF_USE' },
-    ],
-  },
-  {
-    title: 'Workflow',
-    fields: [
-      { name:'workflow_key', label:'Workflow Template', type:'select', options:Object.keys(PERMIT_WORKFLOW_TEMPLATES), value:'PEA_SELF_USE' },
-      { name:'phase', label:'Phase', type:'select', options:PERMIT_PHASES, value:'PRECHECK' },
-      { name:'status', label:'Status', type:'select', options:PERMIT_STATUSES, value:'WAITING' },
-      { name:'application_no', label:'เลขคำขอ' },
-      { name:'payment_status', label:'สถานะชำระเงิน', type:'select', options:['', 'UNPAID', 'PENDING', 'PAID'], value:'UNPAID' },
-      { name:'next_action_date', label:'วันติดตามถัดไป', type:'date' },
-      { name:'aging_days', label:'Aging Days', type:'number' },
-    ],
-  },
-  {
-    title: 'Milestone Dates',
-    fields: [
-      { name:'submit_date', label:'Submit Date', type:'date' },
-      { name:'comment_date', label:'Comment Date', type:'date' },
-      { name:'resubmit_date', label:'Resubmit Date', type:'date' },
-      { name:'contract_date', label:'Contract Date', type:'date' },
-      { name:'install_date', label:'Install Date', type:'date' },
-      { name:'photo_upload_date', label:'Photo Upload Date', type:'date' },
-      { name:'inspection_date', label:'Inspection Date', type:'date' },
-      { name:'meter_change_date', label:'Meter Change Date', type:'date' },
-      { name:'parallel_date', label:'Parallel Date', type:'date' },
-    ],
-  },
-  {
-    title: 'เอกสาร',
-    fields: [
-      { name:'owner_docs_complete', label:'เอกสารเจ้าของครบ', type:'checkbox' },
-      { name:'design_docs_complete', label:'เอกสารออกแบบครบ', type:'checkbox' },
-      { name:'installation_docs_complete', label:'เอกสารติดตั้งครบ', type:'checkbox' },
-    ],
-  },
-  {
-    title: 'หมายเหตุ',
-    fields: [
-      { name:'remark', label:'Remark', type:'textarea' },
-    ],
-  },
-];
-
-// ── State ─────────────────────────────────────────────
-let allData       = { ngan:[], duNgan:[], langPaeng:[], som:[], bil:[] };
-let filters       = { ngan:'all', duNgan:'all', langPaeng:'all', som:'all', bil:'all' };
-let permitData     = [];
-let permitLogs     = [];
-let permitFilters  = { provider:'all', phase:'all', status:'all', search:'' };
-let pendingUpdate = null;
-let pendingComment = null;
-
-// ── Helpers ───────────────────────────────────────────
-function statusClass(tabKey, status) {
-  if (status === 'ยกเลิก') return 'cancel';
-  const opts = STATUS_CONFIG[tabKey] || [];
-  const idx  = opts.indexOf(status);
-  if (idx === 0) return 'waiting';
-  if (idx === opts.length - 1) return 'done';
-  return 'progress';
-}
-
-function fmtAmount(v) {
-  const n = parseFloat(String(v || '').replace(/,/g, ''));
-  return (v !== null && v !== '' && !isNaN(n)) ? n.toLocaleString('th-TH') + ' ฿' : '';
-}
-
-function todayStr() {
-  const d = new Date();
-  return [String(d.getDate()).padStart(2,'0'), String(d.getMonth()+1).padStart(2,'0'), d.getFullYear()].join('/');
-}
-
-function escapeHtml(v) {
-  return String(v || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function teamOptionsHtml(selected = '') {
-  return [
-    '<option value="">-- เลือกทีมงาน --</option>',
-    ...TEAM_MEMBERS.map(name => `<option value="${name}"${name === selected ? ' selected' : ''}>${name}</option>`)
-  ].join('');
-}
-
-function renderTeamOptions(selected = '') {
-  const el = document.getElementById('nameInput');
-  if (!el) return;
-  el.innerHTML = teamOptionsHtml(selected);
-}
-
-function formatCommentDateTime(value) {
-  const d = value ? new Date(value) : new Date();
-  if (isNaN(d)) return '';
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Bangkok',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).formatToParts(d).reduce((acc, part) => {
-    acc[part.type] = part.value;
-    return acc;
-  }, {});
-  return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
-}
-
-function parseCommentLog(note) {
-  return String(note || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean).map(line => {
-    const match = line.match(/^\[(.+?)\]\s*([^:]+):\s*(.*)$/);
-    if (match) return { dateTime: match[1], author: match[2], text: match[3] };
-    return { dateTime: '', author: 'บันทึกเดิม', text: line };
-  });
-}
-
-function commentCount(note) {
-  return parseCommentLog(note).length;
-}
-
-function commentSummaryHtml(note) {
-  const comments = parseCommentLog(note);
-  if (!comments.length) return '';
-  const last = comments[comments.length - 1];
-  const meta = [last.dateTime, last.author].filter(Boolean).join(' · ');
-  return `
-    <div class="comment-preview">
-      <i class="bi bi-chat-text me-1"></i>${meta ? `<strong>${escapeHtml(meta)}:</strong> ` : ''}${escapeHtml(last.text)}
-    </div>
-  `;
-}
-
-function renderCommentLog(note) {
-  const comments = parseCommentLog(note);
-  const el = document.getElementById('commentLog');
-  if (!el) return;
-  if (!comments.length) {
-    el.innerHTML = '<div class="empty-state py-4"><div class="small">ยังไม่มี comment</div></div>';
-    return;
-  }
-  el.innerHTML = comments.map(c => `
-    <div class="comment-bubble">
-      <div class="comment-meta">${escapeHtml([c.dateTime, c.author].filter(Boolean).join(' · '))}</div>
-      <div class="comment-text">${escapeHtml(c.text)}</div>
-    </div>
-  `).join('');
-  el.scrollTop = el.scrollHeight;
-}
-
-// ── Name ─────────────────────────────────────────────
-function formatDateDisplay(value) {
-  if (!value) return '';
-  const s = String(value);
-  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (m) return `${m[3]}/${m[2]}/${m[1]}`;
-  return s;
-}
-
-function formatTimeDisplay(value) {
-  if (!value) return '';
-  const s = String(value);
-  const m = s.match(/^(\d{1,2}):(\d{2})/);
-  if (m) return `${String(m[1]).padStart(2, '0')}:${m[2]}`;
-  return s;
-}
-
-function pickRaw(raw, key, fallback = '') {
-  const value = raw && raw[key];
-  return value !== undefined && value !== null && String(value).trim() !== '' ? value : fallback;
-}
-
-function combineNoteAndComments(note, comments) {
-  const lines = [];
-  const noteText = String(note || '').trim();
-  if (noteText) lines.push(noteText);
-  (comments || []).forEach(comment => {
-    const entry = `[${formatCommentDateTime(comment.commented_at || comment.created_at)}] ${comment.author || 'ไม่ระบุ'}: ${comment.message || ''}`;
-    lines.push(entry);
-  });
-  return lines.join('\n');
-}
-
-function mapJobRow(job, comments) {
-  const raw = job.raw_data || {};
-  return {
-    id: job.id,
-    sheet_key: job.sheet_key,
-    status: job.status || '',
-    customer: pickRaw(raw, 'ลูกค้า', job.customer_name || job.title || ''),
-    item: pickRaw(raw, 'รายการ', job.title || ''),
-    detail: pickRaw(raw, 'รายละเอียด', job.detail || ''),
-    phone: pickRaw(raw, 'เบอร์โทร', job.phone || ''),
-    date: pickRaw(raw, 'วันที่', formatDateDisplay(job.job_date)),
-    time: pickRaw(raw, 'เวลา', formatTimeDisplay(job.job_time)),
-    start_date: pickRaw(raw, 'วันที่เริ่ม', ''),
-    end_date: pickRaw(raw, 'วันที่สิ้นสุด', ''),
-    created_date: pickRaw(raw, 'วันที่สร้าง', formatDateDisplay(job.created_date)),
-    appointment_date: pickRaw(raw, 'วันที่ดำเนินการ', pickRaw(raw, 'วันที่นัด', formatDateDisplay(job.appointment_date))),
-    appointment_time: pickRaw(raw, 'เวลานัด', ''),
-    follow_up_date: pickRaw(raw, 'วันที่ Follow up', ''),
-    report_date: pickRaw(raw, 'วันที่แจ้ง', ''),
-    site_date: pickRaw(raw, 'วันที่เข้างาน', formatDateDisplay(job.sent_date)),
-    return_date: pickRaw(raw, 'วันที่ส่งคืน', formatDateDisplay(job.received_date)),
-    sent_date: pickRaw(raw, 'วันที่ส่ง', formatDateDisplay(job.sent_date)),
-    received_date: pickRaw(raw, 'วันที่รับ', formatDateDisplay(job.received_date)),
-    technician: pickRaw(raw, 'ช่าง', job.technician || ''),
-    type: pickRaw(raw, 'ประเภท', job.job_type || ''),
-    price: pickRaw(raw, 'ราคา', job.price ?? ''),
-    amount: pickRaw(raw, 'ยอด', job.amount ?? ''),
-    maps_url: pickRaw(raw, 'Maps', pickRaw(raw, 'Maps Link', job.maps_url || '')),
-    _noteBase: job.note || '',
-    note: combineNoteAndComments(job.note || '', comments || []),
-    updated_at: job.updated_at || '',
-    _comments: comments || [],
-  };
-}
-
-function defaultStatusForTab(tabKey) {
-  const fields = ADD_FORM_CONFIG[tabKey] || [];
-  return fields.find(field => field.name === 'status')?.value || STATUS_CONFIG[tabKey]?.[0] || '';
-}
-
-function normalizeFormValue(el) {
-  const value = String(el.value || '').trim();
-  if (!value) return '';
-  if (el.dataset.type === 'number') return Number(String(value).replace(/,/g, '')) || 0;
-  return value;
-}
-
-function addFieldHtml(tabKey, field) {
-  const id = `add-${tabKey}-${field.name}`;
-  const value = field.value || '';
-  if (field.type === 'textarea') {
-    return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><textarea class="form-control" id="${id}" data-field="${field.name}" rows="3"${field.required ? ' required' : ''}></textarea></div>`;
-  }
-  if (field.type === 'status') {
-    return `<div><label class="form-label mb-1" for="${id}">${field.label}</label><select class="form-select" id="${id}" data-field="${field.name}">${(STATUS_CONFIG[tabKey] || []).map(status => `<option value="${status}"${status === value ? ' selected' : ''}>${status}</option>`).join('')}</select></div>`;
-  }
-  if (field.type === 'team') {
-    return `<div><label class="form-label mb-1" for="${id}">${field.label}</label><select class="form-select" id="${id}" data-field="${field.name}">${teamOptionsHtml(localStorage.getItem('hiSolarUser') || '')}</select></div>`;
-  }
-  return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><input class="form-control" id="${id}" data-field="${field.name}" data-type="${field.type || 'text'}" type="${field.type || 'text'}" value="${escapeHtml(value)}"${field.required ? ' required' : ''}></div>`;
-}
-
-function googleSheetLinkHtml() {
-  const helper = `<div class="form-note">Bulk sync ผ่าน Google Sheet: ไปที่เมนู Hi Solar &gt; Sync ทั้งหมดเข้า Supabase</div>`;
-  if (!GOOGLE_SHEET_URL) return helper;
-  return `<a class="bulk-link" href="${GOOGLE_SHEET_URL}" target="_blank" rel="noopener"><i class="bi bi-table"></i><span>เพิ่มหลายรายการผ่าน Google Sheet</span></a>${helper}`;
-}
-
-function renderAddForms() {
-  TAB_KEYS.forEach(tabKey => {
-    const host = document.getElementById(`addHost-${tabKey}`);
-    if (!host) return;
-    host.innerHTML = `
-      <div class="add-panel" id="addPanel-${tabKey}">
-        <button class="add-toggle" type="button" onclick="toggleAddForm('${tabKey}')">
-          <span><i class="bi bi-plus-circle me-2 text-primary"></i>เพิ่ม${TAB_NAMES[tabKey] || 'รายการ'}</span>
-          <i class="bi bi-chevron-down text-primary"></i>
-        </button>
-        <div class="add-body">
-          ${googleSheetLinkHtml()}
-          <form onsubmit="submitAddForm(event,'${tabKey}')">
-            <div class="add-grid">
-              ${(ADD_FORM_CONFIG[tabKey] || []).map(field => addFieldHtml(tabKey, field)).join('')}
-            </div>
-            <div class="d-flex gap-2 mt-3">
-              <button class="btn btn-primary flex-fill" type="submit"><i class="bi bi-check2-circle me-1"></i>บันทึก</button>
-              <button class="btn btn-light flex-fill" type="button" onclick="resetAddForm('${tabKey}')">ล้างฟอร์ม</button>
-            </div>
-            ${GOOGLE_SHEET_URL ? '<div class="form-note">เพิ่มหลายรายการพร้อมกัน แนะนำให้ใช้ Google Sheet แล้ว sync เข้า Supabase</div>' : ''}
-          </form>
-        </div>
-      </div>
-    `;
-    resetAddForm(tabKey);
-  });
-}
-
-function toggleAddForm(tabKey) {
-  document.getElementById(`addPanel-${tabKey}`)?.classList.toggle('open');
-}
-
-function resetAddForm(tabKey) {
-  const form = document.querySelector(`#addPanel-${tabKey} form`);
-  form?.reset();
-  (ADD_FORM_CONFIG[tabKey] || []).forEach(field => {
-    if (field.type === 'status' && field.value) {
-      const el = form?.querySelector(`[data-field="${field.name}"]`);
-      if (el) el.value = field.value;
-    }
-    if (field.type === 'team') {
-      const el = form?.querySelector(`[data-field="${field.name}"]`);
-      if (el) el.value = localStorage.getItem('hiSolarUser') || '';
-    }
-  });
-}
-
-function buildInsertPayload(tabKey, data) {
-  const user = localStorage.getItem('hiSolarUser') || 'ไม่ระบุ';
-  const now = new Date().toISOString();
-  const raw = {};
-
-  if (tabKey === 'ngan') {
-    raw['ลูกค้า'] = data.customer || '';
-    raw['เบอร์โทร'] = data.phone || '';
-    raw['รายละเอียด'] = data.detail || '';
-    raw['Maps'] = data.maps_url || '';
-    raw['วันที่'] = data.date || '';
-    raw['เวลา'] = data.time || '';
-    raw['วันที่เริ่ม'] = data.start_date || '';
-    raw['วันที่สิ้นสุด'] = data.end_date || '';
-    raw['ประเภท'] = data.type || '';
-    raw['ช่าง'] = data.technician || '';
-    raw['ราคา'] = data.price || '';
-    raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
-    raw['หมายเหตุ'] = data.note || '';
-    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', detail: data.detail || '', phone: data.phone || '', maps_url: data.maps_url || '', job_date: data.date || null, job_time: data.time ? `${data.time}:00` : null, job_type: data.type || '', technician: data.technician || '', price: data.price || null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', created_date: now.slice(0,10), raw_data: raw, synced_at: now, created_at: now, updated_at: now };
-  }
-  if (tabKey === 'duNgan') {
-    raw['วันที่'] = data.date || '';
-    raw['เวลา'] = data.time || '';
-    raw['ลูกค้า'] = data.customer || '';
-    raw['เบอร์โทร'] = data.phone || '';
-    raw['Maps'] = data.maps_url || '';
-    raw['หมายเหตุ'] = data.note || '';
-    raw['วันที่ Follow up'] = data.follow_up_date || '';
-    raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
-    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', phone: data.phone || '', job_date: data.date || null, job_time: data.time ? `${data.time}:00` : null, appointment_date: data.follow_up_date || null, maps_url: data.maps_url || '', status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
-  }
-  if (tabKey === 'langPaeng') {
-    raw['ลูกค้า'] = data.customer || '';
-    raw['เบอร์โทร'] = data.phone || '';
-    raw['Maps'] = data.maps_url || '';
-    raw['วันที่แจ้ง'] = data.report_date || '';
-    raw['วันที่ดำเนินการ'] = data.appointment_date || '';
-    raw['เวลานัด'] = data.appointment_time || '';
-    raw['ช่าง'] = data.technician || '';
-    raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
-    raw['หมายเหตุ'] = data.note || '';
-    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', phone: data.phone || '', maps_url: data.maps_url || '', job_date: data.report_date || null, appointment_date: data.appointment_date || null, technician: data.technician || '', status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
-  }
-  if (tabKey === 'som') {
-    raw['รายการ'] = data.item || '';
-    raw['ลูกค้า'] = data.customer || '';
-    raw['เบอร์โทร'] = data.phone || '';
-    raw['วันที่แจ้ง'] = data.report_date || '';
-    raw['วันที่เข้างาน'] = data.site_date || '';
-    raw['วันที่ส่งคืน'] = data.return_date || '';
-    raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
-    raw['หมายเหตุ'] = data.note || '';
-    return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], title: data.item || '', customer_name: data.customer || '', phone: data.phone || '', job_date: data.report_date || null, sent_date: data.site_date || null, received_date: data.return_date || null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
-  }
-  raw['ลูกค้า'] = data.customer || '';
-  raw['ยอด'] = data.amount || '';
-  raw['วันที่'] = data.date || '';
-  raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
-  raw['หมายเหตุ'] = data.note || '';
-  return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', amount: data.amount || null, job_date: data.date || null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
-}
-
-function formatSupabaseError(error, actionText = 'ทำรายการ') {
-  const code = String(error?.code || '').trim();
-  const message = String(error?.message || error || '').trim();
-  const details = String(error?.details || '').trim();
-  const hint = String(error?.hint || '').trim();
-  const text = [message, details, hint].filter(Boolean).join(' | ');
-
-  if (code === '42501' || /row-level security|permission denied/i.test(text)) {
-    return `${actionText}ไม่ได้: Supabase ยังไม่เปิดสิทธิ์ให้หน้าเว็บนี้เขียนข้อมูล กรุณารันไฟล์ supabase/schema.sql ใน Supabase SQL Editor และใช้ไฟล์นี้แทน supabase-setup.sql`;
-  }
-  if (code === '42P01' || /relation .* does not exist|table .* does not exist/i.test(text)) {
-    return `${actionText}ไม่ได้: ยังไม่พบตารางที่จำเป็นใน Supabase กรุณารันไฟล์ supabase/schema.sql หรือ supabase/permit-module.sql ก่อน`;
-  }
-  if (code === '22P02' || /invalid input syntax|date\/time field value out of range|invalid input/i.test(text)) {
-    return `${actionText}ไม่ได้: รูปแบบข้อมูลไม่ถูกต้อง ตรวจวันที่ เวลา และตัวเลขอีกครั้ง`;
-  }
-  if (/networkerror|failed to fetch|fetch failed|load failed|network request failed/i.test(text)) {
-    return `${actionText}ไม่ได้: เชื่อมต่อ Supabase ไม่สำเร็จ`;
-  }
-  if (message) return `${actionText}ไม่ได้: ${message}`;
-  return `${actionText}ไม่ได้`;
-}
-
-async function submitAddForm(event, tabKey) {
-  event.preventDefault();
-  if (!sb) {
-    showToast('ยังไม่ได้เชื่อม Supabase', 'danger');
-    return;
-  }
-  const form = event.target;
-  if (!form.reportValidity()) return;
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const originalText = submitBtn.innerHTML;
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
-
-  try {
-    const data = {};
-    form.querySelectorAll('[data-field]').forEach(el => {
-      data[el.dataset.field] = normalizeFormValue(el);
-    });
-    const payload = buildInsertPayload(tabKey, data);
-    const { error } = await sb.from('hi_solar_jobs').insert(payload);
-    if (error) throw error;
-    resetAddForm(tabKey);
-    document.getElementById(`addPanel-${tabKey}`)?.classList.remove('open');
-    await loadData();
-    showToast('เพิ่มรายการแล้ว', 'success');
-  } catch (e) {
-    console.error('submitAddForm failed', e);
-    showToast(formatSupabaseError(e, 'บันทึกข้อมูล'), 'danger');
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalText;
-  }
-}
-
-function goHiSolar() {
-  document.getElementById('loginStep1').style.display = 'none';
-  document.getElementById('loginStep2').style.display = 'block';
-  document.getElementById('hiSolarPwd').value = '';
-  document.getElementById('pwdError').style.display = 'none';
-  setTimeout(() => document.getElementById('hiSolarPwd').focus(), 100);
-}
-
-function showLoginStep1() {
-  document.getElementById('loginStep2').style.display = 'none';
-  document.getElementById('loginStep1').style.display = 'block';
-}
-
-function validateHiSolar() {
-  const pwd = document.getElementById('hiSolarPwd').value;
-  if (pwd === '0091') {
-    window.location.href = './hisolar_planner.html';
-  } else {
-    document.getElementById('pwdError').style.display = 'block';
-    document.getElementById('hiSolarPwd').value = '';
-    document.getElementById('hiSolarPwd').focus();
-  }
-}
-
-function goJdk() {
-  window.location.href = './JDK.html';
-}
-
-function saveName() {
-  const v = document.getElementById('nameInput')?.value.trim();
-  if (!v || !TEAM_MEMBERS.includes(v)) return;
-  localStorage.setItem('hiSolarUser', v);
-  document.getElementById('nameModal').style.display = 'none';
-  document.getElementById('userChip').textContent = '👤 ' + v;
-  document.querySelectorAll('[data-field="technician"]').forEach(el => { el.value = v; });
-  document.querySelectorAll('[data-permit-field="assigned_to"]').forEach(el => { el.value = v; });
-  if (sb) loadData();
-}
-
-function changeName() {
-  document.getElementById('nameModal').style.display = 'flex';
-}
-
-// ── Data — Load all tables ────────────────────────────
-async function loadData() {
-  document.getElementById('loading').style.display = 'flex';
-  try {
-    const [jobsRes, commentsRes, permitsRes, permitLogsRes] = await Promise.all([
-      sb.from('hi_solar_jobs').select('*').order('sheet_row'),
-      sb.from('hi_solar_job_comments').select('*').order('commented_at'),
-      sb.from('hi_solar_permits').select('*').order('next_action_date', { ascending: true }),
-      sb.from('hi_solar_permit_logs').select('*').order('created_at', { ascending: false }),
-    ]);
-    if (jobsRes.error) throw jobsRes.error;
-    if (commentsRes.error) throw commentsRes.error;
-    if (permitsRes.error) throw permitsRes.error;
-    if (permitLogsRes.error) throw permitLogsRes.error;
-    const commentsByJob = (commentsRes.data || []).reduce((acc, comment) => {
-      (acc[comment.job_id] ||= []).push(comment);
-      return acc;
-    }, {});
-    allData = { ngan:[], duNgan:[], langPaeng:[], som:[], bil:[] };
-    (jobsRes.data || []).forEach(job => {
-      if (!allData[job.sheet_key]) return;
-      allData[job.sheet_key].push(mapJobRow(job, commentsByJob[job.id] || []));
-    });
-    permitData = (permitsRes.data || []).map(mapPermitRow);
-    permitLogs = permitLogsRes.data || [];
-  } catch (e) {
-    console.error('loadData failed', e);
-    showToast(formatSupabaseError(e, 'โหลดข้อมูล'), 'danger');
-  }
-  renderAll();
-  updateStats();
-  updateBadges();
-  document.getElementById('loading').style.display = 'none';
-}
-
-// ── Real-time subscriptions ───────────────────────────
-function setupRealtime() {
-  ['hi_solar_jobs', 'hi_solar_job_comments', 'hi_solar_permits', 'hi_solar_permit_logs'].forEach(tableName => {
-    sb.channel(`rt_${tableName}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: tableName }, () => {
-        clearTimeout(realtimeReloadTimer);
-        realtimeReloadTimer = setTimeout(() => loadData(), 300);
-      })
-      .subscribe(status => {
-        document.getElementById('rtIndicator').style.display = status === 'SUBSCRIBED' ? 'flex' : 'none';
+      `;
+      (actions || []).forEach(action => {
+        panel.querySelector(`[data-action="${action.id}"]`)?.addEventListener('click', action.onClick);
       });
-  });
-}
-
-async function callAddComment(tabKey, id, comment) {
-  const user = localStorage.getItem('hiSolarUser') || 'ไม่ระบุ';
-  const item = allData[tabKey].find(r => r.id === id);
-  if (!item) throw new Error('ไม่พบรายการนี้');
-
-  const commentedAt = new Date().toISOString();
-  const { data, error } = await sb.from('hi_solar_job_comments').insert({
-    job_id: id,
-    author: user,
-    message: comment,
-    source: 'app',
-    commented_at: commentedAt,
-  }).select('*').single();
-
-  if (error) throw error;
-  item._comments = [...(item._comments || []), data];
-  item.note = combineNoteAndComments(item._noteBase || '', item._comments);
-  return {
-    success: true,
-    note: item.note,
-    comment: `[${formatCommentDateTime(commentedAt)}] ${user}: ${comment}`
-  };
-}
-
-function openCommentModal(tabKey, id) {
-  const item = allData[tabKey].find(r => r.id === id);
-  if (!item) return;
-  pendingComment = { tabKey, id };
-  document.getElementById('commentModalTitle').textContent = `${TAB_NAMES[tabKey] || tabKey} — ${item.customer || item.item || 'รายการ'}`;
-  document.getElementById('commentInput').value = '';
-  renderCommentLog(item.note || '');
-  document.getElementById('commentModal').classList.add('show');
-  setTimeout(() => document.getElementById('commentInput')?.focus(), 50);
-}
-
-function closeCommentModal() {
-  document.getElementById('commentModal').classList.remove('show');
-  pendingComment = null;
-}
-
-// ── Render ────────────────────────────────────────────
-async function callUpdate(tabKey, id, newStatus) {
-  const { error } = await sb.from('hi_solar_jobs').update({
-    status: newStatus,
-    updated_at: new Date().toISOString(),
-  }).eq('id', id);
-
-  if (error) {
-    console.error('callUpdate failed', error);
-    showToast(formatSupabaseError(error, 'อัปเดตสถานะ'), 'danger');
-    return;
-  }
-
-  const item = allData[tabKey].find(r => r.id === id);
-  if (item) item.status = newStatus;
-  renderTab(tabKey);
-  updateStats();
-  updateBadges();
-  showToast(`อัปเดตสถานะ: ${newStatus}`, 'success');
-}
-
-async function submitComment() {
-  if (!pendingComment) return;
-  const input = document.getElementById('commentInput');
-  const comment = input.value.trim();
-  if (!comment) return alert('กรุณาพิมพ์ comment');
-
-  const btn = document.getElementById('commentSubmitBtn');
-  const originalText = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังส่ง';
-
-  try {
-    const { tabKey, id } = pendingComment;
-    const json = await callAddComment(tabKey, id, comment);
-    const item = allData[tabKey].find(r => r.id === id);
-    if (item) {
-      item.note = json.note;
-      renderCommentLog(item.note);
     }
-    input.value = '';
-    renderTab(tabKey);
-    updateStats();
-    updateBadges();
-    showToast('เพิ่ม comment แล้ว', 'success');
-  } catch (e) {
-    console.error('submitComment failed', e);
-    showToast(formatSupabaseError(e, 'เพิ่มคอมเมนต์'), 'danger');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalText;
-  }
-}
 
-// ── Calendar ──────────────────────────────────────────
-const DOW_TH   = ['อา','จ','อ','พ','พฤ','ศ','ส'];
-const MONTH_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
-                  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-const MONTH_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
-                     'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    function loginAction() {
+      window.HiSolarAuth.startLineLogin('hisolar', '/hisolar_planner.html');
+    }
 
-let calView         = 'list';
-let calDate         = new Date();
-let calSelectedDate = null;   // 'YYYY-MM-DD'
+    async function bootstrap() {
+      const approval = window.HiSolarAuth.getQueryParam('approval');
+      const reason = window.HiSolarAuth.getQueryParam('reason');
 
-function dateKey(d) {
-  if (!d || isNaN(d)) return '';
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function todayKey() { return dateKey(new Date()); }
-
-function parseDisplayDate(str) {
-  if (!str) return null;
-  const s = String(str).trim();
-  let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (m) { const d = new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1])); return isNaN(d) ? null : d; }
-  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if (m) { const d = new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3])); return isNaN(d) ? null : d; }
-  return null;
-}
-function stripTime(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
-
-// Color + render style per job type for the calendar
-const TYPE_STYLE = {
-  ngan:      { cls: 't-ngan', bar: true  },
-  som:       { cls: 't-som',  bar: true  },
-  duNgan:    { cls: 't-du',   bar: false },
-  langPaeng: { cls: 't-lang', bar: false },
-};
-
-function calLegendHtml() {
-  return `<div class="cal-legend">
-    <span><i class="lg" style="background:#1e40af"></i>งาน</span>
-    <span><i class="lg" style="background:#d97706"></i>ซ่อม</span>
-    <span><i class="lg" style="background:#0ea5e9"></i>ดูงาน</span>
-    <span><i class="lg" style="background:#10b981"></i>ล้างแผง</span>
-  </div>`;
-}
-
-// Jobs whose date range covers a given day key (dk strings sort chronologically)
-function jobsOnDay(jobs, dk) {
-  return jobs.filter(j => dk >= j.startDk && dk <= j.endDk);
-}
-
-function getAllJobsWithDates() {
-  const result = [];
-  // Each type maps to a [start, end] range. Single-point types use start === end.
-  //  งาน  : วันเริ่ม → วันสิ้นสุด (fallback วันที่นัด)
-  //  ซ่อม : วันเข้างาน → วันส่งคืน (fallback วันที่แจ้ง)
-  //  ดูงาน/ล้างแผง : วันนัดหมายวันเดียว
-  const rangeField = {
-    ngan:      j => [j.start_date || j.date, j.end_date || j.start_date || j.date],
-    som:       j => [j.site_date || j.report_date, j.return_date || j.site_date || j.report_date],
-    duNgan:    j => { const d = j.date; return [d, d]; },
-    langPaeng: j => { const d = j.appointment_date || j.report_date; return [d, d]; },
-  };
-  Object.keys(allData).forEach(tabKey => {
-    const fn = rangeField[tabKey];
-    if (!fn) return;
-    allData[tabKey].forEach(job => {
-      const [s, e] = fn(job);
-      const start = parseDisplayDate(s);
-      if (!start) return;
-      let end = parseDisplayDate(e) || start;
-      if (end < start) end = start;
-      const startDk = dateKey(start), endDk = dateKey(end);
-      result.push({ tabKey, job, start, end, startDk, endDk, dk: startDk, span: endDk !== startDk });
-    });
-  });
-  return result;
-}
-
-function setCalView(view) {
-  calView = view;
-  const panel = document.getElementById('calendarPanel');
-  const main  = document.getElementById('mainContent');
-  if (view === 'list') {
-    panel.style.display = 'none';
-    main.style.display  = '';
-  } else {
-    panel.style.display = '';
-    main.style.display  = 'none';
-    if (!calSelectedDate) calSelectedDate = todayKey();
-    renderCalendar();
-  }
-  ['list','day','week','month'].forEach(v => {
-    document.getElementById(`calBtn-${v}`)?.classList.toggle('active', v === view);
-  });
-}
-
-function calNavPrev() {
-  if (calView === 'month') calDate = new Date(calDate.getFullYear(), calDate.getMonth()-1, 1);
-  else if (calView === 'week') calDate = new Date(calDate.getTime() - 7*86400000);
-  else if (calView === 'day')  calDate = new Date(calDate.getTime() - 86400000);
-  renderCalendar();
-}
-function calNavNext() {
-  if (calView === 'month') calDate = new Date(calDate.getFullYear(), calDate.getMonth()+1, 1);
-  else if (calView === 'week') calDate = new Date(calDate.getTime() + 7*86400000);
-  else if (calView === 'day')  calDate = new Date(calDate.getTime() + 86400000);
-  renderCalendar();
-}
-
-function renderCalendar() {
-  if (calView === 'month')     renderMonthView();
-  else if (calView === 'week') renderWeekView();
-  else if (calView === 'day')  renderDayView();
-}
-
-function formatCalShort(dk) {
-  const m = String(dk).match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (!m) return dk;
-  return `${parseInt(m[3])} ${MONTH_SHORT[parseInt(m[2])-1]}`;
-}
-function formatCalFull(dk) {
-  const m = String(dk).match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (!m) return dk;
-  const d = new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
-  return `${DOW_TH[d.getDay()]}ที่ ${parseInt(m[3])} ${MONTH_TH[parseInt(m[2])-1]} ${parseInt(m[1])+543}`;
-}
-
-function buildCalEventCard(j) {
-  const key = j.tabKey;
-  const r   = j.job;
-  const sc  = statusClass(key, r.status);
-
-  // Reuse same layout logic as buildCard
-  let name='', detail='', meta='', extra='', cardDate='';
-  if (key === 'ngan') {
-    name     = r.customer || '—';
-    detail   = r.detail   || '';
-    cardDate = r.date || r.created_date || '';
-    const mp = [];
-    if (r.date) mp.push(`<i class="bi bi-calendar3 me-1"></i>${escapeHtml(r.date)}${r.time ? ` ${escapeHtml(r.time)} น.` : ''}`);
-    if (r.technician) mp.push(`<i class="bi bi-person-fill me-1"></i>${escapeHtml(r.technician)}`);
-    if (r.type)       mp.push(`<i class="bi bi-lightning-charge me-1"></i>${escapeHtml(r.type)}`);
-    meta  = mp.join('<span class="mx-2">·</span>');
-    extra = r.price ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.price)}</span>` : '';
-  } else if (key === 'duNgan') {
-    name     = r.customer || '—';
-    cardDate = r.date     || '';
-    const dp = [];
-    if (r.date) dp.push(`<i class="bi bi-calendar3 me-1"></i>${escapeHtml(r.date)}`);
-    if (r.time) dp.push(`<i class="bi bi-clock me-1"></i>${escapeHtml(r.time)} น.`);
-    detail = dp.join('&nbsp;&nbsp;');
-    const dm = [];
-    if (r.phone) dm.push(`<i class="bi bi-telephone-fill me-1"></i><a href="tel:${escapeHtml(r.phone)}" onclick="event.stopPropagation()" class="text-decoration-none" style="color:inherit">${escapeHtml(r.phone)}</a>`);
-    if (r.follow_up_date) dm.push(`<i class="bi bi-calendar-check me-1"></i>Follow up ${escapeHtml(r.follow_up_date)}`);
-    meta = dm.join('<span class="mx-2">·</span>');
-  } else if (key === 'langPaeng') {
-    name   = r.customer || '—';
-    const lp = [];
-    if (r.report_date)      lp.push(`<i class="bi bi-calendar-plus me-1"></i>แจ้ง ${escapeHtml(r.report_date)}`);
-    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${escapeHtml(r.appointment_date)}`);
-    detail = lp.join('&nbsp;&nbsp;');
-    cardDate = r.appointment_date || r.report_date || '';
-    meta   = r.technician ? `<i class="bi bi-person-fill me-1"></i>${escapeHtml(r.technician)}` : '';
-  } else if (key === 'som') {
-    name   = r.item     || '—';
-    detail = r.customer ? `<i class="bi bi-person-fill me-1"></i>${escapeHtml(r.customer)}` : '';
-    const sp = [];
-    if (r.report_date)  sp.push(`<i class="bi bi-bell me-1"></i>แจ้ง ${escapeHtml(r.report_date)}`);
-    if (r.site_date)    sp.push(`<i class="bi bi-tools me-1"></i>เข้างาน ${escapeHtml(r.site_date)}`);
-    if (r.return_date)  sp.push(`<i class="bi bi-check2-circle me-1"></i>ส่งคืน ${escapeHtml(r.return_date)}`);
-    meta = sp.join('&nbsp;&nbsp;');
-    cardDate = r.report_date || '';
-  } else if (key === 'bil') {
-    name   = r.customer || '—';
-    detail = r.date ? `<i class="bi bi-calendar3 me-1"></i>${escapeHtml(r.date)}` : '';
-    extra  = r.amount ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.amount)}</span>` : '';
-  }
-  extra += commentSummaryHtml(r.note || '');
-
-  const statusBtn  = `<button class="status-badge ${sc}" onclick="event.stopPropagation();openStatusModal('${key}','${r.id}')">${escapeHtml(r.status)}</button>`;
-  const commentBtn = `<button class="btn btn-sm btn-outline-secondary btn-comment" onclick="event.stopPropagation();openCommentModal('${key}','${r.id}')"><i class="bi bi-chat-dots me-1"></i>Comment</button>`;
-  const mapsBtn    = r.maps_url ? `<a href="${escapeHtml(r.maps_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="btn btn-sm btn-outline-secondary btn-map"><i class="bi bi-geo-alt-fill me-1"></i>แผนที่</a>` : '';
-  const tabChip    = `<span class="cal-event-tab ${key}" style="font-size:10px;padding:1px 7px;border-radius:4px;">${TAB_NAMES[key]}</span>`;
-
-  return `
-  <article class="card job-card status-${sc}" onclick="openCommentModal('${key}','${r.id}')">
-    <div class="card-body">
-      <div class="d-flex justify-content-between align-items-start mb-1">
-        <div class="card-customer">${escapeHtml(name)}</div>
-        <div class="d-flex align-items-center gap-1">${tabChip}<span class="card-date">${escapeHtml(cardDate)}</span></div>
-      </div>
-      ${detail ? `<div class="card-detail">${detail}</div>` : ''}
-      ${meta   ? `<div class="card-meta">${meta}</div>` : ''}
-      ${extra}
-      <div class="d-flex gap-2 flex-wrap mt-2 align-items-center">
-        ${statusBtn}${commentBtn}${mapsBtn}
-      </div>
-    </div>
-  </article>`;
-}
-
-// Show all event cards as a vertical scrollable list
-function buildCalEventsBlock(jobs) {
-  if (!jobs.length) return `<div class="empty-state py-3"><div class="small">ไม่มีงาน</div></div>`;
-  const cards = jobs.map(j => buildCalEventCard(j)).join('');
-  return `<div class="cal-events-list">${cards}</div>`;
-}
-
-function renderMonthView() {
-  const year  = calDate.getFullYear();
-  const month = calDate.getMonth();
-  document.getElementById('calNavTitle').textContent = `${MONTH_TH[month]} ${year+543}`;
-
-  const jobs     = getAllJobsWithDates();
-  const firstDow = new Date(year, month, 1).getDay();
-  const daysInMon= new Date(year, month+1, 0).getDate();
-  const today    = todayKey();
-  const selDk    = calSelectedDate;
-  const MAX_LANES = 3;
-
-  // Build full grid of day cells (leading/trailing days included to fill whole weeks)
-  const gridStart = new Date(year, month, 1 - firstDow);
-  const totalCells = Math.ceil((firstDow + daysInMon) / 7) * 7;
-  const cells = [];
-  for (let i = 0; i < totalCells; i++) { const d = new Date(gridStart); d.setDate(gridStart.getDate()+i); cells.push(d); }
-
-  let html = calLegendHtml() + '<div class="cal-month2">';
-  html += '<div class="cal-month2-dow">' + DOW_TH.map(d => `<div>${d}</div>`).join('') + '</div>';
-
-  for (let w = 0; w * 7 < cells.length; w++) {
-    const wdays   = cells.slice(w*7, w*7+7);
-    const wStartDk = dateKey(wdays[0]), wEndDk = dateKey(wdays[6]);
-
-    html += '<div class="cal-month2-week"><div class="cal-month2-nums">';
-    wdays.forEach(d => {
-      const dk = dateKey(d), inMon = d.getMonth() === month;
-      const isToday = dk === today, isSel = dk === selDk;
-      html += `<div class="cal-m2-num${inMon?'':' other'}${isSel?' sel':''}" onclick="calDayClick('${dk}')"><span class="${isToday?'today':''}">${d.getDate()}</span></div>`;
-    });
-    html += '</div>';
-
-    // Lay out bars for jobs intersecting this week, cutting ranges at week edges
-    const wjobs = jobs.filter(j => j.startDk <= wEndDk && j.endDk >= wStartDk);
-    const items = wjobs.map(j => {
-      const sc = Math.round((stripTime(j.start) - wdays[0]) / 86400000);
-      const ec = Math.round((stripTime(j.end)   - wdays[0]) / 86400000);
-      return { j, sc: Math.max(0, sc), ec: Math.min(6, ec), contLeft: j.startDk < wStartDk, contRight: j.endDk > wEndDk };
-    }).sort((a,b) => a.sc - b.sc || (b.ec - b.sc) - (a.ec - a.sc));
-
-    const lanes = [];
-    items.forEach(it => {
-      let l = 0;
-      while (true) {
-        const occ = lanes[l] || [];
-        if (occ.every(o => it.sc > o.ec || it.ec < o.sc)) { (lanes[l] ||= []).push(it); it.lane = l; break; }
-        l++;
+      if (approval === 'pending') {
+        renderState({
+          icon: 'bi bi-hourglass-split',
+          title: 'รออนุมัติการเข้าใช้งาน',
+          text: 'บัญชี LINE ของคุณเข้าสู่ระบบได้แล้ว แต่ยังไม่มีสิทธิ์เข้าใช้งาน Hi Solar Planner',
+          meta: 'เมื่อผู้ดูแลอนุมัติแล้ว ให้กลับมากดเข้าสู่ระบบอีกครั้ง',
+          actions: [
+            { id: 'retry-login', label: 'เข้าสู่ระบบด้วย LINE อีกครั้ง', className: 'btn-line', onClick: loginAction },
+          ],
+        });
+        return;
       }
-    });
 
-    const hiddenByCol = {};
-    items.filter(it => it.lane >= MAX_LANES).forEach(it => {
-      for (let c = it.sc; c <= it.ec; c++) hiddenByCol[c] = (hiddenByCol[c] || 0) + 1;
-    });
+      if (reason === 'session_expired') {
+        renderState({
+          icon: 'bi bi-clock-history',
+          title: 'Session หมดอายุ',
+          text: 'กรุณาเข้าสู่ระบบใหม่ก่อนใช้งานหน้า Hi Solar Planner',
+          actions: [
+            { id: 'relogin', label: 'เข้าสู่ระบบด้วย LINE', className: 'btn-line', onClick: loginAction },
+          ],
+        });
+        return;
+      }
 
-    html += `<div class="cal-month2-bars" style="grid-template-rows:repeat(${MAX_LANES},15px) 12px">`;
-    items.filter(it => it.lane < MAX_LANES).forEach(it => {
-      const st   = TYPE_STYLE[it.j.tabKey];
-      const name = it.j.job.customer || it.j.job.item || '—';
-      const cls  = (st.bar ? 'm2-bar ' : 'm2-pill ') + st.cls + (it.contLeft?' cut-l':'') + (it.contRight?' cut-r':'');
-      html += `<div class="${cls}" style="grid-column:${it.sc+1}/${it.ec+2};grid-row:${it.lane+1}" onclick="event.stopPropagation();openCommentModal('${it.j.tabKey}','${it.j.job.id}')" title="${escapeHtml(name)}">${escapeHtml(name)}</div>`;
-    });
-    Object.keys(hiddenByCol).forEach(c => {
-      html += `<div class="m2-more" style="grid-column:${(+c)+1}/${(+c)+2};grid-row:${MAX_LANES+1}" onclick="calDayClick('${dateKey(wdays[+c])}')">+${hiddenByCol[c]}</div>`;
-    });
-    html += '</div></div>';
-  }
-  html += '</div>';
+      try {
+        const auth = await window.HiSolarAuth.fetchAuthMe('hisolar');
+        if (auth && auth.authenticated) {
+          window.location.replace('/hisolar_planner.html');
+          return;
+        }
+      } catch (error) {
+        if (error.status === 401) {
+          renderState({
+            icon: 'bi bi-line',
+            title: 'เข้าสู่ระบบสำหรับทีมงาน Hi Solar',
+            text: 'ใช้บัญชี LINE ที่ได้รับอนุมัติแล้วเพื่อเข้าใช้งาน planner และติดตามงานภายใน',
+            actions: [
+              { id: 'line-login', label: 'เข้าสู่ระบบด้วย LINE', className: 'btn-line', onClick: loginAction },
+            ],
+          });
+          return;
+        }
 
-  // Selected day events — include any job whose range covers the day
-  if (selDk) {
-    const selJobs = jobsOnDay(jobs, selDk);
-    const label = selDk === today ? 'วันนี้' : formatCalShort(selDk);
-    html += `<div class="cal-day-header"><i class="bi bi-calendar-event me-1 text-primary"></i>${label}`;
-    html += selJobs.length ? ` — ${selJobs.length} งาน` : ' — ไม่มีงาน';
-    html += '</div>';
-    html += buildCalEventsBlock(selJobs);
-  }
+        if (error.status === 403 || reason === 'access_denied') {
+          renderState({
+            icon: 'bi bi-shield-lock',
+            title: 'ไม่มีสิทธิ์เข้าใช้งาน',
+            text: 'บัญชีนี้ยังไม่สามารถเปิด Hi Solar Planner ได้',
+            meta: 'ถ้าคุณควรมีสิทธิ์ ให้ผู้ดูแลตรวจสอบ membership ของระบบ Hi Solar',
+            actions: [
+              { id: 'line-login', label: 'ลองเข้าสู่ระบบอีกครั้ง', className: 'btn-line', onClick: loginAction },
+            ],
+          });
+          return;
+        }
 
-  document.getElementById('calContent').innerHTML = html;
-}
-
-function renderWeekView() {
-  const dow  = calDate.getDay();
-  const sun  = new Date(calDate.getFullYear(), calDate.getMonth(), calDate.getDate() - dow);
-  const days = Array.from({length:7}, (_, i) => { const d = new Date(sun); d.setDate(sun.getDate()+i); return d; });
-  const wStartDk = dateKey(days[0]), wEndDk = dateKey(days[6]);
-
-  document.getElementById('calNavTitle').textContent =
-    `${formatCalShort(wStartDk)} – ${formatCalShort(wEndDk)}`;
-
-  const jobs  = getAllJobsWithDates().filter(j => j.startDk <= wEndDk && j.endDk >= wStartDk);
-  const today = todayKey();
-
-  // Header row: weekday + date
-  let head = '<div class="cal-week-head">';
-  days.forEach(d => {
-    const dk = dateKey(d), isToday = dk === today;
-    head += `<div class="cal-week-hcell" onclick="calGoDay('${dk}')">
-      <div class="cal-week-dow">${DOW_TH[d.getDay()]}</div>
-      <div class="cal-week-date${isToday?' today':''}">${d.getDate()}</div>
-    </div>`;
-  });
-  head += '</div>';
-
-  // Lane packing — cut each job range to the visible week
-  const items = jobs.map(j => {
-    const sc = Math.round((stripTime(j.start) - days[0]) / 86400000);
-    const ec = Math.round((stripTime(j.end)   - days[0]) / 86400000);
-    return { j, sc: Math.max(0, sc), ec: Math.min(6, ec), contLeft: j.startDk < wStartDk, contRight: j.endDk > wEndDk };
-  }).sort((a,b) => a.sc - b.sc || (b.ec - b.sc) - (a.ec - a.sc));
-
-  const lanes = [];
-  items.forEach(it => {
-    let l = 0;
-    while (true) {
-      const occ = lanes[l] || [];
-      if (occ.every(o => it.sc > o.ec || it.ec < o.sc)) { (lanes[l] ||= []).push(it); it.lane = l; break; }
-      l++;
-    }
-  });
-
-  let bars = `<div class="cal-week-bars" style="grid-template-rows:repeat(${Math.max(1, lanes.length)},26px)">`;
-  items.forEach(it => {
-    const st   = TYPE_STYLE[it.j.tabKey];
-    const name = it.j.job.customer || it.j.job.item || '—';
-    const cls  = (st.bar ? 'cal-bar ' : 'cal-pill ') + st.cls + (it.contLeft?' cut-l':'') + (it.contRight?' cut-r':'');
-    const lArrow = it.contLeft  ? '<i class="bi bi-chevron-left"></i> ' : '';
-    const rArrow = it.contRight ? ' <i class="bi bi-chevron-right"></i>' : '';
-    bars += `<div class="${cls}" style="grid-column:${it.sc+1}/${it.ec+2};grid-row:${it.lane+1}" onclick="openCommentModal('${it.j.tabKey}','${it.j.job.id}')" title="${escapeHtml(name)}">${lArrow}${escapeHtml(name)}${rArrow}</div>`;
-  });
-  if (!items.length) bars += '<div class="cal-week-empty">ไม่มีงานในสัปดาห์นี้</div>';
-  bars += '</div>';
-
-  document.getElementById('calContent').innerHTML =
-    calLegendHtml() + `<div class="cal-week-scroll"><div class="cal-week-wrap">${head}${bars}</div></div>`;
-}
-
-// Jump to day view for a given day key
-function calGoDay(dk) {
-  const m = dk.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (m) calDate = new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
-  setCalView('day');
-}
-
-function renderDayView() {
-  const dk    = dateKey(calDate);
-  const today = todayKey();
-  document.getElementById('calNavTitle').textContent = formatCalFull(dk);
-
-  const jobs    = getAllJobsWithDates();
-  const dayJobs = jobsOnDay(jobs, dk);
-
-  let html = '';
-  if (!dayJobs.length) {
-    html = '<div class="empty-state py-4"><i class="bi bi-calendar-x"></i><div class="mt-2 small">ไม่มีงานวันนี้</div></div>';
-  } else {
-    html = `<div class="cal-day-header"><i class="bi bi-calendar-check me-1 text-primary"></i>${dk===today?'วันนี้':formatCalShort(dk)} — ${dayJobs.length} งาน</div>`;
-    html += buildCalEventsBlock(dayJobs);
-  }
-  document.getElementById('calContent').innerHTML = html;
-}
-
-function updateSliderDots(sliderEl) {
-  const wrap  = sliderEl.closest('.cal-slider-wrap');
-  if (!wrap) return;
-  const dots  = wrap.querySelectorAll('.cal-slider-dot');
-  const cards = sliderEl.querySelectorAll('.cal-event-card');
-  if (!dots.length || !cards.length) return;
-  const scrollLeft = sliderEl.scrollLeft;
-  const cardWidth  = sliderEl.offsetWidth;
-  const idx = Math.round(scrollLeft / (cardWidth * 0.87));
-  dots.forEach((d, i) => d.classList.toggle('active', i === Math.min(idx, dots.length-1)));
-}
-
-function calDayClick(dk) {
-  calSelectedDate = dk;
-  // Switch calDate to that day so day-view nav works from here
-  const m = dk.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (m) calDate = new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
-  renderMonthView();
-}
-
-// ── renderAll ─────────────────────────────────────────
-function emptyPermitChecklist() {
-  return PERMIT_CHECKLIST_FIELDS.reduce((acc, field) => {
-    acc[field.name] = false;
-    return acc;
-  }, {});
-}
-
-function permitStatusClass(status) {
-  if (status === 'DONE') return 'done';
-  if (status === 'REJECTED' || status === 'NEED_FIX') return 'cancel';
-  if (status === 'IN_PROGRESS') return 'progress';
-  return 'waiting';
-}
-
-function permitBadgeTone(status) {
-  if (status === 'DONE') return 'success';
-  if (status === 'REJECTED' || status === 'NEED_FIX') return 'danger';
-  if (status === 'IN_PROGRESS') return 'info';
-  return 'warning';
-}
-
-function inferPermitWorkflowKey(record = {}) {
-  const provider = String(record.utility_provider || 'PEA').toUpperCase() === 'MEA' ? 'MEA' : 'PEA';
-  const joined = [record.permit_type, record.project_type, record.export_mode].join(' ').toUpperCase();
-  return joined.includes('SELL') ? `${provider}_HOUSEHOLD_SELL` : `${provider}_SELF_USE`;
-}
-
-function computePermitAgingDays(record = {}) {
-  const today = new Date();
-  const baseValue = record.submit_date || record.next_action_date || record.created_at;
-  if (!baseValue) return 0;
-  const base = new Date(baseValue);
-  if (Number.isNaN(base.getTime())) return 0;
-  return Math.max(0, Math.floor((today.getTime() - base.getTime()) / 86400000));
-}
-
-function permitFieldHtml(field) {
-  const id = `permit-${field.name}`;
-  if (field.type === 'textarea') {
-    return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><textarea class="form-control" id="${id}" rows="3" data-permit-field="${field.name}" data-permit-type="textarea"${field.required ? ' required' : ''}></textarea></div>`;
-  }
-  if (field.type === 'select') {
-    return `<div><label class="form-label mb-1" for="${id}">${field.label}</label><select class="form-select" id="${id}" data-permit-field="${field.name}" data-permit-type="select">${(field.options || []).map(option => `<option value="${option}"${option === (field.value || '') ? ' selected' : ''}>${option || '-'}</option>`).join('')}</select></div>`;
-  }
-  if (field.type === 'team') {
-    return `<div><label class="form-label mb-1" for="${id}">${field.label}</label><select class="form-select" id="${id}" data-permit-field="${field.name}" data-permit-type="team">${teamOptionsHtml(localStorage.getItem('hiSolarUser') || '')}</select></div>`;
-  }
-  if (field.type === 'checkbox') {
-    return `<label class="permit-check-item"><input type="checkbox" id="${id}" data-permit-field="${field.name}" data-permit-type="checkbox"><span>${field.label}</span></label>`;
-  }
-  return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><input class="form-control" id="${id}" data-permit-field="${field.name}" data-permit-type="${field.type || 'text'}" type="${field.type || 'text'}"${field.step ? ` step="${field.step}"` : ''}${field.required ? ' required' : ''}></div>`;
-}
-
-function renderPermitFormFields() {
-  const host = document.getElementById('permitFormFields');
-  if (!host) return;
-  host.innerHTML = [
-    ...PERMIT_FORM_SECTIONS.map(section => `
-      <div class="permit-section-title">${section.title}</div>
-      <div class="permit-field-grid">
-        ${section.fields.map(permitFieldHtml).join('')}
-      </div>
-    `),
-    `<div class="permit-section-title">Document Checklist</div>
-     <div class="permit-check-grid">
-       ${PERMIT_CHECKLIST_FIELDS.map(field => `<label class="permit-check-item"><input type="checkbox" data-permit-check="${field.name}" id="permit-check-${field.name}"><span>${field.label}</span></label>`).join('')}
-     </div>`,
-  ].join('');
-}
-
-function newPermitRecord() {
-  return {
-    utility_provider: 'PEA',
-    workflow_key: 'PEA_SELF_USE',
-    phase: 'PRECHECK',
-    status: 'WAITING',
-    priority: 'MEDIUM',
-    payment_status: 'UNPAID',
-    assigned_to: localStorage.getItem('hiSolarUser') || '',
-    document_checklist: emptyPermitChecklist(),
-    owner_docs_complete: false,
-    design_docs_complete: false,
-    installation_docs_complete: false,
-    aging_days: 0,
-  };
-}
-
-function mapPermitRow(record) {
-  return {
-    ...newPermitRecord(),
-    ...record,
-    workflow_key: record.workflow_key || inferPermitWorkflowKey(record),
-    utility_provider: record.utility_provider || 'PEA',
-    phase: record.phase || 'PRECHECK',
-    status: record.status || 'WAITING',
-    payment_status: record.payment_status || '',
-    document_checklist: { ...emptyPermitChecklist(), ...(record.document_checklist || {}) },
-    aging_days: Number.isFinite(Number(record.aging_days)) ? Number(record.aging_days) : computePermitAgingDays(record),
-  };
-}
-
-function permitWarningTags(record) {
-  const tags = [];
-  const docsComplete = record.owner_docs_complete && record.design_docs_complete && record.installation_docs_complete;
-  if (['DOCS', 'SUBMITTED', 'COMMENT', 'CONTRACT', 'INSTALLED', 'INSPECTION', 'APPROVED'].includes(record.phase) && !docsComplete) {
-    tags.push({ label:'เอกสารไม่ครบ', tone:'warning' });
-  }
-  if (record.phase === 'COMMENT' || record.status === 'NEED_FIX' || record.comment_date) {
-    tags.push({ label:'มี comment', tone:'danger' });
-  }
-  if (record.payment_status && String(record.payment_status).toUpperCase() !== 'PAID') {
-    tags.push({ label:'รอชำระ', tone:'info' });
-  }
-  if ((record.phase === 'APPROVED' || record.phase === 'CLOSED') && !record.meter_change_date) {
-    tags.push({ label:'รอเปลี่ยนมิเตอร์', tone:'warning' });
-  }
-  return tags;
-}
-
-function permitMatchesFilters(record) {
-  const search = String(permitFilters.search || '').toLowerCase();
-  if (permitFilters.provider !== 'all' && record.utility_provider !== permitFilters.provider) return false;
-  if (permitFilters.phase !== 'all' && record.phase !== permitFilters.phase) return false;
-  if (permitFilters.status !== 'all' && record.status !== permitFilters.status) return false;
-  if (!search) return true;
-  return [record.customer_name, record.site_name, record.application_no].some(value => String(value || '').toLowerCase().includes(search));
-}
-
-function setPermitProviderFilter(value, el) {
-  permitFilters.provider = value;
-  el.closest('.filter-scroll').querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
-  el.classList.add('active');
-  renderPermitList();
-}
-
-function setPermitPhaseFilter(value) {
-  permitFilters.phase = value;
-  renderPermitList();
-}
-
-function setPermitStatusFilter(value) {
-  permitFilters.status = value;
-  renderPermitList();
-}
-
-function setPermitSearch(value) {
-  permitFilters.search = String(value || '').trim();
-  renderPermitList();
-}
-
-function renderPermitTimeline(record) {
-  const el = document.getElementById('permitWorkflowSteps');
-  if (!el) return;
-  const phases = PERMIT_WORKFLOW_TEMPLATES[record.workflow_key] || PERMIT_PHASES;
-  const currentIndex = phases.indexOf(record.phase);
-  el.innerHTML = phases.map((phase, index) => {
-    const cls = index < currentIndex ? 'permit-step done' : index === currentIndex ? 'permit-step active' : index === currentIndex + 1 ? 'permit-step next' : 'permit-step';
-    return `<div class="${cls}">${phase}</div>`;
-  }).join('');
-}
-
-function renderPermitLogs(permitId) {
-  const el = document.getElementById('permitLogList');
-  if (!el) return;
-  if (!permitId) {
-    el.innerHTML = '<div class="empty-state py-3"><div class="small">ยังไม่มีประวัติ</div></div>';
-    return;
-  }
-  const rows = permitLogs.filter(log => log.permit_id === permitId).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  if (!rows.length) {
-    el.innerHTML = '<div class="empty-state py-3"><div class="small">ยังไม่มีประวัติ</div></div>';
-    return;
-  }
-  el.innerHTML = rows.map(log => `
-    <div class="permit-log-item">
-      <div class="permit-log-meta">${escapeHtml(formatCommentDateTime(log.created_at))} · ${escapeHtml(log.actor || 'ไม่ระบุ')}</div>
-      <div class="permit-log-text">${escapeHtml(log.action || 'UPDATED')}${log.to_phase || log.to_status ? ` · ${escapeHtml([log.to_phase, log.to_status].filter(Boolean).join(' / '))}` : ''}</div>
-    </div>
-  `).join('');
-}
-
-function populatePermitForm(record) {
-  document.getElementById('permitId').value = record.id || '';
-  document.querySelectorAll('[data-permit-field]').forEach(el => {
-    const field = el.dataset.permitField;
-    const type = el.dataset.permitType;
-    const value = record[field];
-    if (type === 'checkbox') {
-      el.checked = !!value;
-    } else if (type === 'date') {
-      el.value = value ? String(value).slice(0, 10) : '';
-    } else {
-      el.value = value ?? '';
-    }
-  });
-  document.querySelectorAll('[data-permit-check]').forEach(el => {
-    el.checked = !!record.document_checklist?.[el.dataset.permitCheck];
-  });
-  document.getElementById('permitModalTitle').textContent = record.id
-    ? `ขออนุญาต — ${record.customer_name || record.site_name || 'รายการ'}`
-    : 'เพิ่มขออนุญาต';
-  renderPermitTimeline(record);
-  renderPermitLogs(record.id || '');
-}
-
-function openPermitModal(id = '') {
-  const record = id ? (permitData.find(item => item.id === id) || newPermitRecord()) : newPermitRecord();
-  populatePermitForm(record);
-  document.getElementById('permitModal').classList.add('show');
-}
-
-function closePermitModal() {
-  document.getElementById('permitModal').classList.remove('show');
-}
-
-function collectPermitFormData(form) {
-  const data = {};
-  form.querySelectorAll('[data-permit-field]').forEach(el => {
-    const field = el.dataset.permitField;
-    const type = el.dataset.permitType;
-    if (type === 'checkbox') {
-      data[field] = el.checked;
-    } else if (type === 'number') {
-      data[field] = el.value === '' ? null : Number(el.value);
-    } else {
-      data[field] = String(el.value || '').trim();
-    }
-  });
-  data.document_checklist = emptyPermitChecklist();
-  form.querySelectorAll('[data-permit-check]').forEach(el => {
-    data.document_checklist[el.dataset.permitCheck] = el.checked;
-  });
-  return data;
-}
-
-function buildPermitRawData(record) {
-  const raw = {};
-  [
-    'customer_name', 'phone', 'site_name', 'site_address', 'utility_provider', 'permit_type', 'project_type', 'meter_phase', 'meter_no', 'ca_no',
-    'pv_kwp', 'inverter_brand', 'inverter_model', 'inverter_kw', 'export_mode', 'workflow_key', 'phase', 'status', 'application_no',
-    'submit_date', 'comment_date', 'resubmit_date', 'contract_date', 'install_date', 'photo_upload_date', 'inspection_date',
-    'meter_change_date', 'parallel_date', 'assigned_to', 'priority', 'next_action_date', 'aging_days',
-    'owner_docs_complete', 'design_docs_complete', 'installation_docs_complete', 'payment_status', 'remark',
-  ].forEach(key => {
-    raw[key] = record[key] ?? '';
-  });
-  Object.entries(record.document_checklist || {}).forEach(([key, value]) => {
-    raw[key] = value;
-  });
-  return raw;
-}
-
-function normalizePermitPayload(data, existing = null) {
-  const merged = { ...(existing || newPermitRecord()), ...data };
-  const workflowKey = merged.workflow_key || inferPermitWorkflowKey(merged);
-  const normalized = {
-    customer_name: merged.customer_name || '',
-    phone: merged.phone || '',
-    site_name: merged.site_name || '',
-    site_address: merged.site_address || '',
-    utility_provider: ['PEA', 'MEA'].includes(merged.utility_provider) ? merged.utility_provider : 'PEA',
-    permit_type: merged.permit_type || '',
-    project_type: merged.project_type || '',
-    meter_phase: merged.meter_phase || '',
-    meter_no: merged.meter_no || '',
-    ca_no: merged.ca_no || '',
-    pv_kwp: merged.pv_kwp === '' || merged.pv_kwp === null ? null : Number(merged.pv_kwp),
-    inverter_brand: merged.inverter_brand || '',
-    inverter_model: merged.inverter_model || '',
-    inverter_kw: merged.inverter_kw === '' || merged.inverter_kw === null ? null : Number(merged.inverter_kw),
-    export_mode: merged.export_mode || '',
-    workflow_key: workflowKey,
-    phase: PERMIT_PHASES.includes(merged.phase) ? merged.phase : 'PRECHECK',
-    status: PERMIT_STATUSES.includes(merged.status) ? merged.status : 'WAITING',
-    application_no: merged.application_no || '',
-    submit_date: merged.submit_date || null,
-    comment_date: merged.comment_date || null,
-    resubmit_date: merged.resubmit_date || null,
-    contract_date: merged.contract_date || null,
-    install_date: merged.install_date || null,
-    photo_upload_date: merged.photo_upload_date || null,
-    inspection_date: merged.inspection_date || null,
-    meter_change_date: merged.meter_change_date || null,
-    parallel_date: merged.parallel_date || null,
-    assigned_to: merged.assigned_to || '',
-    priority: merged.priority || 'MEDIUM',
-    next_action_date: merged.next_action_date || null,
-    owner_docs_complete: !!merged.owner_docs_complete,
-    design_docs_complete: !!merged.design_docs_complete,
-    installation_docs_complete: !!merged.installation_docs_complete,
-    payment_status: merged.payment_status || '',
-    remark: merged.remark || '',
-    document_checklist: { ...emptyPermitChecklist(), ...(merged.document_checklist || {}) },
-    raw_data: {},
-    updated_at: new Date().toISOString(),
-  };
-  normalized.aging_days = merged.aging_days === '' || merged.aging_days === null || Number.isNaN(Number(merged.aging_days))
-    ? computePermitAgingDays({ ...normalized, created_at: existing?.created_at })
-    : Number(merged.aging_days);
-  normalized.raw_data = buildPermitRawData(normalized);
-  return normalized;
-}
-
-async function createPermitLog(action, previousRecord, nextRecord) {
-  if (!nextRecord?.id) return;
-  try {
-    await sb.from('hi_solar_permit_logs').insert({
-      permit_id: nextRecord.id,
-      action,
-      actor: localStorage.getItem('hiSolarUser') || 'ไม่ระบุ',
-      from_phase: previousRecord?.phase || null,
-      to_phase: nextRecord.phase || null,
-      from_status: previousRecord?.status || null,
-      to_status: nextRecord.status || null,
-      metadata: {
-        workflow_key: nextRecord.workflow_key || '',
-        application_no: nextRecord.application_no || '',
-        next_action_date: nextRecord.next_action_date || null,
-      },
-    });
-  } catch (error) {
-    console.error('createPermitLog failed', error);
-  }
-}
-
-async function submitPermitForm(event) {
-  event.preventDefault();
-  const form = event.target;
-  if (!form.reportValidity()) return;
-  const submitBtn = document.getElementById('permitSubmitBtn');
-  const originalText = submitBtn.innerHTML;
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
-
-  try {
-    const id = document.getElementById('permitId').value;
-    const existing = id ? permitData.find(item => item.id === id) : null;
-    const payload = normalizePermitPayload(collectPermitFormData(form), existing);
-
-    let savedRecord = null;
-    if (id) {
-      const { data, error } = await sb.from('hi_solar_permits').update(payload).eq('id', id).select('*').single();
-      if (error) throw error;
-      savedRecord = data;
-    } else {
-      const { data, error } = await sb.from('hi_solar_permits').insert(payload).select('*').single();
-      if (error) throw error;
-      savedRecord = data;
+        renderState({
+          icon: 'bi bi-wifi-off',
+          title: 'เชื่อมต่อระบบไม่สำเร็จ',
+          text: 'ไม่สามารถตรวจสอบสิทธิ์ได้ในขณะนี้',
+          meta: error && error.message ? error.message : '',
+          actions: [
+            { id: 'retry', label: 'ลองใหม่', className: 'btn-ghost', onClick: () => window.location.reload() },
+            { id: 'login', label: 'เข้าสู่ระบบด้วย LINE', className: 'btn-line', onClick: loginAction },
+          ],
+        });
+      }
     }
 
-    const logAction = !existing ? 'CREATED' : (existing.phase !== payload.phase || existing.status !== payload.status ? 'PHASE_STATUS_CHANGED' : 'UPDATED');
-    await createPermitLog(logAction, existing, savedRecord);
-    closePermitModal();
-    await loadData();
-    showToast(id ? 'อัปเดตข้อมูลขออนุญาตแล้ว' : 'เพิ่มข้อมูลขออนุญาตแล้ว', 'success');
-  } catch (error) {
-    console.error('submitPermitForm failed', error);
-    showToast(formatSupabaseError(error, 'บันทึกข้อมูลขออนุญาต'), 'danger');
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalText;
-  }
-}
-
-function buildPermitCard(record) {
-  const warnings = permitWarningTags(record);
-  return `
-    <article class="card job-card status-${permitStatusClass(record.status)}" onclick="openPermitModal('${record.id}')">
-      <div class="card-body">
-        <div class="permit-head">
-          <div>
-            <div class="card-customer">${escapeHtml(record.customer_name || '-')}</div>
-            <div class="permit-subtitle">${escapeHtml(record.site_name || '-')}</div>
-          </div>
-          <div class="d-flex flex-column align-items-end gap-1">
-            <span class="mini-badge neutral">${escapeHtml(record.utility_provider || '-')}</span>
-            <span class="mini-badge ${permitBadgeTone(record.status)}">${escapeHtml(record.status || '-')}</span>
-          </div>
-        </div>
-        <div class="d-flex flex-wrap gap-2 mb-2">
-          <span class="mini-badge neutral">${escapeHtml(record.phase || '-')}</span>
-          ${record.application_no ? `<span class="mini-badge info">${escapeHtml(record.application_no)}</span>` : ''}
-        </div>
-        <div class="permit-meta-grid">
-          <div><i class="bi bi-person-badge me-1"></i>${escapeHtml(record.assigned_to || '-')}</div>
-          <div><i class="bi bi-calendar-event me-1"></i>${record.next_action_date ? escapeHtml(formatDateDisplay(record.next_action_date)) : 'ยังไม่กำหนด'}</div>
-          <div><i class="bi bi-hourglass-split me-1"></i>${escapeHtml(String(record.aging_days ?? 0))} วัน</div>
-        </div>
-        ${warnings.length ? `<div class="permit-warning-row">${warnings.map(tag => `<span class="mini-badge ${tag.tone}">${escapeHtml(tag.label)}</span>`).join('')}</div>` : ''}
-        <div class="d-flex gap-2 flex-wrap mt-2">
-          <button class="btn btn-sm btn-outline-secondary btn-comment" type="button" onclick="event.stopPropagation();openPermitModal('${record.id}')"><i class="bi bi-pencil-square me-1"></i>รายละเอียด</button>
-        </div>
-      </div>
-    </article>
-  `;
-}
-
-function renderPermitList() {
-  const el = document.getElementById('list-permit');
-  if (!el) return;
-  const rows = permitData.filter(permitMatchesFilters);
-  if (!rows.length) {
-    el.innerHTML = `<div class="empty-state"><i class="bi bi-file-earmark-check text-success"></i><div class="mt-2 small">ยังไม่มีรายการขออนุญาต</div></div>`;
-    return;
-  }
-  el.innerHTML = rows
-    .sort((a, b) => {
-      const aDate = a.next_action_date || '9999-12-31';
-      const bDate = b.next_action_date || '9999-12-31';
-      return aDate.localeCompare(bDate) || (b.aging_days || 0) - (a.aging_days || 0);
-    })
-    .map(buildPermitCard)
-    .join('');
-}
-
-function renderAll() {
-  Object.keys(STATUS_CONFIG).forEach(renderTab);
-  renderPermitList();
-  if (calView !== 'list') renderCalendar();
-}
-
-function renderTab(key) {
-  const el   = document.getElementById('list-' + key);
-  const rows = allData[key].filter(r => filters[key] === 'all' || r.status === filters[key]);
-  if (!rows.length) {
-    el.innerHTML = `<div class="empty-state"><i class="bi bi-check2-circle text-success"></i><div class="mt-2 small">ไม่มีรายการ</div></div>`;
-    return;
-  }
-  el.innerHTML = rows.map(r => buildCard(key, r)).join('');
-}
-
-function buildCard(key, r) {
-  const status  = r.status || STATUS_CONFIG[key][0];
-  const sc      = statusClass(key, status);
-  const mapsUrl = r.maps_url || '';
-  const mapsBtn = mapsUrl
-    ? `<a class="btn btn-sm btn-outline-secondary btn-map" href="${mapsUrl}" target="_blank" rel="noopener"><i class="bi bi-geo-alt-fill me-1"></i>แผนที่</a>`
-    : '';
-  const statusBtn = `<button class="status-badge ${sc}" onclick="openStatusModal('${key}','${r.id}')">${status}</button>`;
-  const comments = commentCount(r.note || '');
-  const commentBtn = `<button class="btn btn-sm btn-outline-secondary btn-comment" onclick="openCommentModal('${key}','${r.id}')"><i class="bi bi-chat-dots me-1"></i>Comment${comments ? ` ${comments}` : ''}</button>`;
-
-  let name='', detail='', meta='', extra='', cardDate='';
-
-  if (key === 'ngan') {
-    name     = r.customer || '—';
-    detail   = r.detail   || '';
-    cardDate = r.date || r.created_date || '';
-    const mp = [];
-    if (r.date) mp.push(`<i class="bi bi-calendar3 me-1"></i>${r.date}${r.time ? ` ${r.time} น.` : ''}`);
-    if (r.technician) mp.push(`<i class="bi bi-person-fill me-1"></i>${r.technician}`);
-    if (r.type)       mp.push(`<i class="bi bi-lightning-charge me-1"></i>${r.type}`);
-    meta  = mp.join('<span class="mx-2">·</span>');
-    extra = r.price ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.price)}</span>` : '';
-
-  } else if (key === 'duNgan') {
-    name     = r.customer || '—';
-    cardDate = r.date     || '';
-    const dp = [];
-    if (r.date) dp.push(`<i class="bi bi-calendar3 me-1"></i>${r.date}`);
-    if (r.time) dp.push(`<i class="bi bi-clock me-1"></i>${r.time} น.`);
-    detail = dp.join('&nbsp;&nbsp;');
-    const dm = [];
-    if (r.phone) dm.push(`<i class="bi bi-telephone-fill me-1"></i>${r.phone}`);
-    if (r.follow_up_date) dm.push(`<i class="bi bi-calendar-check me-1"></i>Follow up ${r.follow_up_date}`);
-    meta  = dm.join('<span class="mx-2">·</span>');
-    extra = `<button class="btn btn-sm btn-outline-primary btn-edit-date" onclick="openEditDateModal('${r.id}')"><i class="bi bi-calendar2-week me-1"></i>นัดหมาย</button>`;
-
-  } else if (key === 'langPaeng') {
-    name   = r.customer || '—';
-    const lp = [];
-    if (r.report_date)      lp.push(`<i class="bi bi-calendar-plus me-1"></i>แจ้ง ${r.report_date}`);
-    if (r.appointment_date) lp.push(`<i class="bi bi-calendar3 me-1"></i>ดำเนินการ ${r.appointment_date}${r.appointment_time ? ' ' + r.appointment_time : ''}`);
-    detail = lp.join('&nbsp;&nbsp;');
-    meta   = r.technician ? `<i class="bi bi-person-fill me-1"></i>${r.technician}` : '';
-    cardDate = r.appointment_date || r.report_date || '';
-    extra  = '';
-
-  } else if (key === 'som') {
-    name   = r.item     || '—';
-    detail = r.customer ? `<i class="bi bi-person-fill me-1"></i>${r.customer}` : '';
-    const sp = [];
-    if (r.report_date)  sp.push(`<i class="bi bi-bell me-1"></i>แจ้ง ${r.report_date}`);
-    if (r.site_date)    sp.push(`<i class="bi bi-tools me-1"></i>เข้างาน ${r.site_date}`);
-    if (r.return_date)  sp.push(`<i class="bi bi-check2-circle me-1"></i>ส่งคืน ${r.return_date}`);
-    meta  = sp.join('&nbsp;&nbsp;');
-    cardDate = r.report_date || '';
-    extra = '';
-
-  } else if (key === 'bil') {
-    name   = r.customer || '—';
-    detail = r.date ? `<i class="bi bi-calendar3 me-1"></i>${r.date}` : '';
-    meta   = '';
-    extra  = r.amount ? `<span class="amount-badge"><i class="bi bi-cash-coin me-1"></i>${fmtAmount(r.amount)}</span>` : '';
-  }
-  extra += commentSummaryHtml(r.note || '');
-
-  const updatedBy = '';
-
-  return `
-  <article class="card job-card status-${sc}">
-    <div class="card-body">
-      <div class="d-flex justify-content-between align-items-start mb-1">
-        <div class="card-customer">${name}</div>
-        <div class="card-date">${cardDate}</div>
-      </div>
-      ${detail ? `<div class="card-detail">${detail}</div>` : ''}
-      ${meta   ? `<div class="card-meta">${meta}</div>` : ''}
-      ${extra}
-      <div class="d-flex gap-2 flex-wrap mt-2 align-items-center">
-        ${statusBtn}${commentBtn}${mapsBtn}
-        <div class="ms-auto">${updatedBy}</div>
-      </div>
-    </div>
-  </article>`;
-}
-
-// ── Stats & Badges ────────────────────────────────────
-function updateStats() {
-  const pend = (k, ss) => allData[k].filter(r => ss.includes(r.status)).length;
-  const td   = todayStr();
-  document.getElementById('s-ngan').textContent      = pend('ngan', ['Waiting','In Progress']);
-  document.getElementById('s-langPaeng').textContent  = pend('langPaeng', ['รอนัด','นัดแล้ว']);
-  document.getElementById('s-som').textContent        = pend('som', ['รอส่ง','ส่งซ่อมแล้ว']);
-  document.getElementById('s-bil').textContent        = pend('bil', ['รอออกบิล','ออกบิลแล้ว']);
-  document.getElementById('s-duNgan').textContent     = allData['duNgan'].filter(r => r.date === td && r.status !== 'ดูงานแล้ว').length;
-}
-
-function updateBadges() {
-  const pend = (k, ss) => allData[k].filter(r => ss.includes(r.status)).length;
-  const set  = (id, n) => { const el=document.getElementById(id); el.textContent=n>0?n:''; el.style.display=n>0?'inline':'none'; };
-  set('b-ngan',      pend('ngan',['Waiting','In Progress']));
-  set('b-duNgan',    pend('duNgan',['รอดูงาน','รอนัดหมาย']));
-  set('b-langPaeng', pend('langPaeng',['รอนัด','นัดแล้ว']));
-  set('b-som',       pend('som',['รอส่ง','ส่งซ่อมแล้ว']));
-  set('b-bil',       pend('bil',['รอออกบิล','ออกบิลแล้ว']));
-  set('b-permit',    permitData.filter(r => r.phase !== 'CLOSED' || r.status !== 'DONE').length);
-}
-
-// ── Tab Switch ────────────────────────────────────────
-function switchTab(key) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-'+key).classList.add('active');
-  document.querySelector(`.nav-btn[data-tab="${key}"]`).classList.add('active');
-}
-
-// ── Filter ────────────────────────────────────────────
-function setFilter(key, val, el) {
-  filters[key] = val;
-  el.closest('.filter-scroll').querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  renderTab(key);
-}
-
-// ── Status Modal ──────────────────────────────────────
-function openStatusModal(tabKey, id) {
-  pendingUpdate = { tabKey, id };
-  const opts    = STATUS_CONFIG[tabKey] || [];
-  const current = allData[tabKey].find(r => r.id === id)?.status || '';
-  document.getElementById('statusModalTitle').textContent = 'เปลี่ยนสถานะ — ' + (TAB_NAMES[tabKey]||tabKey);
-  document.getElementById('statusOptions').innerHTML = [
-    ...opts.map((s,i) => {
-      const cls = s === 'ยกเลิก' ? 'cancel' : (i===0 ? 'waiting' : i===opts.length-1 ? 'done' : 'progress');
-      return `<button class="sheet-opt ${cls}" onclick="pickStatus('${s}')">${s}${s===current?' ✓':''}</button>`;
-    }),
-    tabKey !== 'bil' && !opts.includes('ยกเลิก')
-      ? `<button class="sheet-opt cancel" onclick="pickStatus('ยกเลิก')">ยกเลิก${current==='ยกเลิก'?' ✓':''}</button>`
-      : ''
-  ].join('');
-  document.getElementById('statusModal').classList.add('show');
-}
-
-function closeStatusModal() {
-  document.getElementById('statusModal').classList.remove('show');
-  pendingUpdate = null;
-}
-
-function pickStatus(status) {
-  if (!pendingUpdate) return;
-  const { tabKey, id } = pendingUpdate;
-  closeStatusModal();
-  callUpdate(tabKey, id, status);
-}
-
-// ── Edit Date/Time Modal (duNgan) ─────────────────────
-let pendingEditDate = null;
-
-function displayDateToInputDate(s) {
-  if (!s) return '';
-  const m = String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (m) return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
-  const m2 = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (m2) return s.slice(0,10);
-  return '';
-}
-
-function openEditDateModal(id) {
-  const record = allData['duNgan'].find(r => r.id === id);
-  if (!record) return;
-  pendingEditDate = { id };
-  document.getElementById('editDateInput').value = displayDateToInputDate(record.date);
-  document.getElementById('editTimeInput').value = record.time || '';
-  document.getElementById('editDateModal').classList.add('show');
-}
-
-function closeEditDateModal() {
-  document.getElementById('editDateModal').classList.remove('show');
-  pendingEditDate = null;
-}
-
-async function submitEditDate() {
-  if (!pendingEditDate) return;
-  const { id } = pendingEditDate;
-  const dateVal = document.getElementById('editDateInput').value;
-  const timeVal = document.getElementById('editTimeInput').value;
-
-  if (!dateVal) { showToast('กรุณาเลือกวันที่', 'danger'); return; }
-
-  const btn = document.getElementById('editDateSubmitBtn');
-  const originalText = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก';
-
-  try {
-    const record = allData['duNgan'].find(r => r.id === id);
-    const newStatus = record?.status === 'รอดูงาน' ? 'รอนัดหมาย' : record?.status;
-    const updatePayload = {
-      job_date: dateVal,
-      job_time: timeVal ? `${timeVal}:00` : null,
-      status: newStatus,
-      updated_at: new Date().toISOString(),
-    };
-    const { error } = await sb.from('hi_solar_jobs').update(updatePayload).eq('id', id);
-    if (error) throw error;
-
-    if (record) {
-      record.date   = formatDateDisplay(dateVal);
-      record.time   = timeVal;
-      record.status = newStatus;
-    }
-    closeEditDateModal();
-    renderTab('duNgan');
-    updateStats();
-    updateBadges();
-    showToast('บันทึกวันเวลานัดหมายแล้ว', 'success');
-  } catch (e) {
-    console.error('submitEditDate failed', e);
-    showToast(formatSupabaseError(e, 'บันทึกวันเวลา'), 'danger');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalText;
-  }
-}
-
-// ── Toast ─────────────────────────────────────────────
-function showToast(msg, type='success') {
-  const colors = { success:'#16a34a', danger:'#ef4444', info:'#3b82f6' };
-  const t = document.createElement('div');
-  t.style.cssText = `position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:500;
-    background:${colors[type]||'#1e293b'};color:#fff;padding:8px 18px;border-radius:20px;
-    font-size:13px;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,.15);white-space:normal;max-width:min(92vw,440px);text-align:center;`;
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
-
-function initCommentInput() {
-  const input = document.getElementById('commentInput');
-  if (!input) return;
-  input.addEventListener('keydown', event => {
-    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-      event.preventDefault();
-      submitComment();
-    }
-  });
-}
-
-// ── Init ──────────────────────────────────────────────
-(function init() {
-  const hasSupabaseUrl = /^https:\/\/[a-z0-9]+\.supabase\.co$/i.test(SUPABASE_URL);
-  const hasAnonKey = /^(eyJ|sb_publishable_)/.test(SUPABASE_ANON_KEY);
-  renderTeamOptions(localStorage.getItem('hiSolarUser') || '');
-  renderAddForms();
-  renderPermitFormFields();
-  initCommentInput();
-  if (!hasSupabaseUrl || !hasAnonKey) {
-    document.getElementById('configBanner').style.display = 'block';
-    document.getElementById('loading').style.display = 'none';
-    // Show empty state
-    renderAll(); updateStats(); updateBadges();
-    const name = localStorage.getItem('hiSolarUser');
-    if (!name) return;
-    document.getElementById('nameModal').style.display = 'none';
-    document.getElementById('userChip').textContent = '👤 ' + name;
-    return;
-  }
-
-  sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  setupRealtime();
-
-  // Always show login popup so each team member selects their name every session
-  document.getElementById('loading').style.display = 'none';
-})();
-</script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="./hi-solar-importer.js"></script>
+    bootstrap();
+  </script>
 </body>
 </html>
