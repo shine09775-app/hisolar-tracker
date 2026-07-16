@@ -40,9 +40,9 @@ function getAuthCookieSecret() {
 }
 
 function getLineLoginConfig() {
-  const channelId = process.env.LINE_LOGIN_CHANNEL_ID || '';
-  const channelSecret = process.env.LINE_LOGIN_CHANNEL_SECRET || '';
-  const callbackUrl = process.env.LINE_LOGIN_CALLBACK_URL || '';
+  const channelId = process.env.LINE_LOGIN_CHANNEL_ID || process.env.LINE_LOGIN_HISOLAR_CHANNEL_ID || '';
+  const channelSecret = process.env.LINE_LOGIN_CHANNEL_SECRET || process.env.LINE_LOGIN_HISOLAR_CHANNEL_SECRET || '';
+  const callbackUrl = process.env.LINE_LOGIN_CALLBACK_URL || process.env.LINE_LOGIN_HISOLAR_CALLBACK_URL || '';
   const providerNamespace = String(
     process.env.LINE_LOGIN_PROVIDER_NAMESPACE || DEFAULT_LINE_PROVIDER_NAMESPACE
   ).trim();

@@ -87,3 +87,42 @@ test('Hi Solar and JDK share one LINE Login configuration but keep separate succ
   assert.equal(hisolar.successPath, '/hisolar_planner.html');
   assert.equal(jdk.successPath, '/JDK.html');
 });
+
+test('shared LINE Login config can fall back to legacy Hi Solar env names for Vercel previews', () => {
+  const original = {
+    id: process.env.LINE_LOGIN_CHANNEL_ID,
+    secret: process.env.LINE_LOGIN_CHANNEL_SECRET,
+    callback: process.env.LINE_LOGIN_CALLBACK_URL,
+    legacyId: process.env.LINE_LOGIN_HISOLAR_CHANNEL_ID,
+    legacySecret: process.env.LINE_LOGIN_HISOLAR_CHANNEL_SECRET,
+    legacyCallback: process.env.LINE_LOGIN_HISOLAR_CALLBACK_URL,
+  };
+
+  delete process.env.LINE_LOGIN_CHANNEL_ID;
+  delete process.env.LINE_LOGIN_CHANNEL_SECRET;
+  delete process.env.LINE_LOGIN_CALLBACK_URL;
+  process.env.LINE_LOGIN_HISOLAR_CHANNEL_ID = 'legacy-hisolar-channel';
+  process.env.LINE_LOGIN_HISOLAR_CHANNEL_SECRET = 'legacy-hisolar-secret';
+  process.env.LINE_LOGIN_HISOLAR_CALLBACK_URL = 'https://legacy.example/api/auth/line/callback';
+
+  try {
+    const hisolar = getAppConfig('hisolar');
+    const jdk = getAppConfig('jdk');
+    assert.equal(hisolar.channelId, 'legacy-hisolar-channel');
+    assert.equal(jdk.channelId, 'legacy-hisolar-channel');
+    assert.equal(hisolar.channelSecret, 'legacy-hisolar-secret');
+    assert.equal(jdk.channelSecret, 'legacy-hisolar-secret');
+    assert.equal(hisolar.callbackUrl, 'https://legacy.example/api/auth/line/callback');
+    assert.equal(jdk.callbackUrl, 'https://legacy.example/api/auth/line/callback');
+  } finally {
+    process.env.LINE_LOGIN_CHANNEL_ID = original.id;
+    process.env.LINE_LOGIN_CHANNEL_SECRET = original.secret;
+    process.env.LINE_LOGIN_CALLBACK_URL = original.callback;
+    if (original.legacyId === undefined) delete process.env.LINE_LOGIN_HISOLAR_CHANNEL_ID;
+    else process.env.LINE_LOGIN_HISOLAR_CHANNEL_ID = original.legacyId;
+    if (original.legacySecret === undefined) delete process.env.LINE_LOGIN_HISOLAR_CHANNEL_SECRET;
+    else process.env.LINE_LOGIN_HISOLAR_CHANNEL_SECRET = original.legacySecret;
+    if (original.legacyCallback === undefined) delete process.env.LINE_LOGIN_HISOLAR_CALLBACK_URL;
+    else process.env.LINE_LOGIN_HISOLAR_CALLBACK_URL = original.legacyCallback;
+  }
+});
