@@ -10,6 +10,7 @@ process.env.LINE_LOGIN_PROVIDER_NAMESPACE = 'hisolar-tracker-line';
 const { createFlowState, decodeFlowCookieValue } = require('../api/_lib/auth-flow');
 const { resolveMembershipAccess, isSessionActive } = require('../api/_lib/auth-rules');
 const { getAppConfig, resolveReturnTo } = require('../api/_lib/config');
+const { getCanonicalStartUrl } = require('../api/auth/line/start');
 
 test('state and nonce are random, long enough, and survive signed-cookie decode', () => {
   const first = createFlowState({ app: 'hisolar', returnTo: '/hisolar_planner.html' });
@@ -125,4 +126,23 @@ test('shared LINE Login config can fall back to legacy Hi Solar env names for Ve
     if (original.legacyCallback === undefined) delete process.env.LINE_LOGIN_HISOLAR_CALLBACK_URL;
     else process.env.LINE_LOGIN_HISOLAR_CALLBACK_URL = original.legacyCallback;
   }
+});
+
+test('LINE start canonicalizes to callback host before setting flow cookies', () => {
+  const config = { callbackUrl: 'https://branch-alias.vercel.app/api/auth/line/callback' };
+  const url = getCanonicalStartUrl(
+    { headers: { host: 'deployment-id.vercel.app' } },
+    config,
+    'hisolar',
+    '/hisolar_planner.html'
+  );
+
+  assert.equal(
+    url,
+    'https://branch-alias.vercel.app/api/auth/line/start?app=hisolar&return_to=%2Fhisolar_planner.html'
+  );
+  assert.equal(
+    getCanonicalStartUrl({ headers: { host: 'branch-alias.vercel.app' } }, config, 'hisolar', '/hisolar_planner.html'),
+    null
+  );
 });
