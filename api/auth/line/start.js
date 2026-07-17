@@ -3,6 +3,26 @@ const { getAppConfig, normalizeApp, resolveReturnTo } = require('../../_lib/conf
 const { methodNotAllowed, normalizeQueryValue, redirect, sendError } = require('../../_lib/http');
 const { buildAuthorizeUrl } = require('../../_lib/line-login');
 
+function getRequestHost(req) {
+  return String(
+    (req.headers && (req.headers['x-forwarded-host'] || req.headers.host)) || ''
+  )
+    .split(',')[0]
+    .trim()
+    .toLowerCase();
+}
+
+function getCanonicalStartUrl(req, config, app, returnTo) {
+  const callback = new URL(config.callbackUrl);
+  const requestHost = getRequestHost(req);
+  if (!requestHost || requestHost === callback.host.toLowerCase()) return null;
+
+  const canonical = new URL('/api/auth/line/start', callback.origin);
+  canonical.searchParams.set('app', app);
+  if (returnTo) canonical.searchParams.set('return_to', returnTo);
+  return canonical.toString();
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') {
     return methodNotAllowed(res, ['GET']);
@@ -12,6 +32,11 @@ module.exports = async function handler(req, res) {
     const app = normalizeApp(normalizeQueryValue(req.query && req.query.app));
     const returnTo = resolveReturnTo(app, normalizeQueryValue(req.query && req.query.return_to));
     const config = getAppConfig(app);
+    const canonicalStartUrl = getCanonicalStartUrl(req, config, app, returnTo);
+    if (canonicalStartUrl) {
+      return redirect(res, canonicalStartUrl);
+    }
+
     const flowState = createFlowState({ app, returnTo });
 
     setFlowCookie(res, flowState.cookieValue, flowState.expiresAt);
@@ -30,3 +55,5 @@ module.exports = async function handler(req, res) {
     return sendError(res, error);
   }
 };
+
+module.exports.getCanonicalStartUrl = getCanonicalStartUrl;
