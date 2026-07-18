@@ -138,9 +138,10 @@ Flow:
     - `name` as LINE display name
     - `picture` as LINE profile image
 11. Server upserts `app_users`.
-12. Server checks `app_memberships` for requested app and `status = approved`.
-13. If approved, server creates a session, sets a secure cookie, and redirects to the app page.
-14. If not approved, server creates or updates `access_requests` and redirects to a pending page/state.
+12. If the requested app is `jdk` and the JDK membership is missing or still `pending`, server creates/updates `app_memberships` as `organization = 'jdk'`, `role = 'commenter'`, `status = 'approved'`, and closes any pending JDK access request. Suspended or revoked JDK memberships must stay blocked.
+13. Server checks `app_memberships` for requested app and `status = approved`.
+14. If approved, server creates a session, sets a secure cookie, and redirects to the app page.
+15. If not approved, server creates or updates `access_requests` and redirects to a pending page/state.
 
 Do not store LINE access tokens in the browser. The app only needs LINE identity, not long-lived LINE API access.
 
@@ -226,9 +227,9 @@ Constraints:
 
 Access rules:
 
-- Hi Solar app: require `organization = 'hisolar'` and `status = 'approved'`.
-- JDK app: require `organization = 'jdk'` and `status = 'approved'`.
-- JDK default role should be `viewer` or `commenter`; do not grant job updates unless explicitly needed.
+- Hi Solar app: require `organization = 'hisolar'` and `status = 'approved'`. Hi Solar approval stays manual.
+- JDK app: require `organization = 'jdk'` and `status = 'approved'`. First-time or pending JDK users are auto-approved by the backend as `commenter`.
+- JDK default role is `commenter`; do not grant job updates.
 
 ### `auth_sessions`
 
@@ -465,10 +466,10 @@ Result: LINE users can log in and be marked pending or approved, while old app p
 ### Phase 3: Admin approval seed
 
 - Seed at least one Hi Solar admin membership manually in SQL.
-- Seed known JDK approved users if LINE user IDs are already known.
-- For unknown LINE IDs, let first login create pending `access_requests`, then approve.
+- Approve Hi Solar users manually after their first LINE login creates a pending `access_requests` row.
+- JDK users do not need manual approval; first login through `JDK.html` auto-creates an approved `jdk/commenter` membership unless that membership is suspended or revoked.
 
-Result: there is a controlled path to approve users without opening public access.
+Result: there is a controlled path to approve Hi Solar users without opening Hi Solar public access, while JDK outsource users can enter through LINE Login without an approval queue.
 
 ### Phase 4: Frontend integration in preview
 
@@ -525,9 +526,10 @@ Result: database access is enforced by approved memberships.
 
 - `/api/auth/line/start?app=hisolar` redirects to LINE authorize URL with `scope=openid profile`, `state`, `nonce`, `code_challenge`, and `code_challenge_method=S256`.
 - `/api/auth/line/start?app=jdk` uses the same shared LINE Login channel, but keeps JDK success and pending routes.
-- `/api/auth/line/callback` creates `app_users` and pending `access_requests` when no membership exists.
+- `/api/auth/line/callback` creates `app_users` and pending `access_requests` for Hi Solar when no membership exists.
+- `/api/auth/line/callback` auto-approves missing or pending JDK membership as `commenter`, but keeps suspended/revoked JDK users forbidden.
 - Approved Hi Solar user receives a session and redirects to `hisolar_planner.html`.
-- Approved JDK user receives a session and redirects to `JDK.html`.
+- JDK user receives a session and redirects to `JDK.html` after backend auto-approval or existing approved membership.
 - Suspended/revoked users cannot get `/api/auth/me` approval.
 - `/api/auth/logout` revokes session and clears cookie.
 
@@ -557,8 +559,8 @@ Result: database access is enforced by approved memberships.
 
 - Hi Solar approved user: login, view all Hi Solar tabs, add job, update status, add comment, see Realtime reload.
 - Hi Solar pending user: login, see pending approval, no Supabase data visible.
-- JDK approved user: login, view JDK tabs, add comment, cannot access Hi Solar planner.
-- JDK pending user: login, see pending approval.
+- New JDK LINE user: login, auto-approved as `commenter`, view JDK tabs, add comment, cannot access Hi Solar planner.
+- Suspended/revoked JDK user: login attempt is blocked and no new session is issued.
 - Direct browser calls with publishable key after cutover cannot read data as `anon`.
 
 ## Rollback Plan
@@ -584,7 +586,6 @@ Preferred emergency action:
 
 ## Open Decisions
 
-- Whether JDK users should be `viewer` only or `commenter`.
 - Whether Hi Solar admins need an in-app approval UI immediately or first approvals can be seeded via SQL.
 - Exact Supabase JWT signing-key setup in the project dashboard.
 - Session lifetime policy: 7 days is convenient for field teams; 1 day is tighter.

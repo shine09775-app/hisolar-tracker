@@ -116,6 +116,52 @@ async function getMembershipForUserApp(userId, app) {
   return data || null;
 }
 
+async function ensureJdkAutoApprovedMembership(userId, approvedAt) {
+  const existing = await getMembershipForUserApp(userId, 'jdk');
+  if (existing && (existing.status === 'suspended' || existing.status === 'revoked')) {
+    return existing;
+  }
+  if (existing && existing.status === 'approved') {
+    return existing;
+  }
+
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('app_memberships')
+    .upsert(
+      {
+        user_id: userId,
+        organization: 'jdk',
+        role: 'commenter',
+        status: 'approved',
+        approved_by: null,
+        approved_at: approvedAt,
+      },
+      {
+        onConflict: 'user_id,organization',
+      }
+    )
+    .select('*')
+    .single();
+  if (error) throw createHttpError(500, 'Failed to auto-approve JDK membership', error.message);
+
+  const { error: requestError } = await supabase
+    .from('access_requests')
+    .update({
+      status: 'approved',
+      reviewed_by: null,
+      reviewed_at: approvedAt,
+    })
+    .eq('user_id', userId)
+    .eq('requested_organization', 'jdk')
+    .eq('status', 'pending');
+  if (requestError) {
+    throw createHttpError(500, 'Failed to close JDK access request', requestError.message);
+  }
+
+  return data;
+}
+
 async function getAppUserById(userId) {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
@@ -231,6 +277,7 @@ async function revokeAuthSessionByHash(sessionTokenHash) {
 
 module.exports = {
   createAuthSession,
+  ensureJdkAutoApprovedMembership,
   ensurePendingAccessRequest,
   getAppUserById,
   getAuthSessionByHash,

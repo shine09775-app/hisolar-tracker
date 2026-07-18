@@ -1,10 +1,11 @@
 const { clearFlowCookie, readFlowStateFromRequest } = require('../../_lib/auth-flow');
 const { getAppConfig, getSessionMaxAgeSeconds } = require('../../_lib/config');
-const { resolveMembershipAccess } = require('../../_lib/auth-rules');
+const { resolveJdkAutoApproval, resolveMembershipAccess } = require('../../_lib/auth-rules');
 const { methodNotAllowed, normalizeQueryValue, redirect, sendError, writeText } = require('../../_lib/http');
 const { exchangeCodeForTokens, verifyIdToken } = require('../../_lib/line-login');
 const {
   createAuthSession,
+  ensureJdkAutoApprovedMembership,
   ensurePendingAccessRequest,
   getRequestIpHash,
   listMembershipsForUser,
@@ -63,7 +64,13 @@ module.exports = async function handler(req, res) {
       lastLoginAt: nowIso,
     });
 
-    const memberships = await listMembershipsForUser(user.id);
+    let memberships = await listMembershipsForUser(user.id);
+    const jdkAutoApproval = resolveJdkAutoApproval(flowState.app, memberships);
+    if (jdkAutoApproval.shouldAutoApprove) {
+      await ensureJdkAutoApprovedMembership(user.id, nowIso);
+      memberships = await listMembershipsForUser(user.id);
+    }
+
     const access = resolveMembershipAccess(flowState.app, memberships);
 
     if (access.outcome === 'approved') {

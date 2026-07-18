@@ -8,7 +8,7 @@ process.env.LINE_LOGIN_CALLBACK_URL = 'https://example.com/api/auth/line/callbac
 process.env.LINE_LOGIN_PROVIDER_NAMESPACE = 'hisolar-tracker-line';
 
 const { createFlowState, decodeFlowCookieValue } = require('../api/_lib/auth-flow');
-const { resolveMembershipAccess, isSessionActive } = require('../api/_lib/auth-rules');
+const { resolveJdkAutoApproval, resolveMembershipAccess, isSessionActive } = require('../api/_lib/auth-rules');
 const { getAppConfig, resolveReturnTo } = require('../api/_lib/config');
 const { getCanonicalStartUrl } = require('../api/auth/line/start');
 
@@ -43,6 +43,43 @@ test('resolveMembershipAccess enforces approved, pending, and wrong-app outcomes
     { organization: 'jdk', role: 'commenter', status: 'approved' },
   ]);
   assert.equal(wrongApp.outcome, 'wrong_app');
+});
+
+test('JDK auto-approval applies only to missing or pending JDK memberships', () => {
+  assert.deepEqual(resolveJdkAutoApproval('jdk', []), {
+    shouldAutoApprove: true,
+    membership: null,
+  });
+  assert.equal(
+    resolveJdkAutoApproval('jdk', [
+      { organization: 'jdk', role: 'commenter', status: 'pending' },
+    ]).shouldAutoApprove,
+    true
+  );
+  assert.equal(
+    resolveJdkAutoApproval('jdk', [
+      { organization: 'hisolar', role: 'member', status: 'approved' },
+    ]).shouldAutoApprove,
+    true
+  );
+  assert.equal(
+    resolveJdkAutoApproval('jdk', [
+      { organization: 'jdk', role: 'commenter', status: 'suspended' },
+    ]).shouldAutoApprove,
+    false
+  );
+  assert.equal(
+    resolveJdkAutoApproval('jdk', [
+      { organization: 'jdk', role: 'commenter', status: 'revoked' },
+    ]).shouldAutoApprove,
+    false
+  );
+  assert.equal(
+    resolveJdkAutoApproval('hisolar', [
+      { organization: 'hisolar', role: 'member', status: 'pending' },
+    ]).shouldAutoApprove,
+    false
+  );
 });
 
 test('isSessionActive rejects revoked and expired sessions', () => {

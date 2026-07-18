@@ -2,6 +2,17 @@ function findMembership(memberships, organization) {
   return (memberships || []).find(item => item.organization === organization) || null;
 }
 
+function resolveJdkAutoApproval(app, memberships) {
+  if (app !== 'jdk') {
+    return { shouldAutoApprove: false, membership: null };
+  }
+  const requested = findMembership(memberships, 'jdk');
+  if (!requested || requested.status === 'pending') {
+    return { shouldAutoApprove: true, membership: requested };
+  }
+  return { shouldAutoApprove: false, membership: requested };
+}
+
 function resolveMembershipAccess(app, memberships) {
   const requested = findMembership(memberships, app);
   if (requested && requested.status === 'approved') {
@@ -30,5 +41,6 @@ function isSessionActive(session, nowMs = Date.now()) {
 
 module.exports = {
   isSessionActive,
+  resolveJdkAutoApproval,
   resolveMembershipAccess,
 };
