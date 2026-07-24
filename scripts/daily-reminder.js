@@ -16,6 +16,10 @@
  *   SUPABASE_ANON_KEY   — anon public key
  *   LINE_CHANNEL_TOKEN  — Long-lived Channel Access Token
  *   LINE_GROUP_ID       — Group ID ของกลุ่ม LINE
+ *
+ * (ไม่บังคับ) เพิ่มแจ้งเตือนทาง Telegram — ตั้งครบ 2 ตัวจึงจะส่ง:
+ *   TELEGRAM_BOT_TOKEN  — token จาก @BotFather
+ *   TELEGRAM_CHAT_ID    — chat id ปลายทาง (ส่วนตัว หรือ group id)
  */
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -25,6 +29,10 @@ const SUPABASE_KEY   = process.env.SUPABASE_ANON_KEY;
 const LINE_TOKEN     = process.env.LINE_CHANNEL_TOKEN;
 const LINE_GROUP_ID  = process.env.LINE_GROUP_ID;
 const DATE_OVERRIDE  = process.env.DATE_OVERRIDE || '';   // YYYY-MM-DD
+
+// Telegram (ไม่บังคับ) — ตั้งครบทั้งคู่จึงจะส่ง
+const TG_TOKEN       = process.env.TELEGRAM_BOT_TOKEN || '';
+const TG_CHAT        = process.env.TELEGRAM_CHAT_ID   || '';
 
 const LINE_API = 'https://api.line.me/v2/bot/message/push';
 
@@ -317,6 +325,43 @@ async function sendLine(groupId, token, text) {
   console.log('LINE sent OK:', body);
 }
 
+// ── Telegram Send ───────────────────────────────────────────────────────────────
+
+// Telegram จำกัด 4096 ตัวอักษร/ข้อความ — แบ่งเป็นก้อนตามบรรทัดให้ไม่เกิน limit
+function splitForTelegram(text, limit = 4000) {
+  if (text.length <= limit) return [text];
+  const chunks = [];
+  let cur = '';
+  for (const line of text.split('\n')) {
+    if ((cur ? cur.length + 1 : 0) + line.length > limit) {
+      if (cur) chunks.push(cur);
+      cur = line;
+    } else {
+      cur = cur ? `${cur}\n${line}` : line;
+    }
+  }
+  if (cur) chunks.push(cur);
+  return chunks;
+}
+
+async function sendTelegram(chatId, token, text) {
+  const API = `https://api.telegram.org/bot${token}/sendMessage`;
+  for (const chunk of splitForTelegram(text)) {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: chunk,
+        disable_web_page_preview: true,
+      }),
+    });
+    const body = await res.text();
+    if (!res.ok) throw new Error(`Telegram API error ${res.status}: ${body}`);
+  }
+  console.log('Telegram sent OK');
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -338,7 +383,20 @@ async function main() {
   console.log(message);
   console.log('─────────────────────────────────────────────\n');
 
+  // ช่องทางหลัก: LINE (พฤติกรรมเดิม — ถ้าล้มถือว่า error)
   await sendLine(LINE_GROUP_ID, LINE_TOKEN, message);
+
+  // ช่องทางเสริม: Telegram (ถ้าตั้งค่าไว้) — ไม่ให้ error ของ Telegram ทำให้ job ล้ม
+  if (TG_TOKEN && TG_CHAT) {
+    try {
+      await sendTelegram(TG_CHAT, TG_TOKEN, message);
+    } catch (err) {
+      console.error('Telegram send failed (ignored):', err.message);
+    }
+  } else {
+    console.log('Telegram not configured — skipped.');
+  }
+
   console.log('Done ✅');
 }
 
