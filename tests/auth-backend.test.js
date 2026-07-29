@@ -99,13 +99,22 @@ test('isSessionActive rejects revoked and expired sessions', () => {
 });
 
 test('resolveReturnTo only allows fixed internal targets', () => {
+  assert.equal(resolveReturnTo('hisolar', '/home.html'), '/home.html');
   assert.equal(resolveReturnTo('hisolar', '/hisolar_planner.html'), '/hisolar_planner.html');
+  assert.equal(resolveReturnTo('hisolar', '/sites.html'), '/sites.html');
+  assert.equal(resolveReturnTo('hisolar', '/map.html'), '/map.html');
+  assert.equal(resolveReturnTo('hisolar', '/link-jobs.html'), '/link-jobs.html');
+  assert.equal(resolveReturnTo('hisolar', ''), '/home.html');
   assert.throws(
     () => resolveReturnTo('hisolar', 'https://evil.example/phish'),
     /Invalid return_to|not allowed/
   );
   assert.throws(
     () => resolveReturnTo('hisolar', '/JDK.html'),
+    /not allowed/
+  );
+  assert.throws(
+    () => resolveReturnTo('jdk', '/home.html'),
     /not allowed/
   );
 });
@@ -122,7 +131,7 @@ test('Hi Solar and JDK share one LINE Login configuration but keep separate succ
   assert.equal(jdk.callbackUrl, 'https://example.com/api/auth/line/callback');
   assert.equal(hisolar.providerNamespace, 'hisolar-tracker-line');
   assert.equal(jdk.providerNamespace, 'hisolar-tracker-line');
-  assert.equal(hisolar.successPath, '/hisolar_planner.html');
+  assert.equal(hisolar.successPath, '/home.html');
   assert.equal(jdk.successPath, '/JDK.html');
 });
 

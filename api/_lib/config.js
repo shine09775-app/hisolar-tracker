@@ -5,12 +5,21 @@ const DEFAULT_LINE_PROVIDER_NAMESPACE = 'hisolar-tracker-line';
 
 const APP_SETTINGS = {
   hisolar: {
-    successPath: '/hisolar_planner.html',
+    // home.html คือ launcher หลังล็อกอิน ส่วนหน้าอื่นเปิดตรงได้ผ่าน return_to
+    // (เข้าลิงก์ลึกโดยไม่มี session -> ล็อกอินแล้วกลับมาหน้าเดิม)
+    successPath: '/home.html',
     pendingPath: '/index.html?approval=pending&app=hisolar',
+    extraReturnPaths: [
+      '/hisolar_planner.html',
+      '/sites.html',
+      '/map.html',
+      '/link-jobs.html',
+    ],
   },
   jdk: {
     successPath: '/JDK.html',
     pendingPath: '/JDK.html?approval=pending&app=jdk',
+    extraReturnPaths: [],
   },
 };
 
@@ -75,7 +84,7 @@ function getAppConfig(app) {
     providerNamespace: login.providerNamespace,
     successPath: settings.successPath,
     pendingPath: settings.pendingPath,
-    redirectAllowlist: new Set([settings.successPath]),
+    redirectAllowlist: new Set([settings.successPath, ...(settings.extraReturnPaths || [])]),
   };
 }
 
