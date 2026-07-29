@@ -161,15 +161,11 @@ create policy "Public read brands" on public.hi_solar_inverter_brands for select
 drop policy if exists "Public read platforms" on public.hi_solar_platforms;
 create policy "Public read platforms" on public.hi_solar_platforms for select using (true);
 
--- sites: permissive layer (matches existing "Public read/insert/update jobs")
+-- sites: public read only (anon can read the registry like it reads jobs).
+-- Writes go through the service role (importer) or the authenticated
+-- org-scoped policy below — no permissive anon insert/update.
 drop policy if exists "Public read sites" on public.hi_solar_sites;
 create policy "Public read sites" on public.hi_solar_sites for select using (true);
-
-drop policy if exists "Public insert sites" on public.hi_solar_sites;
-create policy "Public insert sites" on public.hi_solar_sites for insert with check (true);
-
-drop policy if exists "Public update sites" on public.hi_solar_sites;
-create policy "Public update sites" on public.hi_solar_sites for update using (true) with check (true);
 
 -- sites: org-scoped authenticated layer (guard writes to hisolar admin/member)
 do $$

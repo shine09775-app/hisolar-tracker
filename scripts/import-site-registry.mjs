@@ -10,8 +10,9 @@
  *
  * Env (same names as scripts/daily-reminder.js):
  *   SUPABASE_URL               required
- *   SUPABASE_SERVICE_ROLE_KEY  preferred (bypasses RLS for the load)
- *   SUPABASE_ANON_KEY          fallback (needs the "Public insert sites" policy)
+ *   SUPABASE_SERVICE_ROLE_KEY  required to write (bypasses RLS for the load;
+ *                              hi_solar_sites has no anon insert/update policy)
+ *   SUPABASE_ANON_KEY          only enough for --dry-run parsing checks
  *
  * Usage:
  *   node scripts/import-site-registry.mjs            # dry-run: parse + preview
