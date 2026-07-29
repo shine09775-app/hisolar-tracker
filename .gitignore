@@ -5,3 +5,9 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Customer site data (PII) — regenerated locally from vendor exports, kept out of git
+Solar_Site_DATA/*.xlsx
+Solar_Site_DATA/*.xls
+Solar_Site_DATA/*.jpg
+Solar_Site_DATA/_reference/sites_seed.csv
