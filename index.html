@@ -209,7 +209,7 @@
     }
 
     function loginAction() {
-      window.HiSolarAuth.startLineLogin('hisolar', '/hisolar_planner.html');
+      window.HiSolarAuth.startLineLogin('hisolar', '/home.html');
     }
 
     async function bootstrap() {
@@ -244,7 +244,7 @@
       try {
         const auth = await window.HiSolarAuth.fetchAuthMe('hisolar');
         if (auth && auth.authenticated) {
-          window.location.replace('/hisolar_planner.html');
+          window.location.replace('/home.html');
           return;
         }
       } catch (error) {

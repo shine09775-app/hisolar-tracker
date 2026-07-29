@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#16a34a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Hi Solar">
+  <title>Hi Solar — เลือกงาน</title>
+
+  <link rel="icon" type="image/png" href="icon_hisolar.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+  <style>
+    :root { --hs-primary:#16a34a; --hs-primary-d:#15803d; --hs-primary-l:#dcfce7; --hs-amber:#f59e0b; }
+    * { font-family:'Kanit',system-ui,sans-serif; }
+    body { background:#f1f5f9; margin:0; }
+    #app { max-width:480px; margin:0 auto; min-height:100vh; background:#f1f5f9; padding-bottom:32px; }
+    @media (min-width:576px){ #app{ box-shadow:0 0 40px rgba(0,0,0,.15);} }
+
+    .hero { background:linear-gradient(155deg,var(--hs-primary),var(--hs-primary-d)); color:#fff; padding:18px 18px 26px; }
+    .hero .row1 { display:flex; align-items:center; justify-content:space-between; }
+    .hero .brand { display:flex; align-items:center; gap:9px; font-size:18px; font-weight:700; }
+    .hero .brand i { font-size:20px; }
+    .logout { background:rgba(255,255,255,.18); border:0; color:#fff; border-radius:9px; padding:6px 11px; font-size:12px; }
+    .hero .greet { margin-top:16px; font-size:14px; opacity:.92; }
+    .hero .who { font-size:20px; font-weight:600; margin-top:2px; line-height:1.2; }
+    .hero .role { display:inline-block; margin-top:7px; font-size:11px; background:rgba(255,255,255,.2); border-radius:99px; padding:3px 10px; }
+
+    .stats { margin:-16px 14px 0; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .stat { background:#fff; border:1px solid #e2e8f0; border-radius:13px; padding:11px 8px; text-align:center; }
+    .stat .v { font-size:19px; font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums; }
+    .stat .l { font-size:10.5px; color:#64748b; margin-top:3px; }
+
+    .section-label { font-size:12px; font-weight:600; color:#64748b; padding:20px 16px 8px; letter-spacing:.02em; }
+
+    .tiles { padding:0 14px; display:flex; flex-direction:column; gap:10px; }
+    .tile {
+      display:flex; align-items:center; gap:13px; background:#fff; border:1px solid #e2e8f0;
+      border-radius:16px; padding:14px; text-decoration:none; color:inherit;
+    }
+    .tile:active { transform:scale(.995); }
+    .tile .ic { width:46px; height:46px; border-radius:13px; display:grid; place-items:center; color:#fff; font-size:21px; flex:0 0 auto; }
+    .tile .tx { flex:1; min-width:0; }
+    .tile .tx b { display:block; font-size:15px; font-weight:600; line-height:1.25; }
+    .tile .tx span { font-size:12px; color:#64748b; display:block; margin-top:2px; }
+    .tile .go { color:#cbd5e1; font-size:18px; }
+    .tile .pill {
+      font-size:10.5px; font-weight:600; border-radius:99px; padding:3px 9px;
+      background:#fef3c7; color:#b45309; white-space:nowrap;
+    }
+    .tile .pill.ok { background:var(--hs-primary-l); color:#15803d; }
+
+    .foot { text-align:center; font-size:11px; color:#94a3b8; padding:22px 16px 0; }
+
+    #appLoading { position:fixed; inset:0; background:#f1f5f9; z-index:1090; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; }
+    #appLoading .txt { font-size:13px; color:#64748b; }
+  </style>
+</head>
+<body>
+
+<div id="appLoading">
+  <div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading…</span></div>
+  <div class="txt">กำลังตรวจสอบสิทธิ์การเข้าใช้งาน...</div>
+</div>
+
+<div id="app" style="display:none;">
+  <div class="hero">
+    <div class="row1">
+      <div class="brand"><i class="bi bi-sun-fill"></i><span>Hi Solar</span></div>
+      <button class="logout" id="btnLogout">ออกจากระบบ</button>
+    </div>
+    <div class="greet" id="greet">สวัสดี</div>
+    <div class="who" id="who">—</div>
+    <span class="role" id="role" style="display:none;"></span>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="v" id="stSites">—</div><div class="l">ไซต์ติดตั้ง</div></div>
+    <div class="stat"><div class="v" id="stKwp">—</div><div class="l">kWp รวม</div></div>
+    <div class="stat"><div class="v" id="stJobs">—</div><div class="l">งานทั้งหมด</div></div>
+  </div>
+
+  <div class="section-label">งานประจำวัน</div>
+  <div class="tiles">
+    <a class="tile" href="./hisolar_planner.html">
+      <div class="ic" style="background:var(--hs-primary)"><i class="bi bi-list-task"></i></div>
+      <div class="tx"><b>Job Tracker</b><span>งาน · ดูงาน · ล้างแผง · ซ่อม · บิล · ขออนุญาต</span></div>
+      <i class="bi bi-chevron-right go"></i>
+    </a>
+  </div>
+
+  <div class="section-label">ทะเบียนลูกค้า</div>
+  <div class="tiles">
+    <a class="tile" href="./sites.html">
+      <div class="ic" style="background:#0891b2"><i class="bi bi-buildings"></i></div>
+      <div class="tx"><b>ทะเบียนไซต์</b><span>ค้นหาลูกค้า ดูข้อมูลติดตั้งและประวัติงาน</span></div>
+      <i class="bi bi-chevron-right go"></i>
+    </a>
+    <a class="tile" href="./map.html">
+      <div class="ic" style="background:#d97706"><i class="bi bi-geo-alt-fill"></i></div>
+      <div class="tx"><b>แผนที่ไซต์</b><span id="mapSub">ดูตำแหน่งไซต์ทั้งหมด นำทางไปหน้างาน</span></div>
+      <span class="pill" id="pillCoords" style="display:none;"></span>
+      <i class="bi bi-chevron-right go"></i>
+    </a>
+    <a class="tile" href="./link-jobs.html">
+      <div class="ic" style="background:#7c3aed"><i class="bi bi-link-45deg"></i></div>
+      <div class="tx"><b>ผูกงานเข้าไซต์</b><span>จับคู่งานที่มีอยู่กับไซต์ลูกค้า</span></div>
+      <span class="pill" id="pillLink" style="display:none;"></span>
+      <i class="bi bi-chevron-right go"></i>
+    </a>
+  </div>
+
+  <div class="foot">Hi Solar Tracker · ทีมงาน Hi Solar Sun Energy</div>
+</div>
+
+<script src="./line-auth-client.js"></script>
+<script>
+const SUPABASE_URL             = 'https://hlswbazcojsnfibirkzl.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Kxzef_y7E3VAmhYvH4eS3g_o3fG7JLn';
+
+const num = n => Number(n || 0).toLocaleString('th-TH');
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'สวัสดีตอนเช้า';
+  if (h < 17) return 'สวัสดีตอนบ่าย';
+  return 'สวัสดีตอนเย็น';
+}
+
+// Counts are a convenience on the launcher: if they fail the tiles must still
+// work, so every stat failure degrades to a dash rather than blocking the page.
+async function loadStats(sb) {
+  const [sites, jobs, unlinked, noCoords] = await Promise.all([
+    sb.from('hi_solar_sites').select('capacity_kwp'),
+    sb.from('hi_solar_jobs').select('id', { count: 'exact', head: true }),
+    sb.from('hi_solar_jobs').select('id', { count: 'exact', head: true }).is('site_id', null),
+    sb.from('hi_solar_sites').select('id', { count: 'exact', head: true }).is('latitude', null),
+  ]);
+
+  if (!sites.error && sites.data) {
+    document.getElementById('stSites').textContent = num(sites.data.length);
+    document.getElementById('stKwp').textContent =
+      num(Math.round(sites.data.reduce((s, r) => s + (Number(r.capacity_kwp) || 0), 0)));
+  }
+  if (!jobs.error) document.getElementById('stJobs').textContent = num(jobs.count);
+
+  if (!unlinked.error && unlinked.count != null) {
+    const p = document.getElementById('pillLink');
+    p.style.display = 'inline-block';
+    if (unlinked.count) { p.textContent = 'ค้าง ' + num(unlinked.count); }
+    else { p.textContent = 'ครบแล้ว'; p.classList.add('ok'); }
+  }
+  if (!noCoords.error && noCoords.count != null) {
+    const p = document.getElementById('pillCoords');
+    p.style.display = 'inline-block';
+    if (noCoords.count) { p.textContent = 'ไม่มีพิกัด ' + num(noCoords.count); }
+    else { p.textContent = 'ครบแล้ว'; p.classList.add('ok'); }
+  }
+}
+
+(async function init() {
+  try {
+    const auth = await window.HiSolarAuth.fetchAuthMe('hisolar');
+    const user = auth?.user || {};
+    const membership = auth?.membership || {};
+    document.getElementById('greet').textContent = greeting();
+    document.getElementById('who').textContent = user.displayName || 'ทีมงาน Hi Solar';
+    if (membership.role) {
+      const r = document.getElementById('role');
+      r.textContent = String(membership.role).toUpperCase();
+      r.style.display = 'inline-block';
+    }
+    document.getElementById('btnLogout').onclick = () => window.HiSolarAuth.logout('/index.html');
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('appLoading').style.display = 'none';
+
+    // tiles are already usable; stats fill in behind them
+    await window.HiSolarAuth.ensureSupabaseClientLoaded();
+    await window.HiSolarAuth.refreshSupabaseToken('hisolar', { forceRefresh: true, reason: 'prime' });
+    const sb = window.HiSolarAuth.createSupabaseClient('hisolar', SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    await loadStats(sb);
+  } catch (error) {
+    if (error?.status === 401) { location.href = '/index.html'; return; }
+    if (error?.status === 403 || /access_denied|forbidden/i.test(String(error?.code || error?.message || ''))) {
+      location.href = '/index.html?reason=access_denied';
+      return;
+    }
+    console.error('home bootstrap failed', error);
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('appLoading').style.display = 'none';
+  }
+})();
+</script>
+</body>
+</html>
