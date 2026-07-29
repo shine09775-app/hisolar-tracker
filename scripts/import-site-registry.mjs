@@ -56,12 +56,26 @@ function parseCsv(text) {
   return rows;
 }
 
+// Vendor exports mix Gregorian and Buddhist-era years (FusionSolar emits both).
+// Anything past 2500 is พ.ศ. and needs the 543-year offset removed.
 function toDate(v) {
   const m = String(v).match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
   if (!m) return null;
   const [, y, mo, d] = m;
-  return `${y}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  const year = Number(y) > 2500 ? Number(y) - 543 : Number(y);
+  return `${year}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`;
 }
+
+// A handful of plants have capacity typed in watts (e.g. 13750 for a 13.75 kWp
+// rooftop). No real site in this fleet is anywhere near 500 kWp, so treat that
+// as the threshold and scale back down.
+const CAPACITY_SANITY_KWP = 500;
+function toCapacity(v) {
+  const n = toNum(v);
+  if (n === null) return null;
+  return n > CAPACITY_SANITY_KWP ? n / 1000 : n;
+}
+
 function toNum(v) {
   const n = parseFloat(String(v).replace(/,/g, '').trim());
   return Number.isFinite(n) ? n : null;
@@ -76,7 +90,8 @@ function loadRows() {
     header.forEach((h, i) => {
       let v = (cols[i] ?? '').trim();
       if (v === '') { rec[h] = null; return; }
-      if (NUMERIC.has(h)) rec[h] = toNum(v);
+      if (h === 'capacity_kwp') rec[h] = toCapacity(v);
+      else if (NUMERIC.has(h)) rec[h] = toNum(v);
       else if (DATE.has(h)) rec[h] = toDate(v);
       else rec[h] = v;
     });
