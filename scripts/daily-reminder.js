@@ -12,10 +12,11 @@
  *   📋 ขออนุญาติ   — status NOT IN (DONE, REJECTED) จาก hi_solar_permits
  *
  * GitHub Secrets ที่ต้องตั้ง:
- *   SUPABASE_URL        — https://xxxx.supabase.co
- *   SUPABASE_ANON_KEY   — anon public key
- *   LINE_CHANNEL_TOKEN  — Long-lived Channel Access Token
- *   LINE_GROUP_ID       — Group ID ของกลุ่ม LINE
+ *   SUPABASE_URL                — https://xxxx.supabase.co
+ *   SUPABASE_SERVICE_ROLE_KEY   — service_role key (แนะนำ; จำเป็นหลัง cutover ที่ลบ anon policies)
+ *   SUPABASE_ANON_KEY           — anon public key (fallback; ใช้ได้เฉพาะก่อน cutover)
+ *   LINE_CHANNEL_TOKEN          — Long-lived Channel Access Token
+ *   LINE_GROUP_ID               — Group ID ของกลุ่ม LINE
  *
  * (ไม่บังคับ) เพิ่มแจ้งเตือนทาง Telegram — ตั้งครบ 2 ตัวจึงจะส่ง:
  *   TELEGRAM_BOT_TOKEN  — token จาก @BotFather
@@ -25,7 +26,10 @@
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const SUPABASE_URL   = process.env.SUPABASE_URL;
-const SUPABASE_KEY   = process.env.SUPABASE_ANON_KEY;
+// Prefer service_role (bypasses RLS) so the reminder keeps working after the
+// LINE-auth cutover removes the legacy anon read policies. Falls back to the
+// anon key while both keys are available (pre-cutover).
+const SUPABASE_KEY   = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 const LINE_TOKEN     = process.env.LINE_CHANNEL_TOKEN;
 const LINE_GROUP_ID  = process.env.LINE_GROUP_ID;
 const DATE_OVERRIDE  = process.env.DATE_OVERRIDE || '';   // YYYY-MM-DD
@@ -365,8 +369,11 @@ async function sendTelegram(chatId, token, text) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
-  const missing = ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'LINE_CHANNEL_TOKEN', 'LINE_GROUP_ID']
+  const missing = ['SUPABASE_URL', 'LINE_CHANNEL_TOKEN', 'LINE_GROUP_ID']
     .filter(k => !process.env[k]);
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_ANON_KEY) {
+    missing.push('SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY');
+  }
   if (missing.length) throw new Error(`Missing env vars: ${missing.join(', ')}`);
 
   const today = getTodayBangkok();
