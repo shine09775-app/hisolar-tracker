@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#16a34a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Hi Solar — ผูกงานเข้าไซต์</title>
+
+  <link rel="icon" type="image/png" href="icon_hisolar.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+  <style>
+    :root {
+      --hs-primary:#16a34a; --hs-primary-d:#15803d; --hs-primary-l:#dcfce7;
+      --hs-amber:#f59e0b; --hs-red:#ef4444;
+    }
+    * { font-family:'Kanit',system-ui,sans-serif; }
+    body { background:#f1f5f9; margin:0; }
+    #app { max-width:480px; margin:0 auto; min-height:100vh; background:#f1f5f9; }
+    @media (min-width:576px){ #app{ box-shadow:0 0 40px rgba(0,0,0,.15);} }
+
+    .hs-navbar { background:var(--hs-primary); padding:12px 16px; position:sticky; top:0; z-index:90;
+      display:flex; align-items:center; justify-content:space-between; }
+    .hs-navbar .brand { display:flex; align-items:center; gap:8px; color:#fff; font-size:17px; font-weight:700; }
+    .hs-navbar .brand-sub { font-size:12px; font-weight:400; opacity:.85; }
+    .nav-link-btn { background:rgba(255,255,255,.18); color:#fff; text-decoration:none;
+      width:32px; height:32px; border-radius:9px; display:grid; place-items:center; flex:0 0 auto; }
+
+    .progress-strip { padding:12px 14px 6px; }
+    .pstat { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:11px 13px; display:flex; align-items:center; gap:12px; }
+    .pstat .pv { font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1; }
+    .pstat .pl { font-size:11.5px; color:#64748b; margin-top:3px; }
+    .bar { flex:1; height:7px; border-radius:99px; background:#e2e8f0; overflow:hidden; }
+    .bar i { display:block; height:100%; background:var(--hs-primary); border-radius:99px; }
+
+    .toolbar { padding:6px 14px 4px; position:sticky; top:62px; background:#f1f5f9; z-index:80; }
+    .chips { display:flex; gap:6px; overflow-x:auto; padding:6px 0; scrollbar-width:none; }
+    .chips::-webkit-scrollbar{ display:none; }
+    .chip { flex:0 0 auto; font-size:12px; font-weight:500; border:1px solid #e2e8f0; background:#fff;
+      color:#475569; border-radius:999px; padding:5px 12px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; }
+    .chip.on { background:var(--hs-primary); border-color:var(--hs-primary); color:#fff; }
+    .chip .cnt { opacity:.7; font-size:11px; }
+
+    .list { padding:4px 14px 40px; }
+    .job-card { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:12px; margin-bottom:10px; }
+    .job-card.linked { border-color:var(--hs-primary-l); background:#f6fdf9; }
+    .jc-top { display:flex; align-items:flex-start; gap:9px; }
+    .jc-ic { width:32px; height:32px; border-radius:10px; display:grid; place-items:center; color:#fff; flex:0 0 auto; }
+    .jc-t { flex:1; min-width:0; }
+    .jc-t b { font-size:14px; font-weight:600; display:block; line-height:1.25; }
+    .jc-t .sub { font-size:11.5px; color:#64748b; margin-top:2px; }
+    .jc-detail { font-size:12px; color:#475569; margin-top:7px;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+    .suggest { margin-top:10px; border-top:1px dashed #e2e8f0; padding-top:9px; }
+    .suggest .sl { font-size:11px; color:#94a3b8; margin-bottom:6px; }
+    .sug-btn { display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+      border:1px solid #e2e8f0; background:#fff; border-radius:10px; padding:8px 10px; margin-bottom:6px; }
+    .sug-btn:hover { border-color:var(--hs-primary); background:var(--hs-primary-l); }
+    .sug-btn .sn { flex:1; min-width:0; font-size:12.5px; font-weight:500; }
+    .sug-btn .sn span { display:block; font-size:10.5px; color:#94a3b8; font-weight:400; }
+    .sug-btn .score { font-size:10px; color:#64748b; background:#f1f5f9; border-radius:6px; padding:2px 6px; }
+    .btn-pick { width:100%; border:1px dashed #cbd5e1; background:#fff; color:#475569;
+      border-radius:10px; padding:9px; font-size:12.5px; font-weight:500; }
+    .linked-row { display:flex; align-items:center; gap:8px; margin-top:9px; font-size:12.5px;
+      background:var(--hs-primary-l); border-radius:10px; padding:8px 10px; color:#14532d; }
+    .linked-row .lname { flex:1; min-width:0; font-weight:600; }
+    .btn-unlink { border:0; background:transparent; color:#15803d; font-size:12px; }
+
+    .empty { text-align:center; padding:44px 20px; color:#94a3b8; }
+    .empty i { font-size:38px; display:block; margin-bottom:10px; opacity:.6; }
+
+    /* picker sheet */
+    .sheet-backdrop { position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:1040; display:none; align-items:flex-end; justify-content:center; }
+    .sheet-backdrop.show { display:flex; }
+    .sheet { background:#f8fafc; width:100%; max-width:480px; max-height:88vh; border-radius:18px 18px 0 0; overflow-y:auto; }
+    .sheet-hero { background:linear-gradient(150deg,var(--hs-primary),var(--hs-primary-d)); color:#fff; padding:14px 16px 16px; }
+    .sheet-hero .row1 { display:flex; align-items:center; justify-content:space-between; }
+    .sheet-hero h2 { font-size:17px; font-weight:600; margin:10px 0 3px; }
+    .sheet-hero .loc { font-size:12px; opacity:.9; }
+    .icon-btn { background:rgba(255,255,255,.18); border:0; color:#fff; width:32px; height:32px; border-radius:9px; display:grid; place-items:center; }
+    .sheet-body { padding:14px; }
+    .search-wrap { position:relative; margin-bottom:10px; }
+    .search-wrap input { width:100%; border:1px solid #e2e8f0; border-radius:11px; padding:10px 12px 10px 33px; font-size:13px; }
+    .search-wrap .bi-search { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#94a3b8; }
+    .panel { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:4px 12px; }
+    .prow { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid #f1f5f9; cursor:pointer; }
+    .prow:first-child { border-top:0; }
+    .prow .pn { flex:1; min-width:0; }
+    .prow .pn b { font-size:13px; font-weight:600; display:block; }
+    .prow .pn span { font-size:11px; color:#64748b; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
+    .badge-brand { font-size:10px; font-weight:600; padding:3px 7px; border-radius:6px; background:#f1f5f9; color:#475569; }
+
+    .toast-wrap { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:1200; }
+    .toast-msg { background:#0f172a; color:#fff; padding:10px 16px; border-radius:10px; font-size:13px; }
+    .toast-msg.err { background:var(--hs-red); }
+
+    #appLoading { position:fixed; inset:0; background:#f1f5f9; z-index:1090; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; }
+    #appLoading .txt { font-size:13px; color:#64748b; }
+  </style>
+</head>
+<body>
+
+<div id="appLoading">
+  <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading…</span></div>
+  <div class="txt" id="appLoadingText">กำลังตรวจสอบสิทธิ์การเข้าใช้งาน...</div>
+</div>
+
+<div id="app" style="display:none;">
+  <div class="hs-navbar">
+    <div class="brand"><i class="bi bi-sun-fill"></i><span>Hi Solar</span><span class="brand-sub">ผูกงานเข้าไซต์</span></div>
+    <div style="display:flex;gap:8px;">
+      <a href="./sites.html" class="nav-link-btn" title="ทะเบียน"><i class="bi bi-buildings"></i></a>
+      <a href="./hisolar_planner.html" class="nav-link-btn" title="งาน"><i class="bi bi-list-task"></i></a>
+    </div>
+  </div>
+
+  <div class="progress-strip">
+    <div class="pstat">
+      <div>
+        <div class="pv" id="pv">—</div>
+        <div class="pl">ผูกแล้ว</div>
+      </div>
+      <div class="bar"><i id="barFill" style="width:0%"></i></div>
+      <div style="text-align:right">
+        <div class="pv" id="pvLeft" style="color:var(--hs-amber)">—</div>
+        <div class="pl">ยังไม่ผูก</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar"><div class="chips" id="chips"></div></div>
+  <div class="list" id="list"></div>
+</div>
+
+<div class="sheet-backdrop" id="sheet"><div class="sheet" id="sheetInner"></div></div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="./line-auth-client.js"></script>
+<script>
+const SUPABASE_URL             = 'https://hlswbazcojsnfibirkzl.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Kxzef_y7E3VAmhYvH4eS3g_o3fG7JLn';
+
+const JOB_TAG = {
+  ngan:      { label:'งานติดตั้ง', icon:'bi-house-gear', color:'#16a34a' },
+  duNgan:    { label:'ดูงาน',      icon:'bi-binoculars', color:'#0891b2' },
+  langPaeng: { label:'ล้างแผง',    icon:'bi-droplet',    color:'#3b82f6' },
+  som:       { label:'ซ่อมบำรุง',  icon:'bi-wrench',     color:'#d97706' },
+  bil:       { label:'บิล VAT',    icon:'bi-receipt',    color:'#64748b' },
+};
+const BRAND_LABEL = { HUAWEI:'Huawei', DEYE:'Deye', SOLIS:'Solis', FELICITY:'Felicity', GROWATT:'Growatt' };
+
+let sb = null, jobs = [], sites = [], sheetFilter = 'PENDING';
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s ?? '').toLowerCase().replace(/\s+/g,' ').trim();
+const fmtDate = d => { if (!d) return ''; const t = new Date(d+'T00:00:00');
+  return isNaN(t) ? d : t.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}); };
+
+function toast(m, err) {
+  const e = document.createElement('div');
+  e.className = 'toast-msg' + (err ? ' err' : '');
+  e.textContent = m;
+  document.getElementById('toastWrap').appendChild(e);
+  setTimeout(() => e.remove(), 3000);
+}
+
+// ── Suggestion scoring ────────────────────────────────
+// Jobs carry informal customer names ("แหม่ม", "สวนส้มจงลักษณ์") while sites carry
+// portal plant names ("JL FARM 1"), so this only ranks candidates for a human to
+// confirm — it never links anything on its own.
+function digits(s) { return String(s ?? '').replace(/[^0-9]/g, ''); }
+
+function scoreSite(job, site) {
+  const c = norm(job.customer_name), sn = norm(site.site_name);
+  if (!c || !sn) return 0;
+  let best = 0;
+  if (c === sn) best = 100;
+  else if (sn.includes(c) || c.includes(sn)) best = 78;
+  else {
+    // token overlap
+    const ct = c.split(' ').filter(t => t.length >= 3);
+    const st = sn.split(' ').filter(t => t.length >= 3);
+    const hit = ct.filter(t => st.some(u => u.includes(t) || t.includes(u))).length;
+    if (hit) best = Math.min(70, 34 + hit * 18);
+  }
+  // phone corroboration against whatever contact text the portal gave us
+  const jp = digits(job.phone);
+  if (jp.length >= 9) {
+    const sp = digits((site.contact_person || '') + ' ' + (site.contact_method || '') + ' ' + (site.phone || ''));
+    if (sp.includes(jp)) best = Math.max(best, 92);
+  }
+  // maps_url on both sides is a strong hint
+  if (job.maps_url && site.maps_url && job.maps_url === site.maps_url) best = Math.max(best, 95);
+  return best;
+}
+
+function suggestionsFor(job) {
+  return sites.map(s => ({ s, sc: scoreSite(job, s) }))
+    .filter(x => x.sc >= 40)
+    .sort((a, b) => b.sc - a.sc)
+    .slice(0, 3);
+}
+
+// ── Data ──────────────────────────────────────────────
+async function loadAll() {
+  const [j, s] = await Promise.all([
+    sb.from('hi_solar_jobs')
+      .select('id,sheet_key,customer_name,title,detail,phone,maps_url,job_date,appointment_date,status,technician,site_id')
+      .order('job_date', { ascending: false }),
+    sb.from('hi_solar_sites')
+      .select('id,site_code,site_name,address,phone,contact_person,contact_method,maps_url,brand_code,capacity_kwp')
+      .order('site_name'),
+  ]);
+  if (j.error) throw j.error;
+  if (s.error) throw s.error;
+  jobs = j.data || [];
+  sites = s.data || [];
+}
+
+async function setJobSite(job, siteId) {
+  const { error } = await sb.from('hi_solar_jobs').update({ site_id: siteId }).eq('id', job.id);
+  if (error) throw error;
+  job.site_id = siteId;
+}
+
+// ── Render ────────────────────────────────────────────
+const siteById = id => sites.find(s => String(s.id) === String(id));
+
+function renderProgress() {
+  const done = jobs.filter(j => j.site_id).length;
+  document.getElementById('pv').textContent = done;
+  document.getElementById('pvLeft').textContent = jobs.length - done;
+  document.getElementById('barFill').style.width = (jobs.length ? (done / jobs.length * 100) : 0) + '%';
+}
+
+function renderChips() {
+  const pending = jobs.filter(j => !j.site_id);
+  const counts = pending.reduce((a, j) => { a[j.sheet_key] = (a[j.sheet_key]||0)+1; return a; }, {});
+  const out = [
+    `<button class="chip ${sheetFilter==='PENDING'?'on':''}" data-f="PENDING">ยังไม่ผูก <span class="cnt">${pending.length}</span></button>`,
+    `<button class="chip ${sheetFilter==='DONE'?'on':''}" data-f="DONE">ผูกแล้ว <span class="cnt">${jobs.length-pending.length}</span></button>`,
+  ];
+  for (const k of Object.keys(JOB_TAG)) {
+    if (!counts[k]) continue;
+    out.push(`<button class="chip ${sheetFilter===k?'on':''}" data-f="${k}">${esc(JOB_TAG[k].label)} <span class="cnt">${counts[k]}</span></button>`);
+  }
+  document.getElementById('chips').innerHTML = out.join('');
+}
+
+function visibleJobs() {
+  if (sheetFilter === 'DONE') return jobs.filter(j => j.site_id);
+  if (sheetFilter === 'PENDING') return jobs.filter(j => !j.site_id);
+  return jobs.filter(j => !j.site_id && j.sheet_key === sheetFilter);
+}
+
+function renderList() {
+  const rows = visibleJobs();
+  const el = document.getElementById('list');
+  if (!rows.length) {
+    el.innerHTML = `<div class="empty"><i class="bi bi-check2-circle"></i>${
+      sheetFilter==='DONE' ? 'ยังไม่มีงานที่ผูกไซต์' : 'ผูกครบแล้วในหมวดนี้'}</div>`;
+    return;
+  }
+  el.innerHTML = rows.map(j => {
+    const tag = JOB_TAG[j.sheet_key] || { label:j.sheet_key, icon:'bi-dot', color:'#64748b' };
+    const when = j.job_date || j.appointment_date;
+    const linked = j.site_id ? siteById(j.site_id) : null;
+    let body;
+    if (linked) {
+      body = `<div class="linked-row">
+          <i class="bi bi-link-45deg"></i>
+          <span class="lname">${esc(linked.site_name)}</span>
+          <button class="btn-unlink" data-unlink="${esc(j.id)}">ยกเลิก</button>
+        </div>`;
+    } else {
+      const sug = suggestionsFor(j);
+      body = (sug.length ? `<div class="suggest"><div class="sl">ไซต์ที่น่าจะใช่ — ตรวจก่อนกดยืนยัน</div>` +
+        sug.map(x => `<button class="sug-btn" data-job="${esc(j.id)}" data-site="${esc(x.s.id)}">
+            <i class="bi bi-buildings text-muted"></i>
+            <span class="sn">${esc(x.s.site_name)}<span>${esc(x.s.address || '')}</span></span>
+            <span class="score">${x.sc}%</span>
+          </button>`).join('') + `</div>` : '') +
+        `<button class="btn-pick" data-pick="${esc(j.id)}"><i class="bi bi-search"></i> ค้นหาไซต์เอง</button>`;
+    }
+    return `<div class="job-card ${linked?'linked':''}">
+      <div class="jc-top">
+        <div class="jc-ic" style="background:${tag.color}"><i class="bi ${tag.icon}"></i></div>
+        <div class="jc-t">
+          <b>${esc(j.customer_name || '(ไม่ระบุลูกค้า)')}</b>
+          <div class="sub">${esc(tag.label)}${when?' · '+fmtDate(when):''}${j.status?' · '+esc(j.status):''}</div>
+        </div>
+      </div>
+      ${j.detail||j.title ? `<div class="jc-detail">${esc(j.title||'')}${j.title&&j.detail?' — ':''}${esc(j.detail||'')}</div>` : ''}
+      ${body}
+    </div>`;
+  }).join('');
+}
+
+function renderAll() { renderProgress(); renderChips(); renderList(); }
+
+// ── Link actions ──────────────────────────────────────
+async function link(jobId, siteId) {
+  const job = jobs.find(j => String(j.id) === String(jobId));
+  const site = siteId ? siteById(siteId) : null;
+  try {
+    await setJobSite(job, siteId);
+    renderAll();
+    toast(siteId ? `ผูก "${job.customer_name}" เข้า ${site.site_name} แล้ว` : 'ยกเลิกการผูกแล้ว');
+  } catch (e) {
+    toast('บันทึกไม่สำเร็จ: ' + (e.message || e), true);
+  }
+}
+
+function openPicker(jobId) {
+  const job = jobs.find(j => String(j.id) === String(jobId));
+  document.getElementById('sheetInner').innerHTML = `
+    <div class="sheet-hero">
+      <div class="row1"><button class="icon-btn" id="sheetClose"><i class="bi bi-chevron-down"></i></button></div>
+      <h2>${esc(job.customer_name || '(ไม่ระบุลูกค้า)')}</h2>
+      <div class="loc">เลือกไซต์ที่ตรงกับงานนี้</div>
+    </div>
+    <div class="sheet-body">
+      <div class="search-wrap"><i class="bi bi-search"></i>
+        <input id="sq" placeholder="ค้นหาชื่อไซต์ / ที่อยู่ / รหัส…" autocomplete="off"></div>
+      <div class="panel"><div id="sres"></div></div>
+    </div>`;
+  const draw = (q = '') => {
+    const t = norm(q);
+    const rows = (t ? sites.filter(s => [s.site_name,s.address,s.site_code].some(v => norm(v).includes(t)))
+                     : sites).slice(0, 50);
+    document.getElementById('sres').innerHTML = rows.length ? rows.map(s => `
+      <div class="prow" data-site="${esc(s.id)}">
+        <div class="pn"><b>${esc(s.site_name)}</b><span>${esc(s.address||'-')}</span></div>
+        <span class="badge-brand">${esc(BRAND_LABEL[s.brand_code]||'-')}</span>
+      </div>`).join('') : '<div class="text-muted small py-3">ไม่พบไซต์</div>';
+  };
+  draw();
+  document.getElementById('sheet').classList.add('show');
+  document.getElementById('sheetClose').onclick = closeSheet;
+  document.getElementById('sq').addEventListener('input', e => draw(e.target.value));
+  document.getElementById('sres').addEventListener('click', e => {
+    const row = e.target.closest('.prow');
+    if (!row) return;
+    closeSheet();
+    link(jobId, row.dataset.site);
+  });
+}
+
+function closeSheet() { document.getElementById('sheet').classList.remove('show'); }
+
+function wire() {
+  document.getElementById('chips').addEventListener('click', e => {
+    const c = e.target.closest('.chip');
+    if (!c) return;
+    sheetFilter = c.dataset.f;
+    renderChips(); renderList();
+  });
+  document.getElementById('list').addEventListener('click', e => {
+    const sug = e.target.closest('.sug-btn');
+    if (sug) return link(sug.dataset.job, sug.dataset.site);
+    const pick = e.target.closest('[data-pick]');
+    if (pick) return openPicker(pick.dataset.pick);
+    const un = e.target.closest('[data-unlink]');
+    if (un) return link(un.dataset.unlink, null);
+  });
+  document.getElementById('sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+}
+
+const setLoading = (v, t) => {
+  if (t) document.getElementById('appLoadingText').textContent = t;
+  document.getElementById('appLoading').style.display = v ? 'flex' : 'none';
+};
+const redirectToIndex = (p={}) => {
+  const qs = new URLSearchParams(p).toString();
+  location.href = '/index.html' + (qs ? '?'+qs : '');
+};
+const isAccessDenied = e => e?.status === 403 || /access_denied|forbidden/i.test(String(e?.code || e?.message || ''));
+
+(async function init() {
+  setLoading(true, 'กำลังตรวจสอบสิทธิ์การเข้าใช้งาน...');
+  wire();
+  try {
+    await window.HiSolarAuth.fetchAuthMe('hisolar');
+    setLoading(true, 'กำลังโหลดงานและทะเบียนไซต์...');
+    await window.HiSolarAuth.ensureSupabaseClientLoaded();
+    await window.HiSolarAuth.refreshSupabaseToken('hisolar', { forceRefresh:true, reason:'prime' });
+    sb = window.HiSolarAuth.createSupabaseClient('hisolar', SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    await loadAll();
+    renderAll();
+    document.getElementById('app').style.display = 'block';
+  } catch (error) {
+    if (error?.status === 401) { redirectToIndex(); return; }
+    if (isAccessDenied(error)) { redirectToIndex({ reason:'access_denied' }); return; }
+    console.error('link-jobs bootstrap failed', error);
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('list').innerHTML =
+      `<div class="empty"><i class="bi bi-exclamation-triangle"></i>โหลดข้อมูลไม่สำเร็จ<br><span class="small">${esc(error.message||error)}</span></div>`;
+  } finally {
+    setLoading(false);
+  }
+})();
+</script>
+</body>
+</html>
