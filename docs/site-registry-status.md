@@ -50,6 +50,23 @@
 (`JL FARM 5`) การจับคู่แบบหลวมจะผูกผิด ทำให้ช่างเห็นประวัติซ่อมของลูกค้าคนอื่น
 ซึ่งแย่กว่าไม่ผูก จึงให้ระบบ "แนะนำ" แล้วให้คนยืนยันแทน
 
+### Sprint 4 (ต่อ) — โครงสร้างข้อมูลแบบมีไซต์เป็นแกน
+`supabase/site-registry-v2.sql` (apply เข้า prod แล้ว: `site_registry_v2_site_centric`)
+
+- `source` (import/manual) + `lifecycle` (lead/installing/active/inactive) —
+  ไซต์ที่สร้างตอนไปติดตั้งใหม่ยังไม่ต้องมี `platform_code`/`platform_plant_id`
+  ค่อยเติมทีหลังเมื่อลงทะเบียนในพอร์ทัลค่ายแล้ว
+- `site_code` ออกอัตโนมัติจาก sequence (ต่อจาก HS-0271) ผ่าน trigger
+- ฟิลด์บำรุงรักษา: `clean_interval_months`, `next_clean_date`,
+  `warranty_inverter_expiry`, `warranty_panel_expiry`, `inverter_model`,
+  `inverter_count`, `panel_count`
+- view `hi_solar_site_overview` — 1 แถวต่อไซต์ พร้อมสรุปงาน (job_count,
+  clean_count, repair_count, last_clean_date, last_repair_date, permit_count)
+  + `clean_due_state` (overdue / due_soon / scheduled) ใช้ `security_invoker`
+  จึงคง RLS เดิม
+- trigger: บันทึกงานล้างแผงที่ผูกไซต์ → เลื่อน `next_clean_date` ให้เอง
+  ตามรอบที่ตั้งไว้ (ทดสอบแล้ว: ล้าง 20 ก.ค. รอบ 6 เดือน → 20 ม.ค. 2027)
+
 ### Sprint 4 (ที่เหลือ)
 1. `hi_solar_permits.site_id` (15 แถว) — ทำแบบเดียวกับ jobs
 2. หน้าบันทึกงานใหม่: เลือกไซต์ → เลือก Tag → บันทึกพร้อม `site_id` ตั้งแต่ต้น
