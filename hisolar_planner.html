@@ -51,6 +51,11 @@
       display: flex; align-items: center; justify-content: space-between;
     }
     .hs-navbar .brand { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 17px; font-weight: 700; }
+    .hs-navbar .sites-link {
+      background: rgba(255,255,255,.18); color: #fff; text-decoration: none;
+      width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; flex: 0 0 auto;
+    }
+    .hs-navbar .sites-link:hover { background: rgba(255,255,255,.3); }
     .hs-navbar .brand i { color: #fbbf24; font-size: 20px; }
     .hs-navbar .auth-actions { display: flex; align-items: center; gap: 8px; }
     .hs-navbar .auth-profile {
@@ -419,6 +424,7 @@
       <span class="brand-sub">Job Tracker</span>
     </div>
     <div class="auth-actions">
+      <a href="./sites.html" class="sites-link" title="ทะเบียนลูกค้า"><i class="bi bi-buildings"></i></a>
       <span id="rtIndicator" class="rt-indicator">
         <span class="rt-dot"></span>
         <span class="rt-label" id="rtIndicatorLabel">Offline</span>

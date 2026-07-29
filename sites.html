@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#16a34a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Hi Solar">
+  <title>Hi Solar — ทะเบียนลูกค้า</title>
+
+  <link rel="icon" type="image/png" href="icon_hisolar.png">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+  <style>
+    :root {
+      --hs-primary:   #16a34a;
+      --hs-primary-d: #15803d;
+      --hs-primary-l: #dcfce7;
+      --hs-amber:     #f59e0b;
+      --hs-amber-l:   #fef3c7;
+      --hs-blue:      #3b82f6;
+      --hs-blue-l:    #dbeafe;
+      --hs-red:       #ef4444;
+      --hs-red-l:     #fee2e2;
+      --nav-h:        62px;
+      --bs-primary:        #16a34a;
+      --bs-primary-rgb:    22,163,74;
+    }
+    * { font-family: 'Kanit', system-ui, sans-serif; }
+    body { background: #f1f5f9; }
+
+    .btn-primary { background-color: var(--hs-primary); border-color: var(--hs-primary); }
+    .btn-primary:hover { background-color: var(--hs-primary-d); border-color: var(--hs-primary-d); }
+    .text-primary { color: var(--hs-primary) !important; }
+
+    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #f1f5f9; }
+    @media (min-width: 576px) { #app { box-shadow: 0 0 40px rgba(0,0,0,.15); } }
+
+    /* Navbar */
+    .hs-navbar {
+      background: var(--hs-primary); padding: 12px 16px;
+      position: sticky; top: 0; z-index: 90;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .hs-navbar .brand { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 17px; font-weight: 700; }
+    .hs-navbar .brand-sub { font-size: 12px; font-weight: 400; opacity: .85; }
+    .auth-actions { display: flex; align-items: center; gap: 8px; }
+    .user-chip {
+      background: rgba(255,255,255,.18); color: #fff; border-radius: 999px;
+      padding: 4px 10px; font-size: 12px; max-width: 120px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .icon-btn {
+      background: rgba(255,255,255,.18); border: 0; color: #fff;
+      width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center;
+    }
+
+    /* Summary strip */
+    .summary { padding: 12px 14px 4px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .sum-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 8px; text-align: center; }
+    .sum-card .v { font-size: 18px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .sum-card .l { font-size: 10.5px; color: #64748b; margin-top: 2px; }
+
+    /* Search + filters */
+    .toolbar { padding: 10px 14px 6px; position: sticky; top: var(--nav-h); background: #f1f5f9; z-index: 80; }
+    .search-wrap { position: relative; }
+    .search-wrap .bi-search { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+    .search-wrap input {
+      width: 100%; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 10px 34px 10px 34px; font-size: 14px; background: #fff;
+    }
+    .search-wrap input:focus { outline: 2px solid var(--hs-primary-l); border-color: var(--hs-primary); }
+    .search-clear {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      border: 0; background: transparent; color: #94a3b8; padding: 4px;
+    }
+    .chips { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0 2px; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip {
+      flex: 0 0 auto; font-size: 12px; font-weight: 500; border: 1px solid #e2e8f0;
+      background: #fff; color: #475569; border-radius: 999px; padding: 5px 12px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .chip.on { background: var(--hs-primary); border-color: var(--hs-primary); color: #fff; }
+    .chip .cnt { opacity: .7; font-size: 11px; }
+    .result-line { font-size: 12px; color: #64748b; padding: 4px 2px 0; }
+
+    /* Site cards */
+    .list { padding: 6px 14px 90px; }
+    .site-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 14px;
+      padding: 12px; margin-bottom: 10px; cursor: pointer;
+    }
+    .site-card:active { transform: scale(.995); }
+    .site-card .top { display: flex; align-items: flex-start; gap: 8px; }
+    .site-card .nm { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 600; line-height: 1.25; }
+    .site-card .addr {
+      font-size: 11.5px; color: #64748b; margin-top: 3px;
+      display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .site-card .meta { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; }
+    .kwp { font-size: 12.5px; font-weight: 600; color: var(--hs-primary); font-variant-numeric: tabular-nums; }
+    .badge-brand { font-size: 10px; font-weight: 600; padding: 3px 7px; border-radius: 6px; letter-spacing: .02em; }
+    .b-HUAWEI   { background: #fee2e2; color: #b91c1c; }
+    .b-DEYE     { background: #dbeafe; color: #1d4ed8; }
+    .b-SOLIS    { background: #dcfce7; color: #15803d; }
+    .b-FELICITY { background: #fef3c7; color: #a16207; }
+    .b-GROWATT  { background: #ede9fe; color: #6d28d9; }
+    .b-none     { background: #f1f5f9; color: #64748b; }
+    .status-pill { font-size: 10.5px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; color: #64748b; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #cbd5e1; }
+    .dot.online { background: #22c55e; }
+    .dot.offline { background: #94a3b8; }
+    .dot.fault   { background: var(--hs-red); }
+
+    .empty { text-align: center; padding: 48px 20px; color: #94a3b8; }
+    .empty i { font-size: 40px; display: block; margin-bottom: 10px; opacity: .6; }
+
+    /* Detail sheet */
+    .sheet-backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 1040;
+      display: none; align-items: flex-end; justify-content: center;
+    }
+    .sheet-backdrop.show { display: flex; }
+    .sheet {
+      background: #f8fafc; width: 100%; max-width: 480px; max-height: 92vh;
+      border-radius: 18px 18px 0 0; overflow-y: auto; animation: slideUp .22s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(18px); opacity: .6; } to { transform: none; opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .sheet { animation: none; } }
+    .sheet-hero { background: linear-gradient(150deg, var(--hs-primary), var(--hs-primary-d)); color: #fff; padding: 14px 16px 16px; }
+    .sheet-hero .row1 { display: flex; align-items: center; justify-content: space-between; }
+    .sheet-hero h2 { font-size: 18px; font-weight: 600; margin: 10px 0 3px; line-height: 1.2; }
+    .sheet-hero .loc { font-size: 12px; opacity: .9; }
+    .hero-stats { display: flex; gap: 18px; margin-top: 12px; }
+    .hero-stats .hv { font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+    .hero-stats .hl { font-size: 10.5px; opacity: .82; margin-top: 3px; }
+    .sheet-body { padding: 14px; }
+    .act-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .act {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px; border-radius: 11px; font-size: 12.5px; font-weight: 600;
+      border: 1px solid #e2e8f0; background: #fff; color: #334155; text-decoration: none;
+    }
+    .act.pri { background: var(--hs-primary); border-color: var(--hs-primary); color: #fff; }
+    .act.map { background: var(--hs-amber); border-color: var(--hs-amber); color: #422006; }
+    .act.disabled { opacity: .45; pointer-events: none; }
+    .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 4px 12px; margin-bottom: 12px; }
+    .panel h6 { font-size: 12px; font-weight: 600; color: #64748b; margin: 12px 0 6px; }
+    .field { display: flex; gap: 10px; padding: 9px 0; border-top: 1px solid #f1f5f9; font-size: 13px; }
+    .field:first-of-type { border-top: 0; }
+    .field .fl { color: #64748b; width: 92px; flex: 0 0 auto; font-size: 12px; }
+    .field .fv { font-weight: 500; flex: 1; word-break: break-word; }
+    .field .fv a { color: var(--hs-primary); text-decoration: none; }
+    .jobs-empty { font-size: 12px; color: #94a3b8; padding: 10px 0; }
+    .job-row { display: flex; gap: 9px; padding: 9px 0; border-top: 1px solid #f1f5f9; }
+    .job-row:first-of-type { border-top: 0; }
+    .job-ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; color: #fff; flex: 0 0 auto; font-size: 14px; }
+    .job-t { flex: 1; min-width: 0; }
+    .job-t b { font-size: 12.5px; font-weight: 600; display: block; }
+    .job-t span { font-size: 11px; color: #64748b; }
+
+    /* Auth gate */
+    .name-overlay {
+      position: fixed; inset: 0; background: rgba(15,23,42,.6); z-index: 1080;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .name-overlay[style*="flex"] { display: flex; }
+    .name-box { background: #fff; border-radius: 16px; padding: 22px; max-width: 380px; width: 100%; }
+    #appLoading {
+      position: fixed; inset: 0; background: #f1f5f9; z-index: 1090;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    }
+    #appLoading .txt { font-size: 13px; color: #64748b; }
+  </style>
+</head>
+<body>
+
+<div id="appLoading">
+  <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading…</span></div>
+  <div class="txt" id="appLoadingText">กำลังตรวจสอบสิทธิ์การเข้าใช้งาน...</div>
+</div>
+
+<div class="name-overlay" id="authGate" style="display:none;">
+  <div class="name-box" id="authGatePanel"></div>
+</div>
+
+<div id="app" style="display:none;">
+
+  <div class="hs-navbar">
+    <div class="brand">
+      <i class="bi bi-sun-fill"></i>
+      <span>Hi Solar</span>
+      <span class="brand-sub">ทะเบียนลูกค้า</span>
+    </div>
+    <div class="auth-actions">
+      <span class="user-chip" id="userChip">-</span>
+      <button class="icon-btn" id="btnPlanner" title="ไปหน้างาน"><i class="bi bi-list-task"></i></button>
+      <button class="icon-btn" id="btnLogout" title="ออกจากระบบ"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="sum-card"><div class="v" id="sumSites">-</div><div class="l">ไซต์ทั้งหมด</div></div>
+    <div class="sum-card"><div class="v" id="sumKwp">-</div><div class="l">kWp รวม</div></div>
+    <div class="sum-card"><div class="v" id="sumBrands">-</div><div class="l">ยี่ห้อ</div></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <i class="bi bi-search"></i>
+      <input type="search" id="q" placeholder="ค้นหาชื่อ / ที่อยู่ / เบอร์ / รหัสไซต์…" autocomplete="off">
+      <button class="search-clear" id="qClear" style="display:none;" aria-label="ล้างคำค้น"><i class="bi bi-x-circle-fill"></i></button>
+    </div>
+    <div class="chips" id="brandChips"></div>
+    <div class="result-line" id="resultLine"></div>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<div class="sheet-backdrop" id="sheet">
+  <div class="sheet" id="sheetInner"></div>
+</div>
+
+<script src="./line-auth-client.js"></script>
+<script>
+const SUPABASE_URL             = 'https://hlswbazcojsnfibirkzl.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Kxzef_y7E3VAmhYvH4eS3g_o3fG7JLn';
+
+let sb = null;
+let allSites = [];
+let brandFilter = 'ALL';
+let searchTerm = '';
+
+const BRAND_LABEL = {
+  HUAWEI: 'Huawei', DEYE: 'Deye', SOLIS: 'Solis',
+  FELICITY: 'Felicity', GROWATT: 'Growatt',
+};
+const PLATFORM_LABEL = {
+  FUSIONSOLAR: 'FusionSolar', SOLARMAN: 'Solarman', DEYECLOUD: 'Deye Cloud',
+  SOLISCLOUD: 'SolisCloud', FSOLAR: 'Fsolar', SHINEPHONE: 'ShinePhone',
+};
+// Job sheets from the planner, reused as the per-site service tags.
+const JOB_TAG = {
+  ngan:      { label: 'งานติดตั้ง', icon: 'bi-house-gear', color: '#16a34a' },
+  duNgan:    { label: 'ดูงาน',      icon: 'bi-binoculars', color: '#0891b2' },
+  langPaeng: { label: 'ล้างแผง',    icon: 'bi-droplet',    color: '#3b82f6' },
+  som:       { label: 'ซ่อมบำรุง',  icon: 'bi-wrench',     color: '#d97706' },
+  bil:       { label: 'บิล VAT',    icon: 'bi-receipt',    color: '#64748b' },
+};
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => (
+  { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+));
+const fmtKwp = (n) => n == null ? '-' : Number(n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtDate = (d) => {
+  if (!d) return '-';
+  const dt = new Date(d + 'T00:00:00');
+  if (Number.isNaN(dt.getTime())) return d;
+  return dt.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+function statusClass(s) {
+  const v = String(s || '').toLowerCase();
+  if (v.includes('online')) return 'online';
+  if (v.includes('fault'))  return 'fault';
+  if (v.includes('offline')) return 'offline';
+  return '';
+}
+
+// ── Data ──────────────────────────────────────────────
+async function loadSites() {
+  const { data, error } = await sb
+    .from('hi_solar_sites')
+    .select('id,site_code,site_name,customer_name,phone,contact_person,contact_method,address,maps_url,capacity_kwp,status,grid_connection_date,platform_code,brand_code,platform_plant_id,total_yield_kwh')
+    .order('site_name');
+  if (error) throw error;
+  allSites = data || [];
+}
+
+async function loadSiteJobs(siteId) {
+  const { data, error } = await sb
+    .from('hi_solar_jobs')
+    .select('id,sheet_key,title,detail,customer_name,job_date,appointment_date,status,technician')
+    .eq('site_id', siteId)
+    .order('job_date', { ascending: false })
+    .limit(20);
+  if (error) throw error;
+  return data || [];
+}
+
+// ── Render ────────────────────────────────────────────
+function renderSummary() {
+  const kwp = allSites.reduce((s, x) => s + (Number(x.capacity_kwp) || 0), 0);
+  const brands = new Set(allSites.map(x => x.brand_code).filter(Boolean));
+  document.getElementById('sumSites').textContent = allSites.length.toLocaleString('th-TH');
+  document.getElementById('sumKwp').textContent = Math.round(kwp).toLocaleString('th-TH');
+  document.getElementById('sumBrands').textContent = brands.size;
+}
+
+function renderChips() {
+  const counts = allSites.reduce((a, s) => {
+    const k = s.brand_code || 'none';
+    a[k] = (a[k] || 0) + 1;
+    return a;
+  }, {});
+  const order = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  const chips = [`<button class="chip ${brandFilter === 'ALL' ? 'on' : ''}" data-brand="ALL">ทั้งหมด <span class="cnt">${allSites.length}</span></button>`];
+  for (const b of order) {
+    chips.push(
+      `<button class="chip ${brandFilter === b ? 'on' : ''}" data-brand="${esc(b)}">` +
+      `${esc(BRAND_LABEL[b] || b)} <span class="cnt">${counts[b]}</span></button>`
+    );
+  }
+  document.getElementById('brandChips').innerHTML = chips.join('');
+}
+
+function visibleSites() {
+  const q = searchTerm.trim().toLowerCase();
+  return allSites.filter(s => {
+    if (brandFilter !== 'ALL' && (s.brand_code || 'none') !== brandFilter) return false;
+    if (!q) return true;
+    return [s.site_name, s.address, s.customer_name, s.phone, s.contact_person, s.site_code, s.platform_plant_id]
+      .some(v => String(v || '').toLowerCase().includes(q));
+  });
+}
+
+function renderList() {
+  const rows = visibleSites();
+  const line = document.getElementById('resultLine');
+  const kwp = rows.reduce((s, x) => s + (Number(x.capacity_kwp) || 0), 0);
+  line.textContent = rows.length === allSites.length
+    ? `${allSites.length} ไซต์ · ${fmtKwp(kwp)} kWp`
+    : `พบ ${rows.length} จาก ${allSites.length} ไซต์ · ${fmtKwp(kwp)} kWp`;
+
+  const el = document.getElementById('list');
+  if (!rows.length) {
+    el.innerHTML = `<div class="empty"><i class="bi bi-search"></i>ไม่พบไซต์ที่ตรงกับการค้นหา<br><span class="small">ลองเปลี่ยนคำค้นหรือตัวกรองยี่ห้อ</span></div>`;
+    return;
+  }
+  el.innerHTML = rows.map(s => {
+    const brand = s.brand_code || 'none';
+    const sc = statusClass(s.status);
+    return `
+      <div class="site-card" data-id="${esc(s.id)}">
+        <div class="top">
+          <div class="nm">${esc(s.site_name)}
+            <div class="addr">${s.address ? '<i class="bi bi-geo-alt"></i> ' + esc(s.address) : '<span class="text-muted">ยังไม่มีที่อยู่</span>'}</div>
+          </div>
+          <span class="badge-brand b-${esc(brand)}">${esc(BRAND_LABEL[brand] || 'ไม่ระบุ')}</span>
+        </div>
+        <div class="meta">
+          <span class="status-pill"><span class="dot ${sc}"></span>${esc(s.status || 'ไม่มีข้อมูลสถานะ')}</span>
+          <span class="kwp">${fmtKwp(s.capacity_kwp)} kWp</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Detail sheet ──────────────────────────────────────
+function mapsHref(s) {
+  if (s.maps_url) return s.maps_url;
+  if (s.address) return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(s.address);
+  return null;
+}
+
+function telHref(s) {
+  const raw = [s.phone, s.contact_person, s.contact_method]
+    .map(v => String(v || '').match(/0\d[\d\s-]{7,}/)?.[0])
+    .find(Boolean);
+  return raw ? 'tel:' + raw.replace(/[\s-]/g, '') : null;
+}
+
+async function openSite(id) {
+  const s = allSites.find(x => String(x.id) === String(id));
+  if (!s) return;
+  const brand = s.brand_code || 'none';
+  const href = mapsHref(s);
+  const tel = telHref(s);
+
+  document.getElementById('sheetInner').innerHTML = `
+    <div class="sheet-hero">
+      <div class="row1">
+        <button class="icon-btn" id="sheetClose"><i class="bi bi-chevron-down"></i></button>
+        <span class="badge-brand b-${esc(brand)}">${esc(BRAND_LABEL[brand] || 'ไม่ระบุ')} · ${esc(s.site_code || '')}</span>
+      </div>
+      <h2>${esc(s.site_name)}</h2>
+      <div class="loc"><i class="bi bi-geo-alt"></i> ${esc(s.address || 'ยังไม่มีที่อยู่')}</div>
+      <div class="hero-stats">
+        <div><div class="hv">${fmtKwp(s.capacity_kwp)}</div><div class="hl">kWp ติดตั้ง</div></div>
+        <div><div class="hv">${esc(PLATFORM_LABEL[s.platform_code] || '-')}</div><div class="hl">แอปติดตาม</div></div>
+        <div><div class="hv">${esc(s.status || '-')}</div><div class="hl">สถานะ</div></div>
+      </div>
+    </div>
+    <div class="sheet-body">
+      <div class="act-row">
+        <a class="act pri ${tel ? '' : 'disabled'}" href="${tel || '#'}"><i class="bi bi-telephone-fill"></i> โทร</a>
+        <a class="act map ${href ? '' : 'disabled'}" href="${href || '#'}" target="_blank" rel="noopener"><i class="bi bi-send-fill"></i> นำทาง</a>
+      </div>
+
+      <div class="panel">
+        <div class="field"><span class="fl">ลูกค้า</span><span class="fv">${esc(s.customer_name || '-')}</span></div>
+        <div class="field"><span class="fl">ผู้ติดต่อ</span><span class="fv">${esc(s.contact_person || '-')}</span></div>
+        <div class="field"><span class="fl">ช่องทาง</span><span class="fv">${esc(s.contact_method || s.phone || '-')}</span></div>
+        <div class="field"><span class="fl">On-grid</span><span class="fv">${fmtDate(s.grid_connection_date)}</span></div>
+        <div class="field"><span class="fl">รหัสในแอป</span><span class="fv">${esc(s.platform_plant_id || '-')}</span></div>
+        ${s.total_yield_kwh != null ? `<div class="field"><span class="fl">ผลิตสะสม</span><span class="fv">${fmtKwp(s.total_yield_kwh)} kWh</span></div>` : ''}
+      </div>
+
+      <div class="panel">
+        <h6>งานบริการของไซต์นี้</h6>
+        <div id="siteJobs"><div class="jobs-empty"><span class="spinner-border spinner-border-sm"></span> กำลังโหลด…</div></div>
+      </div>
+    </div>`;
+
+  document.getElementById('sheet').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('sheetClose').onclick = closeSheet;
+
+  try {
+    const jobs = await loadSiteJobs(s.id);
+    renderSiteJobs(jobs);
+  } catch (e) {
+    document.getElementById('siteJobs').innerHTML =
+      `<div class="jobs-empty text-danger">โหลดงานไม่สำเร็จ: ${esc(e.message || e)}</div>`;
+  }
+}
+
+function renderSiteJobs(jobs) {
+  const el = document.getElementById('siteJobs');
+  if (!el) return;
+  if (!jobs.length) {
+    el.innerHTML = `<div class="jobs-empty">ยังไม่มีงานผูกกับไซต์นี้ — งานที่บันทึกในหน้า Job Tracker จะแสดงที่นี่เมื่อระบุไซต์แล้ว</div>`;
+    return;
+  }
+  el.innerHTML = jobs.map(j => {
+    const tag = JOB_TAG[j.sheet_key] || { label: j.sheet_key, icon: 'bi-dot', color: '#64748b' };
+    const when = j.job_date || j.appointment_date;
+    return `
+      <div class="job-row">
+        <div class="job-ic" style="background:${tag.color}"><i class="bi ${tag.icon}"></i></div>
+        <div class="job-t">
+          <b>${esc(tag.label)}${j.title ? ' — ' + esc(j.title) : ''}</b>
+          <span>${when ? fmtDate(when) : 'ไม่ระบุวันที่'}${j.status ? ' · ' + esc(j.status) : ''}${j.technician ? ' · ' + esc(j.technician) : ''}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function closeSheet() {
+  document.getElementById('sheet').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// ── Events ────────────────────────────────────────────
+function wireEvents() {
+  const q = document.getElementById('q');
+  const clear = document.getElementById('qClear');
+  let t = null;
+  q.addEventListener('input', () => {
+    clear.style.display = q.value ? 'block' : 'none';
+    clearTimeout(t);
+    t = setTimeout(() => { searchTerm = q.value; renderList(); }, 150);
+  });
+  clear.addEventListener('click', () => {
+    q.value = ''; searchTerm = ''; clear.style.display = 'none'; renderList(); q.focus();
+  });
+
+  document.getElementById('brandChips').addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    brandFilter = chip.dataset.brand;
+    renderChips();
+    renderList();
+  });
+
+  document.getElementById('list').addEventListener('click', (e) => {
+    const card = e.target.closest('.site-card');
+    if (card) openSite(card.dataset.id);
+  });
+
+  document.getElementById('sheet').addEventListener('click', (e) => {
+    if (e.target.id === 'sheet') closeSheet();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('sheet').classList.contains('show')) closeSheet();
+  });
+
+  document.getElementById('btnPlanner').onclick = () => { location.href = './hisolar_planner.html'; };
+  document.getElementById('btnLogout').onclick = async () => {
+    await window.HiSolarAuth.logout('/index.html');
+  };
+}
+
+function setLoading(visible, text) {
+  const el = document.getElementById('appLoading');
+  if (text) document.getElementById('appLoadingText').textContent = text;
+  el.style.display = visible ? 'flex' : 'none';
+}
+
+function redirectToIndex(params = {}) {
+  const qs = new URLSearchParams(params).toString();
+  location.href = '/index.html' + (qs ? '?' + qs : '');
+}
+
+function isAccessDeniedError(err) {
+  return err?.status === 403 || /access_denied|forbidden/i.test(String(err?.code || err?.message || ''));
+}
+
+// ── Init ──────────────────────────────────────────────
+(async function init() {
+  setLoading(true, 'กำลังตรวจสอบสิทธิ์การเข้าใช้งาน...');
+  wireEvents();
+
+  try {
+    const auth = await window.HiSolarAuth.fetchAuthMe('hisolar');
+    window.HiSolarAuth.applyUserSummary({
+      user: auth?.user || {},
+      membership: auth?.membership || {},
+      userChipEl: 'userChip',
+    });
+
+    setLoading(true, 'กำลังโหลดทะเบียนไซต์...');
+    await window.HiSolarAuth.ensureSupabaseClientLoaded();
+    await window.HiSolarAuth.refreshSupabaseToken('hisolar', { forceRefresh: true, reason: 'prime' });
+    sb = window.HiSolarAuth.createSupabaseClient('hisolar', SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+    await loadSites();
+    renderSummary();
+    renderChips();
+    renderList();
+    document.getElementById('app').style.display = 'block';
+  } catch (error) {
+    if (error?.status === 401) { redirectToIndex(); return; }
+    if (isAccessDeniedError(error)) { redirectToIndex({ reason: 'access_denied' }); return; }
+    console.error('sites bootstrap failed', error);
+    document.getElementById('list').innerHTML =
+      `<div class="empty"><i class="bi bi-exclamation-triangle"></i>โหลดทะเบียนไม่สำเร็จ<br><span class="small">${esc(error.message || error)}</span></div>`;
+    document.getElementById('app').style.display = 'block';
+  } finally {
+    setLoading(false);
+  }
+})();
+</script>
+</body>
+</html>
