@@ -133,6 +133,61 @@ test('filter changes redraw the stats and charts, not just the list', () => {
   assert.match(wired, /renderAll\(\);/);
 });
 
+function loadNav() {
+  const start = sitesSource.indexOf('const hasCoords = (s) =>');
+  const end = sitesSource.indexOf('function telHref(s)');
+  assert.ok(start > 0 && end > start, 'nav helpers not found in sites.html');
+  const context = { encodeURIComponent };
+  vm.createContext(context);
+  vm.runInContext(sitesSource.slice(start, end), context);
+  return context;
+}
+
+test('navigation prefers a captured pin over a saved link over the address text', () => {
+  const { mapsHref } = loadNav();
+
+  // A pin captured on site routes turn-by-turn to the exact point
+  assert.equal(
+    mapsHref({ latitude: 18.9, longitude: 98.9, maps_url: 'https://maps.app.goo.gl/x', address: 'somewhere' }),
+    'https://www.google.com/maps/dir/?api=1&destination=18.9,98.9'
+  );
+  assert.equal(
+    mapsHref({ latitude: null, longitude: null, maps_url: 'https://maps.app.goo.gl/x', address: 'somewhere' }),
+    'https://maps.app.goo.gl/x'
+  );
+  // Address text is the last resort, and it must be encoded
+  assert.equal(
+    mapsHref({ address: 'อ.หางดง จ.เชียงใหม่' }),
+    'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('อ.หางดง จ.เชียงใหม่')
+  );
+  assert.equal(mapsHref({}), null);
+});
+
+test('the registry reads coordinates so a captured pin is actually used', () => {
+  // Without these columns in the select, sites.html silently falls back to the
+  // address search even for sites a technician has already pinned.
+  const load = sitesSource.slice(
+    sitesSource.indexOf('async function loadSites()'),
+    sitesSource.indexOf('async function loadCleanHistory()')
+  );
+  assert.match(load, /latitude,longitude/);
+});
+
+test('the detail sheet says whether navigation is exact or guessed from the address', () => {
+  const { navSourceLabel } = loadNav();
+
+  // Compared field by field: objects built inside the vm are cross-realm, so
+  // deepStrictEqual would fail on the prototype alone.
+  const pinned = navSourceLabel({ latitude: 18.9, longitude: 98.9 });
+  assert.equal(pinned.text, 'พิกัดจากหน้างาน');
+  assert.equal(pinned.exact, true);
+  assert.equal(navSourceLabel({ maps_url: 'https://maps.app.goo.gl/x' }).exact, true);
+  // Address-only has to be flagged, since 59 of the imported addresses have no
+  // spaces at all and Google Maps cannot resolve them reliably
+  assert.equal(navSourceLabel({ address: 'ประเทศไทยอ.หางดงต.หารแก้ว' }).exact, false);
+  assert.equal(navSourceLabel({}).text, 'ยังนำทางไม่ได้');
+});
+
 test('the edit gate mirrors the RLS write policy, admin and member only', () => {
   assert.match(sitesSource, /const EDIT_ROLES = new Set\(\['admin', 'member'\]\)/);
   assert.match(sitesSource, /const canEditSites = \(\) => EDIT_ROLES\.has\(myRole\)/);

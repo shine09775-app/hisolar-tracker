@@ -251,7 +251,8 @@
     }
     .ef input:focus, .ef textarea:focus { outline: 2px solid var(--hs-primary-l); border-color: var(--hs-primary); }
     .ef textarea { resize: vertical; min-height: 58px; }
-    .ef .hint { font-size: 10px; color: #94a3b8; margin-top: 3px; }
+    .ef .hint, .field .hint { font-size: 10px; color: #94a3b8; margin-top: 3px; line-height: 1.45; }
+    .field .hint a { color: var(--hs-primary); }
     .edit-actions { display: flex; gap: 8px; padding: 12px 0 4px; }
     .edit-actions button { flex: 1; border-radius: 10px; padding: 9px; font-size: 13px; font-weight: 600; border: 1px solid #e2e8f0; }
     .edit-actions .save { background: var(--hs-primary); border-color: var(--hs-primary); color: #fff; }
@@ -524,7 +525,7 @@ function serviceOf(s) {
 async function loadSites() {
   const { data, error } = await sb
     .from('hi_solar_sites')
-    .select('id,site_code,site_name,customer_name,phone,contact_person,contact_method,address,maps_url,capacity_kwp,status,grid_connection_date,platform_code,brand_code,platform_plant_id,total_yield_kwh,warranty_panel_expiry,warranty_inverter_expiry,next_clean_date,clean_interval_months')
+    .select('id,site_code,site_name,customer_name,phone,contact_person,contact_method,address,maps_url,latitude,longitude,capacity_kwp,status,grid_connection_date,platform_code,brand_code,platform_plant_id,total_yield_kwh,warranty_panel_expiry,warranty_inverter_expiry,next_clean_date,clean_interval_months')
     .order('site_name');
   if (error) throw error;
   allSites = data || [];
@@ -792,10 +793,25 @@ function renderList() {
 }
 
 // ── Detail sheet ──────────────────────────────────────
+const hasCoords = (s) => s.latitude != null && s.longitude != null;
+
+// Same precedence as map.html: a pin captured on site beats a saved link, and
+// both beat searching Google Maps for the address text. Many imported addresses
+// run words together with no spaces, so the text search is a last resort that
+// can land far from the site.
 function mapsHref(s) {
+  if (hasCoords(s)) return `https://www.google.com/maps/dir/?api=1&destination=${Number(s.latitude)},${Number(s.longitude)}`;
   if (s.maps_url) return s.maps_url;
   if (s.address) return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(s.address);
   return null;
+}
+
+// How trustworthy the นำทาง button is for this site
+function navSourceLabel(s) {
+  if (hasCoords(s)) return { text: 'พิกัดจากหน้างาน', exact: true };
+  if (s.maps_url) return { text: 'ลิงก์ Google Maps ที่บันทึกไว้', exact: true };
+  if (s.address) return { text: 'ค้นหาจากที่อยู่ — อาจคลาดเคลื่อน', exact: false };
+  return { text: 'ยังนำทางไม่ได้', exact: false };
 }
 
 function telHref(s) {
@@ -860,6 +876,7 @@ function renderSitePanel(s) {
   if (!el) return;
   const svc = serviceOf(s);
   const exp = warrantyExpiryOf(s);
+  const nav = navSourceLabel(s);
   el.innerHTML = `
     <div class="panel-head">
       <h6>ข้อมูลติดต่อ</h6>
@@ -873,6 +890,13 @@ function renderSitePanel(s) {
     <div class="field"><span class="fl">ประกัน</span><span class="fv">${exp ? fmtDate(exp.toISOString().slice(0, 10)) + (warrantyStateOf(s) === 'expired' ? ' (หมดแล้ว)' : '') : 'ไม่ทราบ'}</span></div>
     <div class="field"><span class="fl">รอบบริการ</span><span class="fv">${svc.due ? fmtDate(svc.due.toISOString().slice(0, 10)) + (svc.state === 'overdue' ? ' (เกินกำหนด)' : '') : 'ยังไม่ทราบ'}</span></div>
     <div class="field"><span class="fl">รหัสในแอป</span><span class="fv">${esc(s.platform_plant_id || '-')}</span></div>
+    <div class="field">
+      <span class="fl">นำทางจาก</span>
+      <span class="fv">
+        ${nav.exact ? '' : '<i class="bi bi-exclamation-triangle-fill" style="color:var(--hs-amber)"></i> '}${esc(nav.text)}
+        ${hasCoords(s) ? '' : `<div class="hint" style="margin-top:3px">ปักหมุดที่หน้างานได้ที่ <a href="./map.html">หน้าแผนที่</a> แล้วปุ่มนำทางจะพาไปจุดที่แน่นอน</div>`}
+      </span>
+    </div>
     ${s.notes ? `<div class="field"><span class="fl">หมายเหตุ</span><span class="fv">${esc(s.notes)}</span></div>` : ''}
     ${s.total_yield_kwh != null ? `<div class="field"><span class="fl">ผลิตสะสม</span><span class="fv">${fmtKwp(s.total_yield_kwh)} kWh</span></div>` : ''}`;
 
