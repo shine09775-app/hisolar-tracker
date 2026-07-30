@@ -234,6 +234,33 @@
     .field .fl { color: #64748b; width: 92px; flex: 0 0 auto; font-size: 12px; }
     .field .fv { font-weight: 500; flex: 1; word-break: break-word; }
     .field .fv a { color: var(--hs-primary); text-decoration: none; }
+    /* Inline edit form */
+    .panel-head { display: flex; align-items: center; gap: 8px; padding: 10px 0 4px; }
+    .panel-head h6 { margin: 0; flex: 1; }
+    .btn-edit {
+      border: 1px solid var(--hs-primary); background: #fff; color: var(--hs-primary);
+      font-size: 11.5px; font-weight: 600; border-radius: 8px; padding: 4px 10px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .ef { padding: 8px 0; border-top: 1px solid #f1f5f9; }
+    .ef:first-of-type { border-top: 0; }
+    .ef label { display: block; font-size: 11px; color: #64748b; margin-bottom: 4px; }
+    .ef input, .ef textarea {
+      width: 100%; border: 1px solid #e2e8f0; border-radius: 9px;
+      padding: 8px 10px; font-size: 13.5px; background: #fff; font-family: inherit;
+    }
+    .ef input:focus, .ef textarea:focus { outline: 2px solid var(--hs-primary-l); border-color: var(--hs-primary); }
+    .ef textarea { resize: vertical; min-height: 58px; }
+    .ef .hint { font-size: 10px; color: #94a3b8; margin-top: 3px; }
+    .edit-actions { display: flex; gap: 8px; padding: 12px 0 4px; }
+    .edit-actions button { flex: 1; border-radius: 10px; padding: 9px; font-size: 13px; font-weight: 600; border: 1px solid #e2e8f0; }
+    .edit-actions .save { background: var(--hs-primary); border-color: var(--hs-primary); color: #fff; }
+    .edit-actions .cancel { background: #fff; color: #475569; }
+    .edit-actions button[disabled] { opacity: .6; }
+    .edit-msg { font-size: 11.5px; padding: 8px 10px; border-radius: 9px; margin-top: 8px; display: none; }
+    .edit-msg.err { display: block; background: var(--hs-red-l); color: #b91c1c; }
+    .edit-msg.ok  { display: block; background: var(--hs-primary-l); color: #15803d; }
+
     .jobs-empty { font-size: 12px; color: #94a3b8; padding: 10px 0; }
     .job-row { display: flex; gap: 9px; padding: 9px 0; border-top: 1px solid #f1f5f9; }
     .job-row:first-of-type { border-top: 0; }
@@ -362,6 +389,22 @@ let warrantyFilter = 'ALL';  // active | soon | expired | unknown
 let serviceFilter = 'ALL';   // overdue | soon | ok | never
 let yearMetric = 'sites';    // sites | kwp
 let lastCleanBySite = {};    // site_id -> ISO date ของงานล้างแผงครั้งล่าสุด
+let myRole = '';             // บทบาทใน hisolar จาก /api/auth/me
+
+// ใครแก้ทะเบียนได้ — ต้องตรงกับ RLS policy "Authenticated write sites hisolar admin member"
+// การซ่อนปุ่มเป็นแค่ UX ตัวกันจริงคือ RLS ฝั่งฐานข้อมูล
+const EDIT_ROLES = new Set(['admin', 'member']);
+const canEditSites = () => EDIT_ROLES.has(myRole);
+
+// ฟิลด์ที่แก้ได้จากหน้าเว็บ ตรงกับคอลัมน์ที่ scripts/sites-csv.mjs แก้ได้
+const EDIT_FIELDS = [
+  { key: 'customer_name',        label: 'ลูกค้า' },
+  { key: 'phone',                label: 'เบอร์โทร', hint: 'กรอกแล้วปุ่มโทรจะใช้งานได้' },
+  { key: 'contact_person',       label: 'ผู้ติดต่อ' },
+  { key: 'contact_method',       label: 'ช่องทางติดต่อ' },
+  { key: 'clean_interval_months', label: 'รอบล้างแผง (เดือน)', numeric: true, hint: 'เว้นว่างจะใช้ค่าเริ่มต้น 6 เดือน' },
+  { key: 'notes',                label: 'หมายเหตุ', textarea: true },
+];
 
 // ประกันนับ 2 ปีจากวันติดตั้ง (COD) เว้นแต่มีวันหมดประกันบันทึกไว้จริง
 const WARRANTY_YEARS = 2;
@@ -789,14 +832,7 @@ async function openSite(id) {
         <a class="act map ${href ? '' : 'disabled'}" href="${href || '#'}" target="_blank" rel="noopener"><i class="bi bi-send-fill"></i> นำทาง</a>
       </div>
 
-      <div class="panel">
-        <div class="field"><span class="fl">ลูกค้า</span><span class="fv">${esc(s.customer_name || '-')}</span></div>
-        <div class="field"><span class="fl">ผู้ติดต่อ</span><span class="fv">${esc(s.contact_person || '-')}</span></div>
-        <div class="field"><span class="fl">ช่องทาง</span><span class="fv">${esc(s.contact_method || s.phone || '-')}</span></div>
-        <div class="field"><span class="fl">On-grid</span><span class="fv">${fmtDate(s.grid_connection_date)}</span></div>
-        <div class="field"><span class="fl">รหัสในแอป</span><span class="fv">${esc(s.platform_plant_id || '-')}</span></div>
-        ${s.total_yield_kwh != null ? `<div class="field"><span class="fl">ผลิตสะสม</span><span class="fv">${fmtKwp(s.total_yield_kwh)} kWh</span></div>` : ''}
-      </div>
+      <div class="panel" id="sitePanel"></div>
 
       <div class="panel">
         <h6>งานบริการของไซต์นี้</h6>
@@ -804,6 +840,7 @@ async function openSite(id) {
       </div>
     </div>`;
 
+  renderSitePanel(s);
   document.getElementById('sheet').classList.add('show');
   document.body.style.overflow = 'hidden';
   document.getElementById('sheetClose').onclick = closeSheet;
@@ -814,6 +851,102 @@ async function openSite(id) {
   } catch (e) {
     document.getElementById('siteJobs').innerHTML =
       `<div class="jobs-empty text-danger">โหลดงานไม่สำเร็จ: ${esc(e.message || e)}</div>`;
+  }
+}
+
+// ── Site detail panel: read view / edit form ──────────
+function renderSitePanel(s) {
+  const el = document.getElementById('sitePanel');
+  if (!el) return;
+  const svc = serviceOf(s);
+  const exp = warrantyExpiryOf(s);
+  el.innerHTML = `
+    <div class="panel-head">
+      <h6>ข้อมูลติดต่อ</h6>
+      ${canEditSites() ? `<button class="btn-edit" id="btnEditSite"><i class="bi bi-pencil-fill"></i> แก้ไข</button>` : ''}
+    </div>
+    <div class="field"><span class="fl">ลูกค้า</span><span class="fv">${esc(s.customer_name || '-')}</span></div>
+    <div class="field"><span class="fl">เบอร์โทร</span><span class="fv">${esc(s.phone || '-')}</span></div>
+    <div class="field"><span class="fl">ผู้ติดต่อ</span><span class="fv">${esc(s.contact_person || '-')}</span></div>
+    <div class="field"><span class="fl">ช่องทาง</span><span class="fv">${esc(s.contact_method || '-')}</span></div>
+    <div class="field"><span class="fl">On-grid</span><span class="fv">${fmtDate(s.grid_connection_date)}</span></div>
+    <div class="field"><span class="fl">ประกัน</span><span class="fv">${exp ? fmtDate(exp.toISOString().slice(0, 10)) + (warrantyStateOf(s) === 'expired' ? ' (หมดแล้ว)' : '') : 'ไม่ทราบ'}</span></div>
+    <div class="field"><span class="fl">รอบบริการ</span><span class="fv">${svc.due ? fmtDate(svc.due.toISOString().slice(0, 10)) + (svc.state === 'overdue' ? ' (เกินกำหนด)' : '') : 'ยังไม่ทราบ'}</span></div>
+    <div class="field"><span class="fl">รหัสในแอป</span><span class="fv">${esc(s.platform_plant_id || '-')}</span></div>
+    ${s.notes ? `<div class="field"><span class="fl">หมายเหตุ</span><span class="fv">${esc(s.notes)}</span></div>` : ''}
+    ${s.total_yield_kwh != null ? `<div class="field"><span class="fl">ผลิตสะสม</span><span class="fv">${fmtKwp(s.total_yield_kwh)} kWh</span></div>` : ''}`;
+
+  const btn = document.getElementById('btnEditSite');
+  if (btn) btn.onclick = () => renderSiteEditForm(s);
+}
+
+function renderSiteEditForm(s) {
+  const el = document.getElementById('sitePanel');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="panel-head"><h6>แก้ไขข้อมูลติดต่อ</h6></div>
+    ${EDIT_FIELDS.map(f => `
+      <div class="ef">
+        <label for="ef_${f.key}">${f.label}</label>
+        ${f.textarea
+          ? `<textarea id="ef_${f.key}">${esc(s[f.key] ?? '')}</textarea>`
+          : `<input id="ef_${f.key}" type="${f.numeric ? 'number' : 'text'}"
+               ${f.numeric ? 'min="1" max="60" step="1" inputmode="numeric"' : ''}
+               value="${esc(s[f.key] ?? '')}">`}
+        ${f.hint ? `<div class="hint">${f.hint}</div>` : ''}
+      </div>`).join('')}
+    <div class="edit-msg" id="editMsg"></div>
+    <div class="edit-actions">
+      <button class="cancel" id="btnCancelEdit">ยกเลิก</button>
+      <button class="save" id="btnSaveSite">บันทึก</button>
+    </div>`;
+
+  document.getElementById('btnCancelEdit').onclick = () => renderSitePanel(s);
+  document.getElementById('btnSaveSite').onclick = () => saveSiteEdits(s);
+}
+
+async function saveSiteEdits(s) {
+  const msg = document.getElementById('editMsg');
+  const saveBtn = document.getElementById('btnSaveSite');
+  const cancelBtn = document.getElementById('btnCancelEdit');
+  const show = (kind, text) => { msg.className = 'edit-msg ' + kind; msg.textContent = text; };
+
+  const patch = {};
+  for (const f of EDIT_FIELDS) {
+    const input = document.getElementById('ef_' + f.key);
+    if (!input) continue;
+    const raw = input.value.trim();
+    let next = raw === '' ? null : raw;
+    if (next !== null && f.numeric) {
+      const n = Number(next);
+      if (!Number.isFinite(n) || n <= 0) { show('err', `${f.label} ต้องเป็นตัวเลขมากกว่า 0`); input.focus(); return; }
+      next = Math.round(n);
+    }
+    const before = s[f.key] == null ? null : s[f.key];
+    if (String(before ?? '') !== String(next ?? '')) patch[f.key] = next;
+  }
+
+  if (!Object.keys(patch).length) { show('ok', 'ไม่มีอะไรเปลี่ยน'); return; }
+
+  saveBtn.disabled = cancelBtn.disabled = true;
+  saveBtn.textContent = 'กำลังบันทึก…';
+  try {
+    const { error } = await sb.from('hi_solar_sites').update(patch).eq('id', s.id);
+    if (error) throw error;
+    // อัปเดตสำเนาในหน้าเลย ไม่ต้องโหลดทะเบียนใหม่ทั้งชุด
+    Object.assign(s, patch);
+    renderAll();
+    renderSitePanel(s);
+    const okMsg = document.getElementById('editMsg');
+    if (okMsg) { okMsg.className = 'edit-msg ok'; okMsg.textContent = 'บันทึกแล้ว'; }
+  } catch (error) {
+    saveBtn.disabled = cancelBtn.disabled = false;
+    saveBtn.textContent = 'บันทึก';
+    // RLS ปฏิเสธจะมาเป็น 403/42501 — บอกให้ชัดว่าเป็นเรื่องสิทธิ์ ไม่ใช่ข้อมูลผิด
+    const denied = isAccessDeniedError(error) || /42501|row-level security/i.test(String(error.code || error.message || ''));
+    show('err', denied
+      ? 'บัญชีนี้ไม่มีสิทธิ์แก้ทะเบียนไซต์ (ต้องเป็น admin หรือ member ของ Hi Solar)'
+      : 'บันทึกไม่สำเร็จ: ' + (error.message || error));
   }
 }
 
@@ -954,6 +1087,7 @@ function isAccessDeniedError(err) {
 
   try {
     const auth = await window.HiSolarAuth.fetchAuthMe('hisolar');
+    myRole = String(auth?.membership?.role || '');
     window.HiSolarAuth.applyUserSummary({
       user: auth?.user || {},
       membership: auth?.membership || {},

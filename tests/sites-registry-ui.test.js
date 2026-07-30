@@ -133,6 +133,111 @@ test('filter changes redraw the stats and charts, not just the list', () => {
   assert.match(wired, /renderAll\(\);/);
 });
 
+test('the edit gate mirrors the RLS write policy, admin and member only', () => {
+  assert.match(sitesSource, /const EDIT_ROLES = new Set\(\['admin', 'member'\]\)/);
+  assert.match(sitesSource, /const canEditSites = \(\) => EDIT_ROLES\.has\(myRole\)/);
+  // Role comes from /api/auth/me, not from anything the page can be told locally
+  assert.match(sitesSource, /myRole = String\(auth\?\.membership\?\.role \|\| ''\)/);
+  // The button is UX only; the note has to stay so nobody mistakes it for the boundary
+  assert.match(sitesSource, /การซ่อนปุ่มเป็นแค่ UX ตัวกันจริงคือ RLS/);
+});
+
+test('the edit button is only rendered for roles allowed to write', () => {
+  const panel = sitesSource.slice(
+    sitesSource.indexOf('function renderSitePanel(s)'),
+    sitesSource.indexOf('function renderSiteEditForm(s)')
+  );
+  assert.match(panel, /\$\{canEditSites\(\) \? `<button class="btn-edit" id="btnEditSite"/);
+});
+
+test('saving edits updates one site by id and never inserts', () => {
+  const save = sitesSource.slice(
+    sitesSource.indexOf('async function saveSiteEdits(s)'),
+    sitesSource.indexOf('function renderSiteJobs(jobs)')
+  );
+  assert.match(save, /\.from\('hi_solar_sites'\)\.update\(patch\)\.eq\('id', s\.id\)/);
+  assert.doesNotMatch(save, /\.insert\(|\.upsert\(/);
+  // Only changed fields are sent, so a form round-trip cannot blank other columns
+  assert.match(save, /if \(String\(before \?\? ''\) !== String\(next \?\? ''\)\) patch\[f\.key\] = next/);
+  // A policy refusal has to read as a permissions problem, not as bad input
+  assert.match(save, /42501\|row-level security/);
+  assert.match(save, /ไม่มีสิทธิ์แก้ทะเบียนไซต์/);
+});
+
+// Render the real form with a stub document so the markup itself is checked,
+// not just the source text around it.
+function renderEditFormHtml(site) {
+  // Markers must not contain newlines: sites.html uses CRLF, so "\n\n" never matches.
+  const efStart = sitesSource.indexOf('const EDIT_FIELDS = [');
+  const efEnd = sitesSource.indexOf('];', efStart) + 2;
+  assert.ok(efStart > 0 && efEnd > efStart, 'EDIT_FIELDS not found in sites.html');
+  const fields = sitesSource.slice(efStart, efEnd);
+  const render = sitesSource.slice(
+    sitesSource.indexOf('function renderSiteEditForm(s)'),
+    sitesSource.indexOf('async function saveSiteEdits(s)')
+  );
+
+  const captured = {};
+  const context = {
+    esc: (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    )),
+    document: {
+      getElementById(id) {
+        if (id === 'sitePanel') return captured;
+        return { set onclick(_fn) {} };
+      },
+    },
+  };
+  vm.createContext(context);
+  vm.runInContext(`${fields}\n${render}\nrenderSiteEditForm(${JSON.stringify(site)});`, context);
+  return captured.innerHTML || '';
+}
+
+test('the edit form renders an input per editable field, pre-filled from the site', () => {
+  const html = renderEditFormHtml({
+    customer_name: 'สวนส้มจงลักษณ์',
+    phone: '081-234-5678',
+    contact_person: null,
+    contact_method: '',
+    clean_interval_months: 12,
+    notes: 'ล้างปีละสองครั้ง',
+  });
+
+  for (const id of ['ef_customer_name', 'ef_phone', 'ef_contact_person', 'ef_contact_method', 'ef_clean_interval_months', 'ef_notes']) {
+    assert.ok(html.includes(`id="${id}"`), `missing input ${id}`);
+  }
+  assert.match(html, /value="สวนส้มจงลักษณ์"/);
+  assert.match(html, /value="081-234-5678"/);
+  assert.match(html, /<textarea id="ef_notes">ล้างปีละสองครั้ง<\/textarea>/);
+  // Empty and null both render as an empty field rather than "null"
+  assert.match(html, /id="ef_contact_person"[^>]*value=""/);
+  assert.doesNotMatch(html, /value="null"/);
+  // The cycle field stays numeric so the keypad comes up on a phone
+  assert.match(html, /id="ef_clean_interval_months" type="number"/);
+  assert.ok(html.includes('id="btnSaveSite"') && html.includes('id="btnCancelEdit"'));
+});
+
+test('values from the database are escaped into the form, not injected', () => {
+  const html = renderEditFormHtml({ customer_name: '" onfocus="alert(1)', notes: '<img src=x onerror=alert(1)>' });
+
+  assert.doesNotMatch(html, /onfocus="alert/);
+  assert.doesNotMatch(html, /<img/);
+  assert.ok(html.includes('&quot; onfocus=&quot;alert(1)'));
+  assert.ok(html.includes('&lt;img src=x onerror=alert(1)&gt;'));
+});
+
+test('the web form edits the same columns the CSV importer can write', () => {
+  const importer = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'sites-csv.mjs'), 'utf8');
+  const editable = importer.match(/const EDITABLE = \[(.*?)\]/s)[1];
+  const formKeys = [...sitesSource.matchAll(/\{ key: '([a-z_]+)',/g)].map(m => m[1]);
+
+  assert.ok(formKeys.length >= 6, 'expected the edit form to declare fields');
+  for (const key of formKeys) {
+    assert.ok(editable.includes(`'${key}'`), `${key} is editable in the web form but not in the CSV importer`);
+  }
+});
+
 test('site cards carry a warranty or service pill and service takes precedence', () => {
   const list = sitesSource.slice(
     sitesSource.indexOf('function renderList()'),
