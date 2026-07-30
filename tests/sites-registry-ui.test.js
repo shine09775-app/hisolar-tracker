@@ -133,15 +133,81 @@ test('filter changes redraw the stats and charts, not just the list', () => {
   assert.match(wired, /renderAll\(\);/);
 });
 
-function loadNav() {
-  const start = sitesSource.indexOf('const hasCoords = (s) =>');
+function loadNav({ withHelper = false } = {}) {
+  // Include the maps sanitizer block so mapsHref is exercised with the real rule
+  const start = sitesSource.indexOf('function isAllowedMapsHostname(url) {');
   const end = sitesSource.indexOf('function telHref(s)');
   assert.ok(start > 0 && end > start, 'nav helpers not found in sites.html');
-  const context = { encodeURIComponent };
+  const context = {
+    encodeURIComponent,
+    URL,
+    // withHelper: job-ui-helpers.js loaded. Otherwise the inline fallback runs.
+    window: withHelper ? { JobUiHelpers: require('../job-ui-helpers') } : {},
+    JOB_UI: withHelper ? require('../job-ui-helpers') : {},
+  };
   vm.createContext(context);
   vm.runInContext(sitesSource.slice(start, end), context);
   return context;
 }
+
+test('a pasted maps link is refused unless it is an https Google Maps URL', () => {
+  for (const withHelper of [true, false]) {
+    const { sanitizeMapsUrl, getMapsValidationMessage } = loadNav({ withHelper });
+    const where = withHelper ? 'with helper' : 'inline fallback';
+
+    assert.equal(sanitizeMapsUrl('javascript:alert(1)'), null, `${where}: javascript:`);
+    assert.equal(sanitizeMapsUrl('data:text/html,<svg/onload=alert(1)>'), null, `${where}: data:`);
+    assert.equal(sanitizeMapsUrl('http://www.google.com/maps?q=1'), null, `${where}: plain http`);
+    assert.equal(sanitizeMapsUrl('https://evil.example/maps?q=1'), null, `${where}: wrong host`);
+    assert.equal(sanitizeMapsUrl('not a url'), null, `${where}: malformed`);
+    assert.equal(sanitizeMapsUrl('https://maps.app.goo.gl/abc123'), 'https://maps.app.goo.gl/abc123', where);
+    assert.match(getMapsValidationMessage('javascript:alert(1)'), /Google Maps|maps\.app\.goo\.gl/, where);
+    assert.equal(getMapsValidationMessage(''), '', `${where}: empty is allowed`);
+  }
+});
+
+test('a dangerous maps_url already in the database never reaches an href', () => {
+  const { mapsHref } = loadNav();
+
+  // Falls through to the address search rather than emitting the bad link
+  assert.equal(
+    mapsHref({ maps_url: 'javascript:alert(1)', address: 'อ.หางดง' }),
+    'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('อ.หางดง')
+  );
+  assert.equal(mapsHref({ maps_url: 'javascript:alert(1)' }), null);
+  // Quotes that would break out of the attribute come back encoded
+  const injected = mapsHref({ maps_url: 'https://www.google.com/maps?q=" onclick="alert(1)' });
+  assert.ok(injected.startsWith('https://www.google.com/maps'));
+  assert.doesNotMatch(injected, /"/);
+});
+
+test('the form stores the sanitized maps link and blocks a bad one before saving', () => {
+  const save = sitesSource.slice(
+    sitesSource.indexOf('async function saveSiteEdits(s)'),
+    sitesSource.indexOf('function renderSiteJobs(jobs)')
+  );
+  assert.match(save, /const safe = sanitizeMapsUrl\(next\)/);
+  assert.match(save, /if \(!safe\) \{ show\('err', getMapsValidationMessage\(next\)\)/);
+  assert.match(save, /next = safe/);
+});
+
+test('the CSV importer enforces the same maps link rule as the browser', () => {
+  const importer = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'sites-csv.mjs'), 'utf8');
+  const start = importer.indexOf('function sanitizeMapsUrl(value) {');
+  const end = importer.indexOf('function loadEnv()');
+  assert.ok(start > 0 && end > start, 'importer is missing its maps sanitizer');
+
+  const context = { URL };
+  vm.createContext(context);
+  vm.runInContext(importer.slice(start, end), context);
+
+  assert.equal(context.sanitizeMapsUrl('javascript:alert(1)'), null);
+  assert.equal(context.sanitizeMapsUrl('https://evil.example/maps'), null);
+  assert.equal(context.sanitizeMapsUrl('http://maps.google.com/x'), null);
+  assert.equal(context.sanitizeMapsUrl('https://maps.app.goo.gl/abc'), 'https://maps.app.goo.gl/abc');
+  // A bad link is reported as a row problem instead of being written
+  assert.match(importer, /problems\.push\(`row \$\{i \+ 2\}: maps_url must be an https Google Maps/);
+});
 
 test('navigation prefers a captured pin over a saved link over the address text', () => {
   const { mapsHref } = loadNav();

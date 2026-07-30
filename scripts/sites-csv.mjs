@@ -40,9 +40,29 @@ const repoRoot = resolve(__dirname, '..');
 
 // Reference columns are exported for context but never written back.
 const REFERENCE = ['site_code', 'site_name', 'address', 'capacity_kwp', 'brand_code', 'grid_connection_date'];
-const EDITABLE = ['customer_name', 'phone', 'contact_person', 'contact_method', 'inverter_model', 'inverter_count', 'panel_count', 'clean_interval_months', 'notes'];
+const EDITABLE = ['customer_name', 'phone', 'contact_person', 'contact_method', 'inverter_model', 'inverter_count', 'panel_count', 'clean_interval_months', 'maps_url', 'notes'];
 const NUMERIC = new Set(['inverter_count', 'panel_count', 'clean_interval_months']);
 const CLEAR_TOKEN = '-';
+
+// maps_url is rendered into an href by the browser pages. This path writes with
+// the service role and never sees their validation, so it enforces the same
+// allowlist as job-ui-helpers.js rather than trusting the spreadsheet.
+function sanitizeMapsUrl(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return '';
+  let url;
+  try { url = new URL(raw); } catch { return null; }
+  if (url.protocol !== 'https:') return null;
+  const host = url.hostname.toLowerCase();
+  const path = url.pathname.toLowerCase();
+  const allowed = host === 'maps.app.goo.gl'
+    || /^maps\.google\./.test(host)
+    || (/^(www\.)?google\./.test(host) && path.startsWith('/maps'));
+  if (!allowed) return null;
+  url.username = '';
+  url.password = '';
+  return url.toString();
+}
 
 function loadEnv() {
   let url = process.env.SUPABASE_URL;
@@ -158,6 +178,11 @@ async function doImport(sb, fileArg, commit) {
         const n = Number(next);
         if (!Number.isFinite(n)) { problems.push(`row ${i + 2}: ${f}="${raw}" is not a number`); continue; }
         next = n;
+      }
+      if (next !== null && f === 'maps_url') {
+        const safe = sanitizeMapsUrl(next);
+        if (!safe) { problems.push(`row ${i + 2}: maps_url must be an https Google Maps or maps.app.goo.gl link`); continue; }
+        next = safe;
       }
       const before = site[f] == null ? null : site[f];
       if (String(before ?? '') === String(next ?? '')) continue;   // unchanged
