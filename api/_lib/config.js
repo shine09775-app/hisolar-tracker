@@ -48,13 +48,22 @@ function getAuthCookieSecret() {
   return secret;
 }
 
+// Dashboard-pasted env values pick up stray whitespace, and LINE compares
+// redirect_uri byte for byte -- a leading tab is enough to fail the callback.
+function readEnv(...names) {
+  for (const name of names) {
+    const value = String(process.env[name] || '').trim();
+    if (value) return value;
+  }
+  return '';
+}
+
 function getLineLoginConfig() {
-  const channelId = process.env.LINE_LOGIN_CHANNEL_ID || process.env.LINE_LOGIN_HISOLAR_CHANNEL_ID || '';
-  const channelSecret = process.env.LINE_LOGIN_CHANNEL_SECRET || process.env.LINE_LOGIN_HISOLAR_CHANNEL_SECRET || '';
-  const callbackUrl = process.env.LINE_LOGIN_CALLBACK_URL || process.env.LINE_LOGIN_HISOLAR_CALLBACK_URL || '';
-  const providerNamespace = String(
-    process.env.LINE_LOGIN_PROVIDER_NAMESPACE || DEFAULT_LINE_PROVIDER_NAMESPACE
-  ).trim();
+  const channelId = readEnv('LINE_LOGIN_CHANNEL_ID', 'LINE_LOGIN_HISOLAR_CHANNEL_ID');
+  const channelSecret = readEnv('LINE_LOGIN_CHANNEL_SECRET', 'LINE_LOGIN_HISOLAR_CHANNEL_SECRET');
+  const callbackUrl = readEnv('LINE_LOGIN_CALLBACK_URL', 'LINE_LOGIN_HISOLAR_CALLBACK_URL');
+  const providerNamespace =
+    readEnv('LINE_LOGIN_PROVIDER_NAMESPACE') || DEFAULT_LINE_PROVIDER_NAMESPACE;
 
   if (!channelId || !channelSecret || !callbackUrl) {
     throw createHttpError(500, 'Missing shared LINE Login configuration');

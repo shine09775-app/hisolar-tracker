@@ -135,6 +135,53 @@ test('Hi Solar and JDK share one LINE Login configuration but keep separate succ
   assert.equal(jdk.successPath, '/JDK.html');
 });
 
+test('LINE Login config trims whitespace pasted into dashboard env values', () => {
+  const original = {
+    id: process.env.LINE_LOGIN_CHANNEL_ID,
+    secret: process.env.LINE_LOGIN_CHANNEL_SECRET,
+    callback: process.env.LINE_LOGIN_CALLBACK_URL,
+    namespace: process.env.LINE_LOGIN_PROVIDER_NAMESPACE,
+  };
+  // A leading tab in redirect_uri makes LINE reject the callback outright.
+  process.env.LINE_LOGIN_CHANNEL_ID = '  shared-channel  ';
+  process.env.LINE_LOGIN_CHANNEL_SECRET = '\tshared-secret\n';
+  process.env.LINE_LOGIN_CALLBACK_URL = '\thttps://example.com/api/auth/line/callback\n';
+  process.env.LINE_LOGIN_PROVIDER_NAMESPACE = '  hisolar-tracker-line  ';
+
+  try {
+    const config = getAppConfig('hisolar');
+    assert.equal(config.channelId, 'shared-channel');
+    assert.equal(config.channelSecret, 'shared-secret');
+    assert.equal(config.callbackUrl, 'https://example.com/api/auth/line/callback');
+    assert.equal(config.providerNamespace, 'hisolar-tracker-line');
+  } finally {
+    process.env.LINE_LOGIN_CHANNEL_ID = original.id;
+    process.env.LINE_LOGIN_CHANNEL_SECRET = original.secret;
+    process.env.LINE_LOGIN_CALLBACK_URL = original.callback;
+    process.env.LINE_LOGIN_PROVIDER_NAMESPACE = original.namespace;
+  }
+});
+
+test('whitespace-only env values fall through to the legacy name instead of winning', () => {
+  const original = {
+    callback: process.env.LINE_LOGIN_CALLBACK_URL,
+    legacy: process.env.LINE_LOGIN_HISOLAR_CALLBACK_URL,
+  };
+  process.env.LINE_LOGIN_CALLBACK_URL = '   ';
+  process.env.LINE_LOGIN_HISOLAR_CALLBACK_URL = 'https://legacy.example.com/api/auth/line/callback';
+
+  try {
+    assert.equal(
+      getAppConfig('hisolar').callbackUrl,
+      'https://legacy.example.com/api/auth/line/callback'
+    );
+  } finally {
+    process.env.LINE_LOGIN_CALLBACK_URL = original.callback;
+    if (original.legacy === undefined) delete process.env.LINE_LOGIN_HISOLAR_CALLBACK_URL;
+    else process.env.LINE_LOGIN_HISOLAR_CALLBACK_URL = original.legacy;
+  }
+});
+
 test('shared LINE Login config can fall back to legacy Hi Solar env names for Vercel previews', () => {
   const original = {
     id: process.env.LINE_LOGIN_CHANNEL_ID,
