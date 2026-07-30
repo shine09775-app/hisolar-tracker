@@ -69,6 +69,80 @@
     .sum-card .v { font-size: 18px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
     .sum-card .l { font-size: 10.5px; color: #64748b; margin-top: 2px; }
 
+    /* Overview panel */
+    .ov { margin: 8px 14px 0; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+    .ov-head {
+      width: 100%; border: 0; background: #fff; display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer;
+    }
+    .ov-head .bi-bar-chart-line-fill { color: var(--hs-primary); }
+    .ov-head .sp { flex: 1; text-align: left; }
+    .ov-head .hint { font-size: 10.5px; font-weight: 400; color: #94a3b8; }
+    .ov-head .chev { transition: transform .18s ease; color: #94a3b8; }
+    .ov.open .ov-head .chev { transform: rotate(180deg); }
+    .ov-body { display: none; padding: 2px 12px 12px; border-top: 1px solid #f1f5f9; }
+    .ov.open .ov-body { display: block; }
+
+    .ch { padding: 10px 0 2px; border-top: 1px solid #f1f5f9; }
+    .ch:first-child { border-top: 0; }
+    .ch-top { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+    .ch-t { font-size: 12px; font-weight: 600; color: #475569; flex: 1; }
+    .ch-sub { font-size: 10px; color: #94a3b8; }
+    .metric-tog { display: flex; gap: 0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+    .metric-tog button {
+      border: 0; background: #fff; color: #64748b; font-size: 10.5px; font-weight: 500;
+      padding: 3px 8px; cursor: pointer;
+    }
+    .metric-tog button.on { background: var(--hs-primary); color: #fff; }
+
+    /* Column (year) chart */
+    .cols { display: flex; align-items: flex-end; gap: 4px; height: 108px; }
+    .col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+    .col .stack {
+      width: 100%; display: flex; flex-direction: column; justify-content: flex-end;
+      border-radius: 5px 5px 0 0; overflow: hidden; transition: opacity .15s ease;
+    }
+    .col .seg { width: 100%; }
+    .col.dim .stack { opacity: .28; }
+    .col .cv { font-size: 10px; font-weight: 700; color: #334155; font-variant-numeric: tabular-nums; margin-bottom: 3px; }
+    .col .cl { font-size: 9px; color: #94a3b8; margin-top: 4px; white-space: nowrap; }
+    .col.on .cl { color: var(--hs-primary); font-weight: 600; }
+
+    /* Segmented + bar charts */
+    .segbar { display: flex; height: 22px; border-radius: 7px; overflow: hidden; background: #f1f5f9; }
+    .segbar .s { display: grid; place-items: center; font-size: 10px; font-weight: 600; color: #fff; cursor: pointer; min-width: 0; }
+    .segbar .s.dim { opacity: .3; }
+    .seg-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 7px; }
+    .lg { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; color: #64748b; cursor: pointer; background: none; border: 0; padding: 0; }
+    .lg .sw { width: 9px; height: 9px; border-radius: 3px; flex: 0 0 auto; }
+    .lg.on { color: #334155; font-weight: 600; }
+    .lg b { font-weight: 600; color: #334155; font-variant-numeric: tabular-nums; }
+
+    .hbars { display: flex; flex-direction: column; gap: 7px; }
+    .hb { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .hb .hb-l { font-size: 11px; color: #475569; width: 58px; flex: 0 0 auto; }
+    .hb .hb-track { flex: 1; height: 15px; background: #f1f5f9; border-radius: 5px; overflow: hidden; }
+    .hb .hb-fill { height: 100%; border-radius: 5px; transition: width .2s ease; }
+    .hb .hb-v { font-size: 10.5px; font-weight: 600; color: #334155; font-variant-numeric: tabular-nums; width: 62px; text-align: right; flex: 0 0 auto; }
+    .hb.dim { opacity: .4; }
+
+    .ch-note { font-size: 10px; color: #94a3b8; margin-top: 8px; line-height: 1.45; }
+
+    /* Warranty pill on cards */
+    .wpill { font-size: 9.5px; font-weight: 600; padding: 2px 6px; border-radius: 5px; white-space: nowrap; }
+    .w-active  { background: var(--hs-primary-l); color: #15803d; }
+    .w-soon    { background: var(--hs-amber-l);   color: #a16207; }
+    .w-expired { background: #f1f5f9;             color: #64748b; }
+    .w-due     { background: var(--hs-red-l);     color: #b91c1c; }
+
+    /* Active filter bar */
+    .active-filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0 0; }
+    .afc {
+      display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500;
+      background: var(--hs-primary); color: #fff; border: 0; border-radius: 999px; padding: 4px 8px 4px 10px; cursor: pointer;
+    }
+    .afc i { font-size: 12px; opacity: .85; }
+
     /* Search + filters */
     .toolbar { padding: 10px 14px 6px; position: sticky; top: var(--nav-h); background: #f1f5f9; z-index: 80; }
     .search-wrap { position: relative; }
@@ -212,9 +286,48 @@
   </div>
 
   <div class="summary">
-    <div class="sum-card"><div class="v" id="sumSites">-</div><div class="l">ไซต์ทั้งหมด</div></div>
+    <div class="sum-card"><div class="v" id="sumSites">-</div><div class="l" id="sumSitesLabel">ไซต์ทั้งหมด</div></div>
     <div class="sum-card"><div class="v" id="sumKwp">-</div><div class="l">kWp รวม</div></div>
     <div class="sum-card"><div class="v" id="sumBrands">-</div><div class="l">ยี่ห้อ</div></div>
+  </div>
+
+  <div class="ov" id="ov">
+    <button class="ov-head" id="ovHead" aria-expanded="false" aria-controls="ovBody">
+      <i class="bi bi-bar-chart-line-fill"></i>
+      <span class="sp">ภาพรวม <span class="hint">แตะกราฟเพื่อกรองรายการ</span></span>
+      <i class="bi bi-chevron-down chev"></i>
+    </button>
+    <div class="ov-body" id="ovBody">
+      <div class="ch">
+        <div class="ch-top">
+          <div class="ch-t">ปีที่ติดตั้ง <span class="ch-sub">(พ.ศ.)</span></div>
+          <div class="metric-tog" id="yearMetric">
+            <button data-metric="sites" class="on">ไซต์</button>
+            <button data-metric="kwp">kWp</button>
+          </div>
+        </div>
+        <div class="cols" id="chYear"></div>
+        <div class="seg-legend" id="chYearLegend"></div>
+      </div>
+
+      <div class="ch">
+        <div class="ch-top"><div class="ch-t">สถานะประกัน <span class="ch-sub">2 ปีจากวันติดตั้ง</span></div></div>
+        <div class="segbar" id="chWarranty"></div>
+        <div class="seg-legend" id="chWarrantyLegend"></div>
+      </div>
+
+      <div class="ch">
+        <div class="ch-top"><div class="ch-t">รอบล้างแผง / ต้องเข้าบริการ</div></div>
+        <div class="segbar" id="chService"></div>
+        <div class="seg-legend" id="chServiceLegend"></div>
+        <div class="ch-note" id="chServiceNote"></div>
+      </div>
+
+      <div class="ch">
+        <div class="ch-top"><div class="ch-t">กำลังการผลิตตามยี่ห้อ <span class="ch-sub">kWp</span></div></div>
+        <div class="hbars" id="chBrand"></div>
+      </div>
+    </div>
   </div>
 
   <div class="toolbar">
@@ -224,6 +337,7 @@
       <button class="search-clear" id="qClear" style="display:none;" aria-label="ล้างคำค้น"><i class="bi bi-x-circle-fill"></i></button>
     </div>
     <div class="chips" id="brandChips"></div>
+    <div class="active-filters" id="activeFilters"></div>
     <div class="result-line" id="resultLine"></div>
   </div>
 
@@ -243,10 +357,39 @@ let sb = null;
 let allSites = [];
 let brandFilter = 'ALL';
 let searchTerm = '';
+let yearFilter = 'ALL';      // ปี ค.ศ. ของ grid_connection_date
+let warrantyFilter = 'ALL';  // active | soon | expired | unknown
+let serviceFilter = 'ALL';   // overdue | soon | ok | never
+let yearMetric = 'sites';    // sites | kwp
+let lastCleanBySite = {};    // site_id -> ISO date ของงานล้างแผงครั้งล่าสุด
+
+// ประกันนับ 2 ปีจากวันติดตั้ง (COD) เว้นแต่มีวันหมดประกันบันทึกไว้จริง
+const WARRANTY_YEARS = 2;
+const WARRANTY_SOON_DAYS = 90;
+// รอบล้างแผงเริ่มต้น ใช้เมื่อไซต์ยังไม่ได้ตั้ง clean_interval_months เอง
+const DEFAULT_CLEAN_MONTHS = 6;
+const CLEAN_SOON_DAYS = 30;
 
 const BRAND_LABEL = {
   HUAWEI: 'Huawei', DEYE: 'Deye', SOLIS: 'Solis',
   FELICITY: 'Felicity', GROWATT: 'Growatt',
+};
+// สีเดียวกับ badge ยี่ห้อบนการ์ด เพื่อให้กราฟอ่านคู่กับรายการได้
+const BRAND_COLOR = {
+  HUAWEI: '#dc2626', DEYE: '#2563eb', SOLIS: '#16a34a',
+  FELICITY: '#ca8a04', GROWATT: '#7c3aed', none: '#94a3b8',
+};
+const WARRANTY_META = {
+  active:  { label: 'ในประกัน',      color: '#16a34a' },
+  soon:    { label: 'ใกล้หมด',       color: '#f59e0b' },
+  expired: { label: 'หมดประกันแล้ว', color: '#94a3b8' },
+  unknown: { label: 'ไม่ทราบวันติดตั้ง', color: '#cbd5e1' },
+};
+const SERVICE_META = {
+  overdue: { label: 'เกินกำหนด',        color: '#ef4444' },
+  soon:    { label: 'ใกล้ครบรอบ',       color: '#f59e0b' },
+  ok:      { label: 'ตามรอบ',           color: '#16a34a' },
+  never:   { label: 'ไม่ทราบวันติดตั้ง', color: '#cbd5e1' },
 };
 const PLATFORM_LABEL = {
   FUSIONSOLAR: 'FusionSolar', SOLARMAN: 'Solarman', DEYECLOUD: 'Deye Cloud',
@@ -280,14 +423,86 @@ function statusClass(s) {
   return '';
 }
 
+// ── Warranty / service derivation ─────────────────────
+// วันหมดประกันและรอบล้างแผงส่วนใหญ่ยังไม่ถูกกรอกในฐานข้อมูล จึงคำนวณจากวันติดตั้ง
+// เป็นค่าเริ่มต้น และให้ค่าที่กรอกไว้จริงชนะเสมอเมื่อมีการกรอกภายหลัง
+function parseDate(v) {
+  if (!v) return null;
+  const d = new Date(String(v).slice(0, 10) + 'T00:00:00');
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+function addMonths(date, months) {
+  const d = new Date(date.getTime());
+  const target = d.getDate();
+  d.setMonth(d.getMonth() + months);
+  if (d.getDate() < target) d.setDate(0); // ปลายเดือนไม่ให้ข้ามเดือน
+  return d;
+}
+const startOfToday = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+const daysBetween = (a, b) => Math.round((a.getTime() - b.getTime()) / 86400000);
+
+function codOf(s) { return parseDate(s.grid_connection_date); }
+
+function warrantyExpiryOf(s) {
+  const recorded = parseDate(s.warranty_panel_expiry) || parseDate(s.warranty_inverter_expiry);
+  if (recorded) return recorded;
+  const cod = codOf(s);
+  return cod ? addMonths(cod, WARRANTY_YEARS * 12) : null;
+}
+
+function warrantyStateOf(s) {
+  const exp = warrantyExpiryOf(s);
+  if (!exp) return 'unknown';
+  const left = daysBetween(exp, startOfToday());
+  if (left < 0) return 'expired';
+  if (left <= WARRANTY_SOON_DAYS) return 'soon';
+  return 'active';
+}
+
+function cleanIntervalOf(s) {
+  const n = Number(s.clean_interval_months);
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_CLEAN_MONTHS;
+}
+
+// ครบรอบถัดไป: ใช้ next_clean_date ถ้าตั้งไว้ ไม่งั้นนับจากการล้างครั้งล่าสุด
+// และถ้าไม่เคยมีประวัติล้างเลย ให้นับจากวันติดตั้ง
+function serviceOf(s) {
+  const explicit = parseDate(s.next_clean_date);
+  const lastClean = parseDate(lastCleanBySite[s.id]);
+  const base = lastClean || codOf(s);
+  const due = explicit || (base ? addMonths(base, cleanIntervalOf(s)) : null);
+  if (!due) return { state: 'never', due: null, lastClean: null };
+  const left = daysBetween(due, startOfToday());
+  const state = left < 0 ? 'overdue' : (left <= CLEAN_SOON_DAYS ? 'soon' : 'ok');
+  return { state, due, lastClean };
+}
+
 // ── Data ──────────────────────────────────────────────
 async function loadSites() {
   const { data, error } = await sb
     .from('hi_solar_sites')
-    .select('id,site_code,site_name,customer_name,phone,contact_person,contact_method,address,maps_url,capacity_kwp,status,grid_connection_date,platform_code,brand_code,platform_plant_id,total_yield_kwh')
+    .select('id,site_code,site_name,customer_name,phone,contact_person,contact_method,address,maps_url,capacity_kwp,status,grid_connection_date,platform_code,brand_code,platform_plant_id,total_yield_kwh,warranty_panel_expiry,warranty_inverter_expiry,next_clean_date,clean_interval_months')
     .order('site_name');
   if (error) throw error;
   allSites = data || [];
+}
+
+// ประวัติล้างแผงล่าสุดต่อไซต์ ใช้คำนวณรอบถัดไป
+// งานที่ยังไม่ถูกผูกเข้าไซต์ (site_id ว่าง) จะไม่นับ — ดูหน้า link-jobs.html
+async function loadCleanHistory() {
+  const { data, error } = await sb
+    .from('hi_solar_jobs')
+    .select('site_id,job_date,appointment_date')
+    .eq('sheet_key', 'langPaeng')
+    .not('site_id', 'is', null);
+  if (error) throw error;
+  lastCleanBySite = {};
+  for (const j of data || []) {
+    const when = j.appointment_date || j.job_date;
+    if (!when) continue;
+    const prev = lastCleanBySite[j.site_id];
+    if (!prev || String(when) > String(prev)) lastCleanBySite[j.site_id] = when;
+  }
 }
 
 async function loadSiteJobs(siteId) {
@@ -301,23 +516,48 @@ async function loadSiteJobs(siteId) {
   return data || [];
 }
 
+// ── Filtering ─────────────────────────────────────────
+// `except` ปล่อยให้แต่ละกราฟไม่กรองด้วยมิติของตัวเอง จึงยังเห็นตัวเลือกอื่นให้สลับได้
+function visibleSites(except) {
+  const q = searchTerm.trim().toLowerCase();
+  return allSites.filter(s => {
+    if (except !== 'brand' && brandFilter !== 'ALL' && (s.brand_code || 'none') !== brandFilter) return false;
+    if (except !== 'year' && yearFilter !== 'ALL') {
+      const cod = codOf(s);
+      if (!cod || cod.getFullYear() !== Number(yearFilter)) return false;
+    }
+    if (except !== 'warranty' && warrantyFilter !== 'ALL' && warrantyStateOf(s) !== warrantyFilter) return false;
+    if (except !== 'service' && serviceFilter !== 'ALL' && serviceOf(s).state !== serviceFilter) return false;
+    if (!q) return true;
+    return [s.site_name, s.address, s.customer_name, s.phone, s.contact_person, s.site_code, s.platform_plant_id]
+      .some(v => String(v || '').toLowerCase().includes(q));
+  });
+}
+
+const hasActiveFilter = () =>
+  brandFilter !== 'ALL' || yearFilter !== 'ALL' || warrantyFilter !== 'ALL' ||
+  serviceFilter !== 'ALL' || searchTerm.trim() !== '';
+
 // ── Render ────────────────────────────────────────────
 function renderSummary() {
-  const kwp = allSites.reduce((s, x) => s + (Number(x.capacity_kwp) || 0), 0);
-  const brands = new Set(allSites.map(x => x.brand_code).filter(Boolean));
-  document.getElementById('sumSites').textContent = allSites.length.toLocaleString('th-TH');
+  const rows = visibleSites();
+  const kwp = rows.reduce((s, x) => s + (Number(x.capacity_kwp) || 0), 0);
+  const brands = new Set(rows.map(x => x.brand_code).filter(Boolean));
+  document.getElementById('sumSites').textContent = rows.length.toLocaleString('th-TH');
   document.getElementById('sumKwp').textContent = Math.round(kwp).toLocaleString('th-TH');
   document.getElementById('sumBrands').textContent = brands.size;
+  document.getElementById('sumSitesLabel').textContent = hasActiveFilter() ? 'ไซต์ที่กรอง' : 'ไซต์ทั้งหมด';
 }
 
 function renderChips() {
-  const counts = allSites.reduce((a, s) => {
+  const base = visibleSites('brand');
+  const counts = base.reduce((a, s) => {
     const k = s.brand_code || 'none';
     a[k] = (a[k] || 0) + 1;
     return a;
   }, {});
   const order = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-  const chips = [`<button class="chip ${brandFilter === 'ALL' ? 'on' : ''}" data-brand="ALL">ทั้งหมด <span class="cnt">${allSites.length}</span></button>`];
+  const chips = [`<button class="chip ${brandFilter === 'ALL' ? 'on' : ''}" data-brand="ALL">ทั้งหมด <span class="cnt">${base.length}</span></button>`];
   for (const b of order) {
     chips.push(
       `<button class="chip ${brandFilter === b ? 'on' : ''}" data-brand="${esc(b)}">` +
@@ -327,14 +567,142 @@ function renderChips() {
   document.getElementById('brandChips').innerHTML = chips.join('');
 }
 
-function visibleSites() {
-  const q = searchTerm.trim().toLowerCase();
-  return allSites.filter(s => {
-    if (brandFilter !== 'ALL' && (s.brand_code || 'none') !== brandFilter) return false;
-    if (!q) return true;
-    return [s.site_name, s.address, s.customer_name, s.phone, s.contact_person, s.site_code, s.platform_plant_id]
-      .some(v => String(v || '').toLowerCase().includes(q));
+function renderActiveFilters() {
+  const pills = [];
+  if (yearFilter !== 'ALL') pills.push(['year', `ปี ${Number(yearFilter) + 543}`]);
+  if (warrantyFilter !== 'ALL') pills.push(['warranty', WARRANTY_META[warrantyFilter].label]);
+  if (serviceFilter !== 'ALL') pills.push(['service', SERVICE_META[serviceFilter].label]);
+  document.getElementById('activeFilters').innerHTML = pills
+    .map(([k, label]) => `<button class="afc" data-clear="${k}">${esc(label)} <i class="bi bi-x-lg"></i></button>`)
+    .join('');
+}
+
+// ── Charts ────────────────────────────────────────────
+// วาดด้วย CSS/flex ทั้งหมด ไม่พึ่ง chart library เพื่อให้หน้ายังเบา
+function renderYearChart() {
+  const rows = visibleSites('year');
+  const brandsSeen = [...new Set(rows.map(s => s.brand_code || 'none'))]
+    .sort((a, b) => (BRAND_LABEL[a] || a).localeCompare(BRAND_LABEL[b] || b));
+
+  const byYear = new Map();
+  for (const s of rows) {
+    const cod = codOf(s);
+    if (!cod) continue;
+    const y = cod.getFullYear();
+    if (!byYear.has(y)) byYear.set(y, { total: 0, brands: {} });
+    const bucket = byYear.get(y);
+    const key = s.brand_code || 'none';
+    const add = yearMetric === 'kwp' ? (Number(s.capacity_kwp) || 0) : 1;
+    bucket.total += add;
+    bucket.brands[key] = (bucket.brands[key] || 0) + add;
+  }
+
+  const years = [...byYear.keys()].sort((a, b) => a - b);
+  const el = document.getElementById('chYear');
+  if (!years.length) {
+    el.innerHTML = `<div class="ch-note" style="margin:0">ไม่มีข้อมูลวันติดตั้งในรายการที่กรอง</div>`;
+    document.getElementById('chYearLegend').innerHTML = '';
+    return;
+  }
+  const max = Math.max(...years.map(y => byYear.get(y).total)) || 1;
+
+  el.innerHTML = years.map(y => {
+    const b = byYear.get(y);
+    const h = Math.max(3, Math.round((b.total / max) * 82));
+    const segs = brandsSeen
+      .filter(k => b.brands[k])
+      .map(k => `<div class="seg" style="height:${(b.brands[k] / b.total) * 100}%;background:${BRAND_COLOR[k] || BRAND_COLOR.none}"></div>`)
+      .join('');
+    const on = String(yearFilter) === String(y);
+    const dim = yearFilter !== 'ALL' && !on;
+    const shown = yearMetric === 'kwp' ? Math.round(b.total).toLocaleString('th-TH') : b.total;
+    return `<div class="col ${on ? 'on' : ''} ${dim ? 'dim' : ''}" data-year="${y}" role="button"
+      title="ปี ${y + 543} · ${shown}${yearMetric === 'kwp' ? ' kWp' : ' ไซต์'}">
+      <div class="cv">${shown}</div>
+      <div class="stack" style="height:${h}px">${segs}</div>
+      <div class="cl">${y + 543}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('chYearLegend').innerHTML = brandsSeen.map(k =>
+    `<button class="lg ${brandFilter === k ? 'on' : ''}" data-brand="${esc(k)}">
+      <span class="sw" style="background:${BRAND_COLOR[k] || BRAND_COLOR.none}"></span>${esc(BRAND_LABEL[k] || 'ไม่ระบุ')}
+    </button>`
+  ).join('');
+}
+
+function renderSegChart(opts) {
+  const { barId, legendId, meta, rows, stateOf, current, filterKey } = opts;
+  const counts = {};
+  for (const s of rows) {
+    const k = stateOf(s);
+    counts[k] = (counts[k] || 0) + 1;
+  }
+  const keys = Object.keys(meta).filter(k => counts[k]);
+  const total = rows.length || 1;
+
+  document.getElementById(barId).innerHTML = keys.map(k => {
+    const pct = (counts[k] / total) * 100;
+    const dim = current !== 'ALL' && current !== k;
+    return `<div class="s ${dim ? 'dim' : ''}" data-${filterKey}="${k}" style="flex:0 0 ${pct}%;background:${meta[k].color}"
+      title="${meta[k].label} ${counts[k]} ไซต์">${pct >= 12 ? counts[k] : ''}</div>`;
+  }).join('') || `<div class="s" style="flex:1;background:#e2e8f0"></div>`;
+
+  document.getElementById(legendId).innerHTML = keys.map(k =>
+    `<button class="lg ${current === k ? 'on' : ''}" data-${filterKey}="${k}">
+      <span class="sw" style="background:${meta[k].color}"></span>${meta[k].label} <b>${counts[k]}</b>
+    </button>`
+  ).join('');
+}
+
+function renderBrandKwpChart() {
+  const rows = visibleSites('brand');
+  const agg = {};
+  for (const s of rows) {
+    const k = s.brand_code || 'none';
+    if (!agg[k]) agg[k] = { kwp: 0, n: 0 };
+    agg[k].kwp += Number(s.capacity_kwp) || 0;
+    agg[k].n += 1;
+  }
+  const keys = Object.keys(agg).sort((a, b) => agg[b].kwp - agg[a].kwp);
+  const max = Math.max(...keys.map(k => agg[k].kwp), 1);
+  document.getElementById('chBrand').innerHTML = keys.map(k => {
+    const on = brandFilter === k;
+    const dim = brandFilter !== 'ALL' && !on;
+    return `<div class="hb ${dim ? 'dim' : ''}" data-brand="${esc(k)}" role="button" title="${esc(BRAND_LABEL[k] || 'ไม่ระบุ')} · ${agg[k].n} ไซต์">
+      <div class="hb-l">${esc(BRAND_LABEL[k] || 'ไม่ระบุ')}</div>
+      <div class="hb-track"><div class="hb-fill" style="width:${(agg[k].kwp / max) * 100}%;background:${BRAND_COLOR[k] || BRAND_COLOR.none}"></div></div>
+      <div class="hb-v">${Math.round(agg[k].kwp).toLocaleString('th-TH')}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderCharts() {
+  renderYearChart();
+  renderSegChart({
+    barId: 'chWarranty', legendId: 'chWarrantyLegend', meta: WARRANTY_META,
+    rows: visibleSites('warranty'), stateOf: warrantyStateOf,
+    current: warrantyFilter, filterKey: 'warranty',
   });
+  const svcRows = visibleSites('service');
+  renderSegChart({
+    barId: 'chService', legendId: 'chServiceLegend', meta: SERVICE_META,
+    rows: svcRows, stateOf: (s) => serviceOf(s).state,
+    current: serviceFilter, filterKey: 'service',
+  });
+  const tracked = svcRows.filter(s => lastCleanBySite[s.id]).length;
+  document.getElementById('chServiceNote').textContent = tracked
+    ? `นับรอบ ${DEFAULT_CLEAN_MONTHS} เดือนจากการล้างครั้งล่าสุด · มีประวัติล้างแล้ว ${tracked} ไซต์`
+    : `ยังไม่มีไซต์ใดมีประวัติล้างแผงที่ผูกไว้ จึงนับรอบ ${DEFAULT_CLEAN_MONTHS} เดือนจากวันติดตั้งก่อน — ผูกงานล้างแผงเข้าไซต์ที่หน้า "ผูกงาน" แล้วตัวเลขจะแม่นขึ้น`;
+  renderBrandKwpChart();
+}
+
+function renderAll() {
+  renderSummary();
+  renderChips();
+  renderActiveFilters();
+  renderCharts();
+  renderList();
 }
 
 function renderList() {
@@ -347,12 +715,20 @@ function renderList() {
 
   const el = document.getElementById('list');
   if (!rows.length) {
-    el.innerHTML = `<div class="empty"><i class="bi bi-search"></i>ไม่พบไซต์ที่ตรงกับการค้นหา<br><span class="small">ลองเปลี่ยนคำค้นหรือตัวกรองยี่ห้อ</span></div>`;
+    el.innerHTML = `<div class="empty"><i class="bi bi-search"></i>ไม่พบไซต์ที่ตรงกับเงื่อนไข<br><span class="small">ลองเปลี่ยนคำค้น ตัวกรองยี่ห้อ หรือล้างตัวกรองจากกราฟ</span></div>`;
     return;
   }
   el.innerHTML = rows.map(s => {
     const brand = s.brand_code || 'none';
     const sc = statusClass(s.status);
+    const w = warrantyStateOf(s);
+    const svc = serviceOf(s);
+    // ป้ายเดียวต่อการ์ด: ถ้าเกินรอบบริการแล้วให้เรื่องบริการมาก่อน เพราะเป็นงานที่ต้องทำ
+    const pill = svc.state === 'overdue'
+      ? { cls: 'w-due', text: 'ถึงรอบบริการ' }
+      : (w === 'active'  ? { cls: 'w-active',  text: 'ในประกัน' }
+      : (w === 'soon'    ? { cls: 'w-soon',    text: 'ประกันใกล้หมด' }
+      : (w === 'expired' ? { cls: 'w-expired', text: 'หมดประกัน' } : null)));
     return `
       <div class="site-card" data-id="${esc(s.id)}">
         <div class="top">
@@ -363,7 +739,10 @@ function renderList() {
         </div>
         <div class="meta">
           <span class="status-pill"><span class="dot ${sc}"></span>${esc(s.status || 'ไม่มีข้อมูลสถานะ')}</span>
-          <span class="kwp">${fmtKwp(s.capacity_kwp)} kWp</span>
+          <span style="display:flex;align-items:center;gap:6px">
+            ${pill ? `<span class="wpill ${pill.cls}">${pill.text}</span>` : ''}
+            <span class="kwp">${fmtKwp(s.capacity_kwp)} kWp</span>
+          </span>
         </div>
       </div>`;
   }).join('');
@@ -472,18 +851,67 @@ function wireEvents() {
   q.addEventListener('input', () => {
     clear.style.display = q.value ? 'block' : 'none';
     clearTimeout(t);
-    t = setTimeout(() => { searchTerm = q.value; renderList(); }, 150);
+    t = setTimeout(() => { searchTerm = q.value; renderAll(); }, 150);
   });
   clear.addEventListener('click', () => {
-    q.value = ''; searchTerm = ''; clear.style.display = 'none'; renderList(); q.focus();
+    q.value = ''; searchTerm = ''; clear.style.display = 'none'; renderAll(); q.focus();
   });
 
   document.getElementById('brandChips').addEventListener('click', (e) => {
     const chip = e.target.closest('.chip');
     if (!chip) return;
     brandFilter = chip.dataset.brand;
-    renderChips();
-    renderList();
+    renderAll();
+  });
+
+  // ── Overview panel ──
+  const ov = document.getElementById('ov');
+  const ovHead = document.getElementById('ovHead');
+  if (localStorage.getItem('hsSitesOverview') === 'open') {
+    ov.classList.add('open');
+    ovHead.setAttribute('aria-expanded', 'true');
+  }
+  ovHead.addEventListener('click', () => {
+    const open = ov.classList.toggle('open');
+    ovHead.setAttribute('aria-expanded', open ? 'true' : 'false');
+    localStorage.setItem('hsSitesOverview', open ? 'open' : 'closed');
+  });
+
+  document.getElementById('yearMetric').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-metric]');
+    if (!btn) return;
+    yearMetric = btn.dataset.metric;
+    [...e.currentTarget.querySelectorAll('button')].forEach(b => b.classList.toggle('on', b === btn));
+    renderYearChart();
+  });
+
+  // แตะกราฟ = สลับตัวกรองของมิตินั้น (แตะซ้ำที่เดิมเพื่อยกเลิก)
+  const toggleFilter = (key, value) => {
+    if (key === 'year')     yearFilter     = String(yearFilter) === String(value) ? 'ALL' : value;
+    if (key === 'brand')    brandFilter    = brandFilter === value ? 'ALL' : value;
+    if (key === 'warranty') warrantyFilter = warrantyFilter === value ? 'ALL' : value;
+    if (key === 'service')  serviceFilter  = serviceFilter === value ? 'ALL' : value;
+    renderAll();
+  };
+
+  document.getElementById('ovBody').addEventListener('click', (e) => {
+    const target = e.target.closest('[data-year],[data-brand],[data-warranty],[data-service]');
+    if (!target) return;
+    const d = target.dataset;
+    if (d.year !== undefined)     return toggleFilter('year', d.year);
+    if (d.warranty !== undefined) return toggleFilter('warranty', d.warranty);
+    if (d.service !== undefined)  return toggleFilter('service', d.service);
+    if (d.brand !== undefined)    return toggleFilter('brand', d.brand);
+  });
+
+  document.getElementById('activeFilters').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-clear]');
+    if (!btn) return;
+    const k = btn.dataset.clear;
+    if (k === 'year')     yearFilter = 'ALL';
+    if (k === 'warranty') warrantyFilter = 'ALL';
+    if (k === 'service')  serviceFilter = 'ALL';
+    renderAll();
   });
 
   document.getElementById('list').addEventListener('click', (e) => {
@@ -538,9 +966,13 @@ function isAccessDeniedError(err) {
     sb = window.HiSolarAuth.createSupabaseClient('hisolar', SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
     await loadSites();
-    renderSummary();
-    renderChips();
-    renderList();
+    // ประวัติล้างแผงเป็นข้อมูลเสริม ถ้าดึงไม่ได้ก็ยังแสดงทะเบียนได้ตามปกติ
+    try {
+      await loadCleanHistory();
+    } catch (cleanError) {
+      console.warn('clean history unavailable', cleanError);
+    }
+    renderAll();
     document.getElementById('app').style.display = 'block';
   } catch (error) {
     if (error?.status === 401) { redirectToIndex(); return; }
