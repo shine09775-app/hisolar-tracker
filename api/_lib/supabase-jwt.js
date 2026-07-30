@@ -1,15 +1,30 @@
 const { webcrypto } = require('crypto');
 const { toBase64Url } = require('./base64url');
+const { readCleanEnv } = require('./env');
 const { createHttpError } = require('./http');
+
+// Supabase selects the verifying key by `kid` -- the project JWKS holds several
+// ES256 keys, so a token without one, or with a corrupted one, is rejected with
+// "No suitable key or wrong key type" from Supabase rather than anything
+// pointing back at this config. Keys are UUIDs, so anything else is a bad paste.
+const JWKS_KID_PATTERN = /^[0-9a-fA-F-]{8,64}$/;
 
 let cachedSigningKeyPromise = null;
 
 function parsePrivateKeySource() {
-  const raw = process.env.SUPABASE_JWT_PRIVATE_KEY || '';
-  if (!raw) throw createHttpError(500, 'SUPABASE_JWT_PRIVATE_KEY is not configured');
-  const normalized = raw.trim();
+  const normalized = readCleanEnv('SUPABASE_JWT_PRIVATE_KEY');
   if (normalized.startsWith('{')) {
-    return { format: 'jwk', value: JSON.parse(normalized) };
+    let parsed;
+    try {
+      parsed = JSON.parse(normalized);
+    } catch (_error) {
+      throw createHttpError(
+        500,
+        'SUPABASE_JWT_PRIVATE_KEY is not valid JSON',
+        'Re-enter SUPABASE_JWT_PRIVATE_KEY in Vercel; the stored JWK appears truncated or altered.'
+      );
+    }
+    return { format: 'jwk', value: parsed };
   }
   const pem = normalized.replace(/\\n/g, '\n');
   const base64 = pem
@@ -45,16 +60,23 @@ async function getSigningKey() {
 }
 
 async function signSupabaseAccessToken({ session, user, membership, lifetimeSeconds = 300 }) {
-  const issuer = process.env.SUPABASE_JWT_ISSUER || '';
-  const audience = process.env.SUPABASE_JWT_AUDIENCE || 'authenticated';
-  if (!issuer) throw createHttpError(500, 'SUPABASE_JWT_ISSUER is not configured');
+  const issuer = readCleanEnv('SUPABASE_JWT_ISSUER', {
+    pattern: /^https:\/\/[^\s]+\/auth\/v1$/,
+    hint: 'Expected https://<project-ref>.supabase.co/auth/v1',
+  });
+  const audience = readCleanEnv('SUPABASE_JWT_AUDIENCE', { required: false }) || 'authenticated';
+  // Required, not optional: without a kid Supabase cannot pick a key out of the
+  // project JWKS and rejects every token, with no hint that the kid is missing.
+  const kid = readCleanEnv('SUPABASE_JWT_KID', {
+    pattern: JWKS_KID_PATTERN,
+    hint: 'Must match a kid published at https://<project-ref>.supabase.co/auth/v1/.well-known/jwks.json',
+  });
 
   const header = {
     alg: 'ES256',
     typ: 'JWT',
+    kid,
   };
-  const kid = process.env.SUPABASE_JWT_KID || '';
-  if (kid) header.kid = kid;
 
   const nowSeconds = Math.floor(Date.now() / 1000);
   const payload = {
