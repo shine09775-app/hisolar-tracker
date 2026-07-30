@@ -4,6 +4,26 @@ const { createHttpError } = require('./http');
 
 let cachedAdminClient = null;
 
+// SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY go into every admin request as
+// header values (apikey / Authorization), which fetch requires to be
+// ByteString (codepoints 0-255). A dashboard env var pasted from a masked
+// display, or otherwise corrupted, fails deep inside supabase-js with a
+// generic "Cannot convert argument to a ByteString" TypeError that gives no
+// hint which variable is at fault. Checking here turns that into a message
+// naming the exact variable and character position.
+function assertByteStringSafe(name, value) {
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    if (code > 255) {
+      throw createHttpError(
+        500,
+        `${name} contains an invalid character (U+${code.toString(16).toUpperCase()} at position ${i}) and cannot be used as an HTTP header value`,
+        `Re-enter ${name} in Vercel — this usually happens when a masked/obscured value gets pasted instead of the real one.`
+      );
+    }
+  }
+}
+
 function getSupabaseAdminClient() {
   if (cachedAdminClient) return cachedAdminClient;
   const url = process.env.SUPABASE_URL || '';
@@ -11,6 +31,8 @@ function getSupabaseAdminClient() {
   if (!url || !serviceKey) {
     throw createHttpError(500, 'Supabase admin credentials are not configured');
   }
+  assertByteStringSafe('SUPABASE_URL', url);
+  assertByteStringSafe('SUPABASE_SERVICE_ROLE_KEY', serviceKey);
   cachedAdminClient = createClient(url, serviceKey, {
     auth: {
       autoRefreshToken: false,
