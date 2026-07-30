@@ -32,6 +32,51 @@
 
 ---
 
+## Phase 3.5 — Merge เข้า production (ต้องทำก่อน Phase 4)
+
+ตรวจแล้ว (2026-07-30): production ยังเป็นระบบเดิมทั้งหมด
+- `https://hisolar-tracker.vercel.app/` = หน้า **PIN** เดิม
+- `https://hisolar-tracker.vercel.app/api/auth/line/start` = **404** (โค้ด auth ยังไม่ถึง production)
+
+การ merge จึงเป็นการสลับ production จาก PIN → LINE + launcher + site registry **ในครั้งเดียว**
+
+### ⚠️ ผลกระทบที่ต้องรู้ก่อน merge
+
+- **PIN จะใช้ไม่ได้อีก** ทันทีที่ merge (index.html ถูกแทนที่)
+- ใครที่**ยังไม่ได้ login LINE + ถูก approve** จะเข้าไม่ได้ (เห็นหน้า "รออนุมัติ")
+  → ต้องให้ทีมที่เหลือ login ให้ครบ **ก่อน** merge หรือเตรียมอนุมัติทันทีหลัง merge
+- Supabase ยังเปิด anon อยู่ (cutover แยกทำทีหลัง) → data ยังไม่ปลอดภัยจนถึง Phase 4
+
+### ลำดับ
+
+1. 👤 **ตั้ง Production env vars บน Vercel ให้ครบ 13 ตัว** (scope: Production)
+   ตอนนี้มีแค่ scope Preview — production ยังไม่มีเลย ถ้าไม่ตั้งจะได้
+   `500 Missing shared LINE Login configuration` ทันทีหลัง merge
+
+   | Env | ค่า |
+   |-----|-----|
+   | `SUPABASE_URL` | เดิม |
+   | `SUPABASE_SERVICE_ROLE_KEY` | เดิม (Sensitive) |
+   | `LINE_LOGIN_CHANNEL_ID` | `2010738223` |
+   | `LINE_LOGIN_CHANNEL_SECRET` | (Sensitive) |
+   | `LINE_LOGIN_CALLBACK_URL` | `https://hisolar-tracker.vercel.app/api/auth/line/callback` |
+   | `LINE_LOGIN_PROVIDER_NAMESPACE` | `hisolar-tracker-line` ← **ต้องเท่าเดิม** ไม่งั้น identity ไม่ unify ทีมต้องขออนุมัติใหม่หมด |
+   | `AUTH_SESSION_SECRET` | สุ่มยาว (Sensitive) |
+   | `AUTH_SESSION_MAX_AGE_SECONDS` | `604800` |
+   | `AUTH_FLOW_COOKIE_NAME` / `AUTH_SESSION_COOKIE_NAME` | ปล่อย default ได้ |
+   | `SUPABASE_JWT_PRIVATE_KEY` / `SUPABASE_JWT_KID` | (Sensitive) |
+   | `SUPABASE_JWT_ISSUER` | `https://hlswbazcojsnfibirkzl.supabase.co/auth/v1` |
+   | `SUPABASE_JWT_AUDIENCE` | `authenticated` |
+
+2. 👤 **LINE Console** — เพิ่ม callback ของ production (เก็บของ preview ไว้ด้วย):
+   `https://hisolar-tracker.vercel.app/api/auth/line/callback`
+3. 💻 `git checkout main && git merge feat/site-registry-pr && git push`
+4. 💻 ทดสอบ production: login → `/home.html` → เข้า 4 หน้าย่อยได้
+5. 👤 แจ้งทีมย้ายไป `https://hisolar-tracker.vercel.app` (URL ถาวร ไม่ผูก branch)
+6. 💻 ใช้งานจริงให้เสถียร 2–3 วัน → แล้วค่อยเข้า Phase 4
+
+---
+
 ## Preconditions — ต้องเป็นจริงทุกข้อก่อนรัน (Gate)
 
 - [ ] ทีม **Hi Solar** ทุกคน login ระบบใหม่ + ถูก approve แล้ว (ตรวจ: ไม่มี pending ค้างที่ยังต้องใช้งาน)
