@@ -177,7 +177,82 @@ function toast(m, err) {
 // Jobs carry informal customer names ("แหม่ม", "สวนส้มจงลักษณ์") while sites carry
 // portal plant names ("JL FARM 1"), so this only ranks candidates for a human to
 // confirm — it never links anything on its own.
+//
+// A name token only counts when it actually identifies someone. Words that
+// appear across the fleet do not: honorifics and building words (คุณ, บ้าน,
+// ร้าน) and generic plant words (home, farm) matched almost every site and
+// buried the real candidates. Thai names carry no spaces, so substring matching
+// made it worse — "บ้านคุณเต็มดวง" contains "คุณ", which paired unrelated
+// customers at the same score as a genuine hit.
 function digits(s) { return String(s ?? '').replace(/[^0-9]/g, ''); }
+
+// Words carrying no identity. Thai honorifics and building words come first,
+// then the generic plant words the vendor exports use.
+const NAME_STOPWORDS = new Set([
+  // honorifics and building words
+  'คุณ', 'นาย', 'นาง', 'นางสาว', 'บ้าน', 'ร้าน', 'สวน', 'หมู่', 'หมู่บ้าน',
+  'บริษัท', 'หจก', 'จำกัด', 'มหาชน', 'สาขา', 'ประปา', 'ลูกค้า',
+  'home', 'house', 'farm', 'solar', 'site', 'khun', 'the', 'and', 'ltd', 'co',
+  // business type, shared by unrelated customers
+  'คลินิก', 'ทันตกรรม', 'การค้า', 'ค้าส่ง', 'โรงงาน', 'เทศบาล', 'โภชนา',
+  'school', 'garden', 'clinic', 'shop', 'cafe', 'resort',
+  // places this fleet sits in — a shared district is not a shared customer.
+  // Listed because they fall under the frequency cut below; extend as the
+  // registry spreads to new areas.
+  'เชียงใหม่', 'เชียงไหม่', 'เชียงราย', 'เชียงดาว', 'ลำพูน', 'ลำปาง', 'กทม',
+  'หางดง', 'สารภี', 'สันป่าตอง', 'แม่สะเรียง', 'แม่ริม', 'แม่สาย', 'แม่แรม',
+  'แม่สอด', 'แม่โจ้', 'ฮอด', 'จอมทอง', 'น่าน',
+]);
+
+// Thai writes these onto the front of the name with no space, so "บ้านคุณเต็มดวง"
+// is a single token. Without stripping the prefix, "บ้านคุณทับทิม" and
+// "บ้านคุณ ธีรภาพ" match on the shared "บ้านคุณ" and score the same as a real
+// hit. Longest prefix first so "บ้านคุณ" wins over "บ้าน".
+const HONORIFIC_PREFIXES = [
+  'บ้านสวนคุณ', 'ห้างหุ้นส่วนจำกัด', 'บ้านคุณ', 'ร้านคุณ', 'สวนคุณ', 'บ้านสวน',
+  'นางสาว', 'บ้าน', 'ร้าน', 'คุณ', 'นาย', 'นาง', 'khun',
+].sort((a, b) => b.length - a.length);
+
+function stripHonorific(token) {
+  for (const prefix of HONORIFIC_PREFIXES) {
+    if (token.length > prefix.length && token.startsWith(prefix)) {
+      return token.slice(prefix.length);
+    }
+  }
+  return token;
+}
+
+// Punctuation split matters: "(sorawit home)" tokenized to "home)", which then
+// missed the stopword check and matched every Home site.
+function nameTokens(value) {
+  return norm(value)
+    .split(/[^0-9a-z฀-๿]+/)
+    .map(stripHonorific)
+    .filter(t => t.length >= 3 && !NAME_STOPWORDS.has(t));
+}
+
+// Anything shared by several sites is a place or a house word, not a name.
+// Derived from the data so it keeps working as the registry grows.
+let commonSiteTokens = new Set();
+function rebuildCommonSiteTokens() {
+  const counts = new Map();
+  for (const s of sites) {
+    for (const t of new Set(nameTokens(s.site_name))) {
+      counts.set(t, (counts.get(t) || 0) + 1);
+    }
+  }
+  const limit = Math.max(3, Math.floor(sites.length * 0.02));
+  commonSiteTokens = new Set([...counts].filter(([, n]) => n > limit).map(([t]) => t));
+}
+
+// Short tokens must match exactly. Containment is only trusted once the shorter
+// token is long enough to be a name in its own right.
+const MIN_CONTAINMENT_LENGTH = 6;
+function tokensMatch(a, b) {
+  if (a === b) return true;
+  const [short, long] = a.length <= b.length ? [a, b] : [b, a];
+  return short.length >= MIN_CONTAINMENT_LENGTH && long.includes(short);
+}
 
 function scoreSite(job, site) {
   const c = norm(job.customer_name), sn = norm(site.site_name);
@@ -186,10 +261,11 @@ function scoreSite(job, site) {
   if (c === sn) best = 100;
   else if (sn.includes(c) || c.includes(sn)) best = 78;
   else {
-    // token overlap
-    const ct = c.split(' ').filter(t => t.length >= 3);
-    const st = sn.split(' ').filter(t => t.length >= 3);
-    const hit = ct.filter(t => st.some(u => u.includes(t) || t.includes(u))).length;
+    const st = nameTokens(site.site_name);
+    const hit = nameTokens(job.customer_name)
+      .filter(t => !commonSiteTokens.has(t))
+      .filter(t => st.some(u => !commonSiteTokens.has(u) && tokensMatch(t, u)))
+      .length;
     if (hit) best = Math.min(70, 34 + hit * 18);
   }
   // phone corroboration against whatever contact text the portal gave us
@@ -224,6 +300,7 @@ async function loadAll() {
   if (s.error) throw s.error;
   jobs = j.data || [];
   sites = s.data || [];
+  rebuildCommonSiteTokens();
 }
 
 async function setJobSite(job, siteId) {
