@@ -11,3 +11,4 @@ Solar_Site_DATA/*.xlsx
 Solar_Site_DATA/*.xls
 Solar_Site_DATA/*.jpg
 Solar_Site_DATA/_reference/sites_seed.csv
+Solar_Site_DATA/_reference/sites-edit*.csv
