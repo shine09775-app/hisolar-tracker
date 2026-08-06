@@ -34,7 +34,12 @@ const CSV_PATH = fileArg && fileArg !== '--commit'
   ? resolve(fileArg)
   : resolve(__dirname, '../Solar_Site_DATA/_reference/sites_seed.csv');
 
-const NUMERIC = new Set(['capacity_kwp', 'current_power_kw', 'yield_today_kwh', 'total_yield_kwh']);
+// latitude/longitude only appear in seeds hand-typed from an app screenshot
+// (EnergyLIB shows them); the vendor xlsx exports never carry coordinates.
+const NUMERIC = new Set([
+  'capacity_kwp', 'current_power_kw', 'yield_today_kwh', 'total_yield_kwh',
+  'latitude', 'longitude',
+]);
 const DATE = new Set(['grid_connection_date']);
 
 // --- minimal RFC-4180 CSV parser (handles quotes, commas, newlines) ---------
@@ -82,7 +87,8 @@ function toNum(v) {
 }
 
 function loadRows() {
-  const raw = readFileSync(CSV_PATH, 'utf8');
+  // Strip the BOM Excel writes back, or the first header lands as "﻿site_code".
+  const raw = readFileSync(CSV_PATH, 'utf8').replace(/^﻿/, '');
   const rows = parseCsv(raw).filter(r => r.length > 1 && r.some(c => c !== ''));
   const header = rows.shift().map(h => h.trim());
   return rows.map(cols => {
