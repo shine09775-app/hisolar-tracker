@@ -22,27 +22,69 @@ Deye เปิด remote MCP ที่ `https://developer.deyecloud.com/openmcp/
 claude mcp add --transport http deye-open https://developer.deyecloud.com/openmcp/mcp
 ```
 
+## เอา AppId / AppSecret มาจากไหน
+
+พอร์ทัล `developer.deyecloud.com` เป็น SPA เมนูไม่มี href ตรง ๆ เส้นทางจริงคือ
+
+| หน้า | URL |
+|---|---|
+| Quick Start (มีวิธีทั้งหมด) | `/start` |
+| **Application** (ออก AppId/AppSecret) | **`/app`** |
+| API Documentation (Swagger) | `/api` |
+| OpenAPI FAQ | `/support/openApi/faq` |
+
+ที่ `/app` → กรอกฟอร์ม new Application → ระบบออก **AppId** กับ **AppSecret** ให้
+(Quick Start เขียนว่า "Please save this information securely" — เห็นครั้งเดียว
+ให้เก็บทันที)
+
 ## ตั้งค่า env บน Vercel
 
-ต้องมี OpenAPI application ของ Deye ก่อน (สมัครที่ developer.deyecloud.com →
-Application) แล้วใส่ค่าเหล่านี้ใน Vercel → Project → Settings → Environment
-Variables (scope **Production** และ **Preview** ถ้าจะทดสอบบน preview ด้วย)
+Vercel → Project → Settings → Environment Variables (scope **Production** และ
+**Preview** ถ้าจะทดสอบบน preview ด้วย)
 
 | ตัวแปร | จำเป็น | หมายเหตุ |
 |---|---|---|
-| `DEYE_APP_ID` | ✅ | AppId ของ application |
-| `DEYE_APP_SECRET` | ✅ | AppSecret |
+| `DEYE_APP_ID` | ✅ | AppId จาก `/app` |
+| `DEYE_APP_SECRET` | ✅ | AppSecret จาก `/app` |
 | `DEYE_EMAIL` | ✅* | อีเมลบัญชี Deye Cloud |
 | `DEYE_PASSWORD` | ✅* | รหัสผ่านบัญชี (โค้ด sha256 ให้เองก่อนส่ง) |
 | `DEYE_PASSWORD_SHA256` | – | ใช้แทน `DEYE_PASSWORD` ถ้าไม่อยากเก็บ plaintext |
 | `DEYE_REGION` | – | `eu` (ค่าเริ่มต้น) / `am` / `india` |
+| `DEYE_COMPANY_ID` | – | เฉพาะตอนบัญชีอยู่หลายองค์กร (ดูหัวข้อถัดไป) |
 | `DEYE_MOBILE` + `DEYE_COUNTRY_CODE` | – | ใช้แทน `DEYE_EMAIL` ถ้าล็อกอินด้วยเบอร์ |
 
 \* ต้องมี `DEYE_EMAIL` หรือ `DEYE_MOBILE` อย่างใดอย่างหนึ่ง
 
 **`DEYE_REGION` ต้องตรงกับศูนย์ข้อมูลที่บัญชีถูกสร้าง** ไม่งั้น `/v1.0/account/token`
-จะตอบว่าไม่มีบัญชีนี้ ทั้งที่รหัสผ่านถูก — ถ้าดึงไม่ผ่านให้ลองสลับ `eu` ↔ `am` ก่อน
-อย่างอื่น
+จะตอบว่าไม่มีบัญชีนี้ ทั้งที่รหัสผ่านถูก — Quick Start บอกให้เลือกตามที่ตั้งอุปกรณ์:
+ยุโรป/แอฟริกา/เอเชียแปซิฟิก → `eu` · อเมริกาเหนือ-ใต้ → `am`
+(ไทยอยู่เอเชียแปซิฟิก → `eu`)
+
+## Business Member ต้องขอ token สองรอบ
+
+จุดนี้พลาดง่ายที่สุดและ**พังแบบดูเหมือนสำเร็จ** — Quick Start หัวข้อ
+"Business Member" ระบุว่า
+
+1. `POST /v1.0/account/token?appId=…` body `{appSecret, email, password}` → token ของ**คน**
+2. `POST /v1.0/account/info` (ใส่ token จากข้อ 1) → ได้ `orgInfoList[].companyId`
+3. `POST /v1.0/account/token?appId=…` body เดิม **+ `companyId`** → token ของ**องค์กร**
+
+โรงไฟฟ้าเป็นของ *องค์กร* ไม่ใช่ของคน ถ้าหยุดที่ข้อ 1 แล้วยิง `/v1.0/station/list`
+เลย มันจะตอบ **200 พร้อม `stationList` ว่าง** ซึ่งอ่านเหมือน "บัญชีนี้ไม่มีโรงไฟฟ้า"
+ทั้งที่จริงคือ token ผิด scope
+
+`api/_lib/deye-cloud.js` ทำครบทั้ง 3 ขั้นให้เอง:
+
+- เจอ **1 องค์กร** → ขอ token รอบสองอัตโนมัติ ไม่ต้องตั้งอะไร
+- เจอ **หลายองค์กร** → หยุดแล้วฟ้องพร้อมรายชื่อ `companyId = ชื่อ (role)` ให้เลือก
+  แล้วเอาไปใส่ `DEYE_COMPANY_ID` (ไม่เดาให้ เพราะเดาผิด = ดึงไซต์ของบริษัทอื่นเข้ามา)
+- เจอ **0 องค์กร** → เป็น personal account ใช้ token แรกได้เลย
+
+ชื่อองค์กรที่ token ผูกอยู่จะถูกส่งกลับมาแสดงบนจอยืนยันด้วย (`companyName`)
+จะได้แยกออกว่า "ไม่มีไซต์" กับ "ต่อผิดองค์กร" คนละเรื่องกัน
+
+token อายุ 60 วัน (`expiresIn` 5183999) โค้ด cache ไว้ข้าม warm invocation
+และจะหมดอายุทันทีถ้ามีการเปลี่ยนรหัสผ่านหรือแก้ role
 
 ## กันข้อมูลซ้ำยังไง
 

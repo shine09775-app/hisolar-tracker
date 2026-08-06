@@ -18,6 +18,8 @@
 //   DEYE_REGION            eu (default) | am | india — must match the data
 //                          centre the account was created in, otherwise the
 //                          token call returns "account does not exist"
+//   DEYE_COMPANY_ID        only needed when the account belongs to more than
+//                          one organisation; a single one is found on its own
 
 const { readCleanEnv } = require('./env');
 const { createHttpError } = require('./http');
@@ -72,10 +74,19 @@ function getDeyeConfig() {
     throw createHttpError(500, 'DEYE_PASSWORD or DEYE_PASSWORD_SHA256 is not configured');
   }
 
+  // Optional: pins which organisation to sync. Only needed when the account
+  // belongs to several — otherwise the single one is discovered automatically.
+  const rawCompanyId = String(process.env.DEYE_COMPANY_ID || '').trim();
+  const companyId = rawCompanyId ? Number.parseInt(rawCompanyId, 10) : null;
+  if (rawCompanyId && !Number.isFinite(companyId)) {
+    throw createHttpError(500, 'DEYE_COMPANY_ID must be a number', `Got "${rawCompanyId}"`);
+  }
+
   return {
     appId,
     appSecret,
     baseUrl,
+    companyId,
     countryCode: String(process.env.DEYE_COUNTRY_CODE || '').trim(),
     email,
     mobile,
@@ -111,13 +122,14 @@ async function readJsonResponse(response, label) {
   return payload || {};
 }
 
-async function fetchAccessToken(config) {
+async function fetchAccessToken(config, companyId = null) {
   const body = { appSecret: config.appSecret, password: config.passwordSha256 };
   if (config.email) body.email = config.email;
   if (config.mobile) {
     body.mobile = config.mobile;
     if (config.countryCode) body.countryCode = config.countryCode;
   }
+  if (companyId !== null) body.companyId = Number(companyId);
 
   const response = await fetch(
     `${config.baseUrl}/v1.0/account/token?appId=${encodeURIComponent(config.appId)}`,
@@ -147,6 +159,53 @@ async function fetchAccessToken(config) {
   return { token: accessToken, expiresAtMs: Date.now() + ttlMs };
 }
 
+// The organisations this account belongs to. Empty for a personal account.
+async function fetchOrganizations(config, token) {
+  const response = await fetch(`${config.baseUrl}/v1.0/account/info`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      authorization: withBearer(token),
+    },
+    body: '{}',
+  });
+  const payload = await readJsonResponse(response, 'account info');
+  return Array.isArray(payload.orgInfoList) ? payload.orgInfoList : [];
+}
+
+// A business-member account needs the token issued twice. The first call
+// authenticates the person; the stations belong to the *company*, so without a
+// second call carrying companyId, /v1.0/station/list answers 200 with an empty
+// list — which reads exactly like "this account has no plants" and is the one
+// failure here that would look like success.
+async function resolveAccessToken(config) {
+  if (config.companyId) {
+    const scoped = await fetchAccessToken(config, config.companyId);
+    return { ...scoped, companyId: config.companyId, companyName: null };
+  }
+
+  const personal = await fetchAccessToken(config);
+  const organizations = await fetchOrganizations(config, personal.token);
+
+  if (!organizations.length) {
+    // Genuinely a personal account — its own token already sees the plants.
+    return { ...personal, companyId: null, companyName: null };
+  }
+
+  if (organizations.length > 1) {
+    throw createHttpError(
+      500,
+      'This Deye account belongs to more than one organisation, so DEYE_COMPANY_ID must say which one to sync',
+      organizations.map(org => `${org.companyId} = ${org.companyName} (${org.roleName})`).join(' · ')
+    );
+  }
+
+  const org = organizations[0];
+  const scoped = await fetchAccessToken(config, org.companyId);
+  return { ...scoped, companyId: org.companyId, companyName: org.companyName || null };
+}
+
 async function getAccessToken(config) {
   const now = Date.now();
   if (
@@ -154,25 +213,28 @@ async function getAccessToken(config) {
     && cachedToken.region === config.region
     && cachedToken.expiresAtMs - TOKEN_EXPIRY_SKEW_MS > now
   ) {
-    return cachedToken.token;
+    return cachedToken;
   }
-  const fresh = await fetchAccessToken(config);
+  const fresh = await resolveAccessToken(config);
   cachedToken = { ...fresh, region: config.region };
-  return cachedToken.token;
+  return cachedToken;
+}
+
+// The spec's own example prints the token already carrying "Bearer ", so the
+// prefix is only added when it is not there already.
+function withBearer(token) {
+  return /^bearer\s/i.test(token) ? token : `Bearer ${token}`;
 }
 
 async function callDeye(config, path, body) {
-  const token = await getAccessToken(config);
-  // The spec's own example prints the token already carrying "Bearer ", so the
-  // prefix is only added when it is not there already.
-  const authorization = /^bearer\s/i.test(token) ? token : `Bearer ${token}`;
+  const { token } = await getAccessToken(config);
 
   const response = await fetch(`${config.baseUrl}${path}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      authorization,
+      authorization: withBearer(token),
     },
     body: JSON.stringify(body || {}),
   });
@@ -197,7 +259,15 @@ async function listAllStations(config = getDeyeConfig()) {
     if (total !== null && stations.length >= total) break;
   }
 
-  return { stations, total: total === null ? stations.length : total };
+  // Which organisation the token was scoped to — reported back so an empty
+  // result can be told apart from a token pointing at the wrong company.
+  const { companyId, companyName } = await getAccessToken(config);
+  return {
+    stations,
+    total: total === null ? stations.length : total,
+    companyId: companyId || null,
+    companyName: companyName || null,
+  };
 }
 
 module.exports = {

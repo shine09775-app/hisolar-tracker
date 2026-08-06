@@ -1124,8 +1124,9 @@ function renderSyncPlan(plan) {
         <div class="sync-count dup"><div class="v">${c.duplicates || 0}</div><div class="l">ซ้ำ · ข้าม</div></div>
       </div>
       <div class="sync-note">
-        พบ ${plan.stationsFetched || 0} ไซต์ในบัญชี Deye Cloud ·
+        พบ ${plan.stationsFetched || 0} ไซต์${plan.companyName ? ' ในองค์กร ' + esc(plan.companyName) : ' ในบัญชี Deye Cloud'} ·
         ทะเบียนตอนนี้มี ${plan.registrySize || 0} ไซต์
+        ${plan.stationsFetched === 0 ? `<br><b>ไม่พบไซต์เลย</b> — ถ้าบัญชีนี้มีหลายองค์กร ให้ตั้ง <code>DEYE_COMPANY_ID</code> ให้ตรงกับองค์กรที่ถือไซต์` : ''}
       </div>
     </div>
 

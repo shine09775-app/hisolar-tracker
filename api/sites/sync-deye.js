@@ -48,7 +48,7 @@ module.exports = async function handler(req, res) {
     const { dryRun = true } = readBody(req);
     const syncedAt = new Date().toISOString();
 
-    const [{ stations, total }, existingSites] = await Promise.all([
+    const [{ stations, total, companyId, companyName }, existingSites] = await Promise.all([
       listAllStations(),
       listSitesForSync('hisolar'),
     ]);
@@ -61,6 +61,10 @@ module.exports = async function handler(req, res) {
       stationsFetched: stations.length,
       stationsReported: total,
       registrySize: existingSites.length,
+      // Named so 0 stations reads as "wrong organisation" rather than
+      // "the account is empty" — the two look identical otherwise.
+      companyId: companyId || null,
+      companyName: companyName || null,
       counts: {
         toInsert: plan.inserts.length,
         toUpdate: plan.updates.length,
