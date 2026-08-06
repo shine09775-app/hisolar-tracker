@@ -275,7 +275,48 @@ async function revokeAuthSessionByHash(sessionTokenHash) {
   if (error) throw createHttpError(500, 'Failed to revoke auth session', error.message);
 }
 
+// ---------------------------------------------------------------------------
+// Site registry (used by the Deye Cloud sync)
+// ---------------------------------------------------------------------------
+// hi_solar_sites has no anon insert/update policy on purpose, so the sync runs
+// through the service role after the handler has checked the caller's role.
+
+// Only the columns the sync compares against or fills in — the registry is
+// ~271 rows today, small enough to hold in memory while planning.
+const SYNC_SITE_COLUMNS =
+  'id,site_code,site_name,platform_code,platform_plant_id,customer_name,phone,address,latitude,longitude';
+
+async function listSitesForSync(organization = 'hisolar') {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('hi_solar_sites')
+    .select(SYNC_SITE_COLUMNS)
+    .eq('organization', organization);
+  if (error) throw createHttpError(500, 'Failed to load the site registry', error.message);
+  return data || [];
+}
+
+async function insertSites(rows) {
+  if (!rows.length) return [];
+  const supabase = getSupabaseAdminClient();
+  // site_code is left out on purpose: the hi_solar_sites_set_code trigger
+  // hands out the next HS-#### from the shared sequence.
+  const { data, error } = await supabase
+    .from('hi_solar_sites')
+    .insert(rows)
+    .select('id,site_code,site_name,platform_plant_id');
+  if (error) throw createHttpError(500, 'Failed to add sites to the registry', error.message);
+  return data || [];
+}
+
+async function updateSite(siteId, patch) {
+  const supabase = getSupabaseAdminClient();
+  const { error } = await supabase.from('hi_solar_sites').update(patch).eq('id', siteId);
+  if (error) throw createHttpError(500, 'Failed to update a registry site', error.message);
+}
+
 module.exports = {
+  SYNC_SITE_COLUMNS,
   createAuthSession,
   ensureJdkAutoApprovedMembership,
   ensurePendingAccessRequest,
@@ -284,9 +325,12 @@ module.exports = {
   getMembershipForUserApp,
   getRequestIpHash,
   getSupabaseAdminClient,
+  insertSites,
   listApprovedMembersForOrganization,
   listMembershipsForUser,
+  listSitesForSync,
   revokeAuthSessionByHash,
   touchAuthSession,
+  updateSite,
   upsertAppUserProfile,
 };
