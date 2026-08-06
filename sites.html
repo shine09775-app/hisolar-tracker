@@ -262,6 +262,21 @@
     .edit-msg.err { display: block; background: var(--hs-red-l); color: #b91c1c; }
     .edit-msg.ok  { display: block; background: var(--hs-primary-l); color: #15803d; }
 
+    /* Deye Cloud sync sheet */
+    .sync-counts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
+    .sync-count { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 11px; padding: 9px 6px; text-align: center; }
+    .sync-count .v { font-size: 19px; font-weight: 700; line-height: 1.1; }
+    .sync-count .l { font-size: 10.5px; color: #64748b; margin-top: 2px; }
+    .sync-count.new .v { color: var(--hs-primary); }
+    .sync-count.dup .v { color: #d97706; }
+    .sync-list { max-height: 210px; overflow-y: auto; margin-top: 4px; }
+    .sync-item { display: flex; gap: 8px; align-items: baseline; padding: 7px 0; border-top: 1px solid #f1f5f9; font-size: 12.5px; }
+    .sync-item:first-child { border-top: 0; }
+    .sync-item b { font-weight: 600; flex: 1; min-width: 0; word-break: break-word; }
+    .sync-item span { font-size: 11px; color: #64748b; flex: 0 0 auto; }
+    .sync-note { font-size: 11.5px; color: #64748b; line-height: 1.5; margin-top: 6px; }
+    .sync-spin { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; padding: 18px 0; }
+
     .jobs-empty { font-size: 12px; color: #94a3b8; padding: 10px 0; }
     .job-row { display: flex; gap: 9px; padding: 9px 0; border-top: 1px solid #f1f5f9; }
     .job-row:first-of-type { border-top: 0; }
@@ -308,6 +323,7 @@
       <a href="./home.html" class="icon-btn" title="หน้าแรก"><i class="bi bi-house-door-fill"></i></a>
       <a href="./map.html" class="icon-btn" title="แผนที่ไซต์"><i class="bi bi-geo-alt-fill"></i></a>
       <a href="./link-jobs.html" class="icon-btn" title="ผูกงานเข้าไซต์"><i class="bi bi-link-45deg"></i></a>
+      <button class="icon-btn" id="btnSyncDeye" title="ดึงไซต์ใหม่จาก Deye Cloud" style="display:none;"><i class="bi bi-arrow-repeat"></i></button>
       <button class="icon-btn" id="btnPlanner" title="ไปหน้างาน"><i class="bi bi-list-task"></i></button>
       <button class="icon-btn" id="btnLogout" title="ออกจากระบบ"><i class="bi bi-box-arrow-right"></i></button>
     </div>
@@ -1053,6 +1069,146 @@ function renderSiteJobs(jobs) {
   }).join('');
 }
 
+// ── ดึงไซต์จาก Deye Cloud ─────────────────────────────
+// สองจังหวะเสมอ: ขอแผนก่อน (dryRun) ให้คนเห็นว่าจะเพิ่มอะไรบ้าง แล้วค่อยยืนยัน
+// ไซต์ที่ชื่อตรงกับไซต์เดิมในทะเบียน (ส่วนใหญ่คือ Deye ที่ดูผ่าน Solarman อยู่แล้ว)
+// จะถูกข้าม ไม่ดึงซ้ำ
+async function requestDeyeSync(dryRun) {
+  return window.HiSolarAuth.requestJson('/api/sites/sync-deye', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ dryRun }),
+  });
+}
+
+function openSyncSheet(innerHtml) {
+  document.getElementById('sheetInner').innerHTML = `
+    <div class="sheet-hero">
+      <div class="row1">
+        <button class="icon-btn" id="sheetClose"><i class="bi bi-chevron-down"></i></button>
+        <span class="badge-brand b-DEYE">Deye Cloud</span>
+      </div>
+      <h2>ดึงไซต์จาก Deye Cloud</h2>
+      <div class="loc"><i class="bi bi-cloud-arrow-down"></i> เพิ่มเฉพาะไซต์ที่ยังไม่มีในทะเบียน</div>
+    </div>
+    <div class="sheet-body" id="syncBody">${innerHtml}</div>`;
+  document.getElementById('sheet').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('sheetClose').onclick = closeSheet;
+}
+
+function syncSpinner(text) {
+  return `<div class="panel"><div class="sync-spin">
+    <span class="spinner-border spinner-border-sm"></span> ${esc(text)}
+  </div></div>`;
+}
+
+function renderSyncPlan(plan) {
+  const c = plan.counts || {};
+  const newList = (plan.newSites || []).map(s => `
+    <div class="sync-item">
+      <b>${esc(s.siteName)}</b>
+      <span>${s.capacityKwp == null ? '' : fmtKwp(s.capacityKwp) + ' kWp'}</span>
+    </div>`).join('');
+  const dupList = (plan.duplicates || []).slice(0, 50).map(d => `
+    <div class="sync-item">
+      <b>${esc(d.stationName)}</b>
+      <span>มีแล้ว · ${esc(d.matchedSiteCode || '')} ${esc(PLATFORM_LABEL[d.matchedPlatform] || d.matchedPlatform || '')}</span>
+    </div>`).join('');
+
+  return `
+    <div class="panel">
+      <div class="sync-counts">
+        <div class="sync-count new"><div class="v">${c.toInsert || 0}</div><div class="l">เพิ่มใหม่</div></div>
+        <div class="sync-count"><div class="v">${c.toUpdate || 0}</div><div class="l">อัปเดต</div></div>
+        <div class="sync-count dup"><div class="v">${c.duplicates || 0}</div><div class="l">ซ้ำ · ข้าม</div></div>
+      </div>
+      <div class="sync-note">
+        พบ ${plan.stationsFetched || 0} ไซต์${plan.companyName ? ' ในองค์กร ' + esc(plan.companyName) : ' ในบัญชี Deye Cloud'} ·
+        ทะเบียนตอนนี้มี ${plan.registrySize || 0} ไซต์
+        ${plan.stationsFetched === 0 ? `<br><b>ไม่พบไซต์เลย</b> — ถ้าบัญชีนี้มีหลายองค์กร ให้ตั้ง <code>DEYE_COMPANY_ID</code> ให้ตรงกับองค์กรที่ถือไซต์` : ''}
+      </div>
+    </div>
+
+    ${newList ? `<div class="panel"><h6>จะเพิ่มเข้าทะเบียน (${c.toInsert})</h6>
+      <div class="sync-list">${newList}</div></div>` : ''}
+
+    ${dupList ? `<div class="panel"><h6>ข้ามเพราะมีอยู่แล้ว (${c.duplicates})</h6>
+      <div class="sync-list">${dupList}</div>
+      <div class="sync-note">จับคู่จากชื่อไซต์ที่ตรงกัน — ส่วนใหญ่คือ Deye ที่ติดตามผ่าน Solarman อยู่ก่อนแล้ว
+      ถ้ามีรายการที่ไม่ควรถูกข้าม แก้ชื่อไซต์ในทะเบียนให้ต่างกันก่อน แล้วกดดึงใหม่</div></div>` : ''}
+
+    <div class="edit-msg" id="syncMsg"></div>
+    <div class="edit-actions">
+      <button class="cancel" id="btnSyncCancel">ปิด</button>
+      <button class="save" id="btnSyncApply" ${(c.toInsert || c.toUpdate) ? '' : 'disabled'}>
+        ${(c.toInsert || c.toUpdate) ? 'ยืนยัน ดึงเข้าทะเบียน' : 'ไม่มีอะไรต้องดึง'}
+      </button>
+    </div>`;
+}
+
+function renderSyncResult(result) {
+  const a = result.applied || {};
+  const added = (a.insertedSites || []).map(s => `
+    <div class="sync-item"><b>${esc(s.siteName)}</b><span>${esc(s.siteCode || '')}</span></div>`).join('');
+  return `
+    <div class="panel">
+      <div class="sync-counts">
+        <div class="sync-count new"><div class="v">${a.inserted || 0}</div><div class="l">เพิ่มแล้ว</div></div>
+        <div class="sync-count"><div class="v">${a.updated || 0}</div><div class="l">อัปเดตแล้ว</div></div>
+        <div class="sync-count dup"><div class="v">${(result.counts || {}).duplicates || 0}</div><div class="l">ข้าม</div></div>
+      </div>
+    </div>
+    ${added ? `<div class="panel"><h6>ไซต์ใหม่</h6><div class="sync-list">${added}</div></div>` : ''}
+    <div class="edit-actions"><button class="cancel" id="btnSyncCancel">เสร็จแล้ว</button></div>`;
+}
+
+function syncErrorMessage(error) {
+  const msg = String(error?.message || error || '');
+  const detail = error?.payload?.details;
+  if (/DEYE_[A-Z_]+ is not configured|not a Deye data centre/.test(msg)) {
+    return 'ยังไม่ได้ตั้งค่าบัญชี Deye Cloud บนเซิร์ฟเวอร์ (' + esc(msg) + ')';
+  }
+  if (error?.status === 403) return 'บัญชีนี้ไม่มีสิทธิ์ดึงไซต์ (ต้องเป็น admin หรือ member ของ Hi Solar)';
+  return esc(msg) + (detail ? ' — ' + esc(detail) : '');
+}
+
+async function applyDeyeSync() {
+  const body = document.getElementById('syncBody');
+  body.innerHTML = syncSpinner('กำลังบันทึกเข้าทะเบียน…');
+  try {
+    const result = await requestDeyeSync(false);
+    body.innerHTML = renderSyncResult(result);
+    document.getElementById('btnSyncCancel').onclick = closeSheet;
+    // ทะเบียนเปลี่ยนแล้ว โหลดใหม่ให้รายการหลังชีทตรงกับของจริง
+    await loadSites();
+    renderAll();
+  } catch (error) {
+    body.innerHTML = `<div class="panel"><div class="edit-msg err" style="display:block">
+      ดึงไม่สำเร็จ: ${syncErrorMessage(error)}</div></div>
+      <div class="edit-actions"><button class="cancel" id="btnSyncCancel">ปิด</button></div>`;
+    document.getElementById('btnSyncCancel').onclick = closeSheet;
+  }
+}
+
+async function startDeyeSync() {
+  openSyncSheet(syncSpinner('กำลังอ่านรายชื่อไซต์จาก Deye Cloud…'));
+  try {
+    const plan = await requestDeyeSync(true);
+    const body = document.getElementById('syncBody');
+    body.innerHTML = renderSyncPlan(plan);
+    document.getElementById('btnSyncCancel').onclick = closeSheet;
+    const apply = document.getElementById('btnSyncApply');
+    if (apply && !apply.disabled) apply.onclick = applyDeyeSync;
+  } catch (error) {
+    const body = document.getElementById('syncBody');
+    body.innerHTML = `<div class="panel"><div class="edit-msg err" style="display:block">
+      อ่านข้อมูลไม่สำเร็จ: ${syncErrorMessage(error)}</div></div>
+      <div class="edit-actions"><button class="cancel" id="btnSyncCancel">ปิด</button></div>`;
+    document.getElementById('btnSyncCancel').onclick = closeSheet;
+  }
+}
+
 function closeSheet() {
   document.getElementById('sheet').classList.remove('show');
   document.body.style.overflow = '';
@@ -1141,6 +1297,7 @@ function wireEvents() {
     if (e.key === 'Escape' && document.getElementById('sheet').classList.contains('show')) closeSheet();
   });
 
+  document.getElementById('btnSyncDeye').onclick = startDeyeSync;
   document.getElementById('btnPlanner').onclick = () => { location.href = './hisolar_planner.html'; };
   document.getElementById('btnLogout').onclick = async () => {
     await window.HiSolarAuth.logout('/index.html');
@@ -1170,6 +1327,9 @@ function isAccessDeniedError(err) {
   try {
     const auth = await window.HiSolarAuth.fetchAuthMe('hisolar');
     myRole = String(auth?.membership?.role || '');
+    // ปุ่มดึงไซต์เขียนทะเบียน จึงให้เห็นเฉพาะคนที่แก้ทะเบียนได้
+    // (การซ่อนปุ่มเป็นแค่ UX ตัวกันจริงคือการเช็ก role ใน /api/sites/sync-deye)
+    if (canEditSites()) document.getElementById('btnSyncDeye').style.display = '';
     window.HiSolarAuth.applyUserSummary({
       user: auth?.user || {},
       membership: auth?.membership || {},
