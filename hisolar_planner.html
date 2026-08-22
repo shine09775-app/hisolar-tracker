@@ -806,6 +806,10 @@
       <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ลูกค้า *</label>
       <input class="form-control" type="text" id="ebCustomer">
     </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เบอร์ติดต่อ</label>
+      <input class="form-control" type="tel" id="ebPhone" placeholder="0812345678">
+    </div>
     <div class="row g-2 mb-2">
       <div class="col">
         <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ยอด (฿)</label>
@@ -964,6 +968,14 @@
   <div class="sheet-box">
     <div class="sheet-title">✏️ แก้ไขงาน</div>
     <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">ลูกค้า *</label>
+      <input class="form-control" type="text" id="editNganCustomer" placeholder="ชื่อลูกค้า">
+    </div>
+    <div class="mb-2">
+      <label class="form-label mb-1 fw-semibold" style="font-size:13px;">เบอร์ติดต่อ</label>
+      <input class="form-control" type="tel" id="editNganPhone" placeholder="0812345678">
+    </div>
+    <div class="mb-2">
       <label class="form-label mb-1 fw-semibold" style="font-size:13px;">Maps URL</label>
       <input class="form-control" type="url" id="editNganMapsUrl" data-map-field="true" data-map-feedback-id="editNganMapsUrlFeedback" placeholder="https://maps.google.com/...">
       <div class="map-url-feedback" id="editNganMapsUrlFeedback"></div>
@@ -1069,7 +1081,6 @@ const PERMIT_STATUS_LABEL = Object.fromEntries(PERMIT_STATUSES.map(s => [s.key, 
 // ── Init Supabase client ──────────────────────────────
 let sb = null;
 let currentAuth = null;
-let approvedTeamMembers = [];
 let realtimeController = null;
 
 // ── Table map ─────────────────────────────────────────
@@ -1137,6 +1148,7 @@ const ADD_FORM_CONFIG = {
   ],
   bil: [
     { name:'customer', label:'ลูกค้า', required:true },
+    { name:'phone', label:'เบอร์ติดต่อ', type:'tel' },
     { name:'amount', label:'ยอด', type:'number' },
     { name:'date', label:'วันที่', type:'date' },
     { name:'status', label:'สถานะ', type:'status', value:'รอออกบิล' },
@@ -1227,20 +1239,8 @@ function getCurrentUserId() {
   return currentAuth?.user?.id || null;
 }
 
-function getApprovedTeamNames() {
-  const seen = new Set();
-  return (approvedTeamMembers || [])
-    .map(member => member?.user?.displayName || '')
-    .filter(name => {
-      if (!name || seen.has(name)) return false;
-      seen.add(name);
-      return true;
-    });
-}
-
 function applyAuthenticatedIdentity(auth) {
   currentAuth = auth;
-  approvedTeamMembers = Array.isArray(auth?.teamMembers) ? auth.teamMembers : [];
   window.HiSolarAuth.applyUserSummary({
     user: auth?.user || {},
     membership: auth?.membership || {},
@@ -1354,17 +1354,23 @@ function escapeHtml(v) {
     .replace(/'/g, '&#39;');
 }
 
+// ทีมงานที่ admin เลือก assign ได้ — เป็น "ทีม" ไม่ใช่รายบุคคล
+const TEAM_OPTIONS = [
+  'Hi-Solar Only',
+  'JDK-พี่อ๊อด',
+  'JDK-พี่หล้า',
+  'JDK-ช่างก้าว',
+  'JDK-ช่างป๊อก',
+];
+
 function teamOptionsHtml(selected = '') {
+  const names = [...TEAM_OPTIONS];
+  // ค่าเดิมที่ไม่อยู่ในลิสต์ (เช่นชื่อรายบุคคลที่บันทึกไว้ก่อนเปลี่ยนมาใช้ทีม) ต้องไม่หายตอนแก้ไข
+  if (selected && !names.includes(selected)) names.push(selected);
   return [
     '<option value="">-- เลือกทีมงาน --</option>',
-    ...getApprovedTeamNames().map(name => `<option value="${name}"${name === selected ? ' selected' : ''}>${name}</option>`)
+    ...names.map(name => `<option value="${escapeHtml(name)}"${name === selected ? ' selected' : ''}>${escapeHtml(name)}</option>`)
   ].join('');
-}
-
-function renderTeamOptions(selected = '') {
-  const el = document.getElementById('nameInput');
-  if (!el) return;
-  el.innerHTML = teamOptionsHtml(selected);
 }
 
 function formatCommentDateTime(value) {
@@ -1683,7 +1689,7 @@ function addFieldHtml(tabKey, field) {
     return `<div><label class="form-label mb-1" for="${id}">${field.label}${field.required ? ' *' : ''}</label><select class="form-select" id="${id}" data-field="${field.name}">${opts}</select></div>`;
   }
   if (field.type === 'team') {
-    return `<div><label class="form-label mb-1" for="${id}">${field.label}</label><select class="form-select" id="${id}" data-field="${field.name}">${teamOptionsHtml(getCurrentUserName())}</select></div>`;
+    return `<div><label class="form-label mb-1" for="${id}">${field.label}</label><select class="form-select" id="${id}" data-field="${field.name}">${teamOptionsHtml()}</select></div>`;
   }
   const stepAttr = field.step ? ` step="${field.step}"` : '';
   const mapAttrs = field.name === 'maps_url' ? ` data-map-field="true" data-map-feedback-id="${id}-feedback"` : '';
@@ -1825,11 +1831,12 @@ function buildInsertPayload(tabKey, data) {
     };
   }
   raw['ลูกค้า'] = data.customer || '';
+  raw['เบอร์โทร'] = data.phone || '';
   raw['ยอด'] = data.amount || '';
   raw['วันที่'] = data.date || '';
   raw['สถานะ'] = data.status || defaultStatusForTab(tabKey);
   raw['หมายเหตุ'] = data.note || '';
-  return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', amount: data.amount || null, job_date: data.date || null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
+  return { sheet_key: tabKey, sheet_name: TAB_NAMES[tabKey], customer_name: data.customer || '', phone: data.phone || '', amount: data.amount || null, job_date: data.date || null, status: data.status || defaultStatusForTab(tabKey), note: data.note || '', raw_data: raw, synced_at: now, created_at: now, updated_at: now };
 }
 
 function formatSupabaseError(error, actionText = 'ทำรายการ') {
@@ -2757,6 +2764,7 @@ function buildCard(key, r) {
     name   = r.customer || '—';
     detail = r.date ? `<i class="bi bi-calendar3 me-1"></i>${r.date}` : '';
     const etaxMeta = [];
+    if (r.phone)        etaxMeta.push(buildPhoneMeta(r.phone));
     if (r.etax_first_name || r.etax_last_name) etaxMeta.push(`<i class="bi bi-person-vcard me-1"></i>${escapeHtml((r.etax_first_name + ' ' + r.etax_last_name).trim())}`);
     if (r.etax_tax_id)  etaxMeta.push(`<i class="bi bi-card-text me-1"></i>${escapeHtml(r.etax_tax_id)}`);
     if (r.etax_date)    etaxMeta.push(`<i class="bi bi-file-earmark-text me-1"></i>E-Tax ${escapeHtml(r.etax_date)}`);
@@ -3262,6 +3270,7 @@ function openEditBilModal(id) {
   if (!r) return;
   pendingEditBil = { id };
   document.getElementById('ebCustomer').value  = r.customer        || '';
+  document.getElementById('ebPhone').value     = r.phone           || '';
   document.getElementById('ebAmount').value    = r.amount          ?? '';
   document.getElementById('ebDate').value      = displayDateToInputDate(r.date);
   document.getElementById('ebFirstName').value = r.etax_first_name || '';
@@ -3281,6 +3290,7 @@ async function submitEditBil() {
   if (!pendingEditBil) return;
   const { id } = pendingEditBil;
   const customer  = document.getElementById('ebCustomer').value.trim();
+  const phone     = document.getElementById('ebPhone').value.trim();
   const amount    = document.getElementById('ebAmount').value;
   const dateVal   = document.getElementById('ebDate').value;
   const firstName = document.getElementById('ebFirstName').value.trim();
@@ -3298,6 +3308,7 @@ async function submitEditBil() {
     const r = allData['bil'].find(x => x.id === id);
     const newRaw = { ...(r?._rawData || {}) };
     newRaw['ลูกค้า']              = customer;
+    newRaw['เบอร์โทร']           = phone;
     newRaw['ยอด']                 = amount;
     newRaw['วันที่']              = dateVal;
     newRaw['ชื่อ']                = firstName;
@@ -3308,12 +3319,13 @@ async function submitEditBil() {
     newRaw['เบอร์โทรศัพท์']      = etaxPhone;
     newRaw['วันที่ออก E-Tax']     = etaxDate;
     const { error } = await sb.from('hi_solar_jobs').update({
-      customer_name: customer, amount: amount ? Number(amount) : null,
+      customer_name: customer, phone: phone || null, amount: amount ? Number(amount) : null,
       job_date: dateVal || null, raw_data: newRaw, updated_at: new Date().toISOString(),
     }).eq('id', id);
     if (error) throw error;
     if (r) {
-      r.customer        = customer;    r.amount    = amount;
+      r.customer        = customer;    r.phone     = phone;
+      r.amount          = amount;
       r.date            = formatDateDisplay(dateVal);
       r.etax_first_name = firstName;   r.etax_last_name = lastName;
       r.etax_tax_id     = taxId;       r.etax_address   = address;
@@ -3534,6 +3546,8 @@ function openEditNganModal(id) {
   if (!record) return;
   const mapsInput = document.getElementById('editNganMapsUrl');
   pendingEditNgan = { id };
+  document.getElementById('editNganCustomer').value = record.customer || '';
+  document.getElementById('editNganPhone').value    = record.phone    || '';
   mapsInput.value = record.maps_url || '';
   document.getElementById('editNganDate').value     = displayDateToInputDate(record.date);
   document.getElementById('editNganTime').value     = record.time || '';
@@ -3553,6 +3567,8 @@ function closeEditNganModal() {
 async function submitEditNgan() {
   if (!pendingEditNgan) return;
   const { id } = pendingEditNgan;
+  const customerVal = document.getElementById('editNganCustomer').value.trim();
+  const phoneVal    = document.getElementById('editNganPhone').value.trim();
   const mapsInput = document.getElementById('editNganMapsUrl');
   if (!validateMapsInput(mapsInput)) { mapsInput.reportValidity(); return; }
   const mapsUrl   = sanitizeMapsUrl(mapsInput.value.trim()) || '';
@@ -3570,6 +3586,8 @@ async function submitEditNgan() {
   try {
     const record = allData['ngan'].find(r => r.id === id);
     const newRaw = { ...(record?._rawData || {}) };
+    if (customerVal) newRaw['ลูกค้า']  = customerVal;
+    newRaw['เบอร์โทร'] = phoneVal;
     newRaw['Maps']      = mapsUrl;
     newRaw['วันที่']    = dateVal ? formatDateDisplay(dateVal) : (newRaw['วันที่'] || '');
     newRaw['เวลา']      = timeVal;
@@ -3578,6 +3596,8 @@ async function submitEditNgan() {
     newRaw['ราคา']      = priceVal;
 
     const updatePayload = {
+      customer_name: customerVal || record?.customer || null,
+      phone:      phoneVal || null,
       maps_url:   mapsUrl,
       job_date:   dateVal || null,
       job_time:   timeVal ? `${timeVal}:00` : null,
@@ -3591,6 +3611,8 @@ async function submitEditNgan() {
     if (error) throw error;
 
     if (record) {
+      if (customerVal) record.customer = customerVal;
+      record.phone      = phoneVal;
       record.maps_url   = mapsUrl;
       record.date       = dateVal ? formatDateDisplay(dateVal) : record.date;
       record.time       = timeVal;
@@ -3621,7 +3643,7 @@ function openAssignedModal(tabKey, id) {
   document.getElementById('assignedStart').value = record.assigned_start || '';
   document.getElementById('assignedEnd').value   = record.assigned_end   || '';
   const techEl = document.getElementById('assignedTechnician');
-  techEl.innerHTML = teamOptionsHtml(record.technician || getCurrentUserName() || '');
+  techEl.innerHTML = teamOptionsHtml(record.technician || '');
   document.getElementById('assignedModal').classList.add('show');
 }
 

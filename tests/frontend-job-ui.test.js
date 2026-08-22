@@ -117,3 +117,55 @@ test('legacy comments keep old author name and fallback avatar', () => {
   assert.equal(getCommentOrganizationLabel(legacy), '');
   assert.equal(escapeHtml('<script>alert(1)</script>'), '&lt;script&gt;alert(1)&lt;/script&gt;');
 });
+
+function loadInlineTeamOptions() {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'hisolar_planner.html'), 'utf8');
+  const startToken = 'const TEAM_OPTIONS = [';
+  const endToken = 'function formatCommentDateTime(';
+  const start = source.indexOf(startToken);
+  const end = source.indexOf(endToken);
+  assert.ok(start >= 0, 'hisolar_planner.html is missing TEAM_OPTIONS');
+  assert.ok(end > start, 'hisolar_planner.html is missing formatCommentDateTime');
+  const context = vm.createContext({ escapeHtml });
+  vm.runInContext(`
+${source.slice(start, end)}
+this.inlineExports = { TEAM_OPTIONS, teamOptionsHtml };
+`, context);
+  return context.inlineExports;
+}
+
+test('the team dropdown is a fixed roster of teams, not whoever logged in via LINE', () => {
+  const { TEAM_OPTIONS, teamOptionsHtml } = loadInlineTeamOptions();
+
+  assert.deepEqual([...TEAM_OPTIONS], [
+    'Hi-Solar Only',
+    'JDK-พี่อ๊อด',
+    'JDK-พี่หล้า',
+    'JDK-ช่างก้าว',
+    'JDK-ช่างป๊อก',
+  ]);
+
+  const html = teamOptionsHtml();
+  for (const team of TEAM_OPTIONS) {
+    assert.ok(html.includes(`>${team}</option>`), `${team} is missing from the dropdown`);
+  }
+  assert.ok(html.includes('-- เลือกทีมงาน --'));
+  assert.doesNotMatch(html, / selected/);
+});
+
+test('the saved team is preselected and an unknown legacy value survives editing', () => {
+  const { teamOptionsHtml } = loadInlineTeamOptions();
+
+  assert.ok(teamOptionsHtml('JDK-พี่หล้า').includes('value="JDK-พี่หล้า" selected'));
+
+  const legacy = teamOptionsHtml('Shine Chaiwat');
+  assert.ok(legacy.includes('value="Shine Chaiwat" selected'), 'legacy technician must not be silently dropped');
+  assert.equal(legacy.match(/<option /g).length, 7);
+});
+
+test('a team name is escaped rather than injected into the dropdown', () => {
+  const { teamOptionsHtml } = loadInlineTeamOptions();
+  const html = teamOptionsHtml('" onclick="alert(1)');
+  assert.doesNotMatch(html, /onclick="alert/);
+  assert.ok(html.includes('&quot;'));
+});
