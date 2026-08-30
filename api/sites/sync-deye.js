@@ -40,7 +40,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const context = await getAuthenticatedSessionContext(req, 'hisolar');
+    const context = await getAuthenticatedSessionContext(req, 'hisolar', res);
     if (!WRITE_ROLES.has(String(context.membership.role))) {
       throw createHttpError(403, 'Only a Hi Solar admin or member can sync the site registry');
     }

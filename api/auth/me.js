@@ -11,7 +11,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const app = normalizeApp(normalizeQueryValue(req.query && req.query.app)) || undefined;
-    const context = await getAuthenticatedSessionContext(req, app);
+    const context = await getAuthenticatedSessionContext(req, app, res);
     const availableApps = (context.memberships || [])
       .filter(item => item.status === 'approved')
       .map(item => ({

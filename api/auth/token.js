@@ -11,7 +11,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const app = normalizeApp(normalizeQueryValue(req.query && req.query.app)) || undefined;
-    const context = await getAuthenticatedSessionContext(req, app);
+    const context = await getAuthenticatedSessionContext(req, app, res);
     const token = await signSupabaseAccessToken(context);
     return writeJson(res, 200, {
       app: context.targetApp,

@@ -1,15 +1,18 @@
 const { createHttpError } = require('./http');
 const { isSessionActive } = require('./auth-rules');
-const { normalizeApp } = require('./config');
+const { getSessionMaxAgeSeconds, normalizeApp } = require('./config');
 const {
   getAppUserById,
   getAuthSessionByHash,
   listMembershipsForUser,
   touchAuthSession,
 } = require('./supabase-admin');
-const { hashSessionToken, readSessionTokenFromRequest } = require('./session');
+const { hashSessionToken, readSessionTokenFromRequest, setSessionCookie } = require('./session');
 
-async function getAuthenticatedSessionContext(req, requestedApp) {
+// Sliding session: every authenticated request pushes expires_at back out and
+// re-issues the cookie, so an account in daily use never hits the ceiling.
+// Only someone absent for the full window in a row is asked to sign in again.
+async function getAuthenticatedSessionContext(req, requestedApp, res) {
   const sessionToken = readSessionTokenFromRequest(req);
   if (!sessionToken) {
     throw createHttpError(401, 'Authentication required');
@@ -37,12 +40,17 @@ async function getAuthenticatedSessionContext(req, requestedApp) {
     throw createHttpError(403, 'Membership is not approved for this app');
   }
 
-  await touchAuthSession(session.id);
+  const maxAgeSeconds = getSessionMaxAgeSeconds();
+  const renewedExpiresAt = new Date(Date.now() + maxAgeSeconds * 1000).toISOString();
+  await touchAuthSession(session.id, renewedExpiresAt);
+  if (res) {
+    setSessionCookie(res, sessionToken, maxAgeSeconds);
+  }
 
   return {
     membership,
     memberships,
-    session,
+    session: { ...session, expires_at: renewedExpiresAt },
     sessionTokenHash,
     targetApp,
     user,

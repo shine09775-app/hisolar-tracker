@@ -256,11 +256,13 @@ async function getAuthSessionByHash(sessionTokenHash) {
   return data || null;
 }
 
-async function touchAuthSession(sessionId) {
+async function touchAuthSession(sessionId, expiresAt) {
   const supabase = getSupabaseAdminClient();
+  const update = { last_seen_at: new Date().toISOString() };
+  if (expiresAt) update.expires_at = expiresAt;
   const { error } = await supabase
     .from('auth_sessions')
-    .update({ last_seen_at: new Date().toISOString() })
+    .update(update)
     .eq('id', sessionId);
   if (error) throw createHttpError(500, 'Failed to update auth session', error.message);
 }
