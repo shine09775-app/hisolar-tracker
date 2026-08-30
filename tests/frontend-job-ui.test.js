@@ -31,6 +31,37 @@ test('sanitizeMapsUrl allows supported Google Maps hosts and neutralizes quote i
   );
 });
 
+test('sanitizeMapsUrl rewrites link shapes that fail to deep-link on iOS into the api=1 search form', () => {
+  assert.equal(
+    sanitizeMapsUrl('https://www.google.com/maps?q=13.7563,100.5018'),
+    'https://www.google.com/maps/search/?api=1&query=13.7563,100.5018'
+  );
+  assert.equal(
+    sanitizeMapsUrl('https://www.google.com/maps/@13.7563,100.5018,17z'),
+    'https://www.google.com/maps/search/?api=1&query=13.7563,100.5018'
+  );
+  assert.equal(
+    sanitizeMapsUrl('https://www.google.com/maps/place/Somewhere/data=!3d13.7563061!4d100.5018693'),
+    'https://www.google.com/maps/search/?api=1&query=13.7563061,100.5018693'
+  );
+  // maps.app.goo.gl is an opaque short link with no coordinates to read out of
+  // the URL itself, so it must pass through unchanged rather than be dropped.
+  assert.equal(sanitizeMapsUrl('https://maps.app.goo.gl/abc123'), 'https://maps.app.goo.gl/abc123');
+});
+
+test('sanitizeMapsUrl prefers the place pin over the map pan/zoom center when a link carries both', () => {
+  // A real "share this place" link often has the map's viewport center
+  // (/@lat,lng,zoom) AND the place's own stored coordinate (!3d..!4d..) in the
+  // same URL. The center drifts if the map was scrolled before copying the
+  // link; the !3d/!4d pin is the one that actually marks the place.
+  const placeLink =
+    'https://www.google.com/maps/place/Customer+Site/@13.7,100.4,17z/data=!4m6!3m5!1s0x0:0x0!8m2!3d13.7437061!4d100.4888693';
+  assert.equal(
+    sanitizeMapsUrl(placeLink),
+    'https://www.google.com/maps/search/?api=1&query=13.7437061,100.4888693'
+  );
+});
+
 test('buildTelHref normalizes valid phone values and rejects malformed phones', () => {
   assert.equal(buildTelHref('081-234-5678'), 'tel:0812345678');
   assert.equal(buildTelHref('+66 81 234 5678'), 'tel:+66812345678');
