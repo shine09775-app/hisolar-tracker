@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#16a34a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -41,7 +41,7 @@
     .btn-primary:hover { background-color: var(--hs-primary-d); border-color: var(--hs-primary-d); }
     .text-primary { color: var(--hs-primary) !important; }
 
-    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #f1f5f9; }
+    #app { max-width: 480px; margin: 0 auto; min-height: 100dvh; background: #f1f5f9; }
     @media (min-width: 576px) { #app { box-shadow: 0 0 40px rgba(0,0,0,.15); } }
 
     /* Navbar */
@@ -55,7 +55,6 @@
       background: rgba(255,255,255,.18); color: #fff; text-decoration: none;
       width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; flex: 0 0 auto;
     }
-    .hs-navbar .sites-link:hover { background: rgba(255,255,255,.3); }
     .hs-navbar .brand i { color: #fbbf24; font-size: 20px; }
     .hs-navbar .auth-actions { display: flex; align-items: center; gap: 8px; }
     .hs-navbar .auth-profile {
@@ -198,7 +197,6 @@
     .add-panel.open .add-body { display: block; }
     .add-grid { display: grid; gap: 10px; margin-top: 12px; }
     .bulk-link { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 12px; padding: 10px 12px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; color: #166534; text-decoration: none; font-size: 13px; }
-    .bulk-link:hover { background: #f8fafc; color: #166534; }
     .form-note { font-size: 11px; color: #64748b; margin-top: 4px; }
 
     /* Bottom Nav */
@@ -244,7 +242,6 @@
     .cal-view-btn { flex: 1; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #475569; border-radius: 10px; padding: 6px 4px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 4px; }
     .cal-view-btn i { font-size: 13px; }
     .cal-view-btn.active { background: var(--hs-primary); border-color: var(--hs-primary); color: #fff; }
-    .cal-view-btn:hover:not(.active) { background: #f1f5f9; border-color: #cbd5e1; }
 
     /* Calendar Panel */
     #calendarPanel { padding: 12px 14px calc(var(--nav-h) + 16px); }
@@ -257,7 +254,6 @@
     .cal-month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 12px; }
     .cal-dow { text-align: center; font-size: 10px; color: #94a3b8; padding: 4px 0; font-weight: 500; }
     .cal-day { border-radius: 8px; padding: 3px 2px; min-height: 46px; cursor: pointer; transition: background .1s; }
-    .cal-day:hover { background: #f1f5f9; }
     .cal-day.today .cal-day-num { background: var(--hs-primary); color: #fff; }
     .cal-day.selected { background: #e0f2fe; }
     .cal-day.other-month .cal-day-num { color: #d1d5db; }
@@ -396,6 +392,38 @@
     .cal-dot.assigned          { background: #7c3aed; }
     .cal-week-event.assigned   { background: #ede9fe; color: #4c1d95; }
     .assigned-range            { display:inline-flex; align-items:center; gap:4px; background:#ede9fe; color:#4c1d95; border-radius:6px; padding:2px 10px; font-size:12px; font-weight:600; margin-bottom:6px; }
+    /* ── Desktop polish ──────────────────────────────────────────
+       Layout stays single-column mobile; these only widen and enlarge it
+       on screens that can afford it. Nothing here applies below 576px. */
+    @media (min-width: 576px) {
+      /* #app, the fixed bottom nav and the sheet all have to move together
+         or their edges stop lining up. */
+      #app        { max-width: 560px; }
+      .bottom-nav { max-width: 560px; }
+      .sheet-box  { max-width: 560px; }
+
+      /* Sized for a phone at arm's length; too small on a monitor.
+         Scoped under #app because hi-solar-theme-reference.css loads after this
+         block and redefines .stat-item and .card-date/.card-meta at equal
+         specificity -- unscoped rules here would silently lose to it. */
+      #app .stat-item .num { font-size: 23px; }
+      #app .stat-item .lbl { font-size: 11.5px; }
+      #app .nav-btn        { font-size: 11.5px; }
+      #app .nav-btn i      { font-size: 22px; }
+      #app .card-date,
+      #app .card-meta      { font-size: 12.5px; }
+      .cal-dow             { font-size: 11.5px; }
+      .cal-month2-bars .m2-bar,
+      .cal-month2-bars .m2-pill { height: 17px; line-height: 17px; font-size: 10.5px; }
+    }
+
+    /* Hover tints only where there is a real pointer. */
+    @media (hover: hover) {
+      .hs-navbar .sites-link:hover { background: rgba(255,255,255,.3); }
+      .bulk-link:hover { background: #f8fafc; color: #166534; }
+      .cal-view-btn:hover:not(.active) { background: #f1f5f9; border-color: #cbd5e1; }
+      .cal-day:hover { background: #f1f5f9; }
+    }
   </style>
   <link rel="stylesheet" href="./hi-solar-theme-reference.css">
 </head>
