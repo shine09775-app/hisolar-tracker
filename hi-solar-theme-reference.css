@@ -55,7 +55,9 @@ body {
 @media (min-width: 576px) {
   #app {
     border-radius: 0 0 28px 28px;
-    overflow: hidden;
+    /* `clip`, not `hidden`: hidden makes #app a scroll container, which stops
+       the sticky navbar inside it from pinning to the viewport. */
+    overflow: clip;
     box-shadow: 0 20px 46px rgba(9, 25, 45, 0.16);
   }
 }
@@ -444,9 +446,12 @@ body {
   color: var(--hs-primary);
 }
 
-.bulk-link:hover {
-  background: #fff3cf;
-  color: var(--hs-primary);
+/* Hover tint only where there is a real pointer; on touch it sticks after a tap. */
+@media (hover: hover) {
+  .bulk-link:hover {
+    background: #fff3cf;
+    color: var(--hs-primary);
+  }
 }
 
 .bottom-nav {

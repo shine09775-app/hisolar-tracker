@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -39,7 +39,7 @@
 
     #app {
       max-width: 480px;
-      min-height: 100vh;
+      min-height: 100dvh;
       margin: 0 auto;
       background:
         radial-gradient(circle at top right, rgba(20, 184, 166, 0.18), transparent 30%),
@@ -47,9 +47,6 @@
       position: relative;
     }
 
-    @media (min-width: 576px) {
-      #app { box-shadow: 0 0 40px rgba(15, 23, 42, 0.18); }
-    }
 
     .btn-primary {
       background: var(--hs-primary);
@@ -798,6 +795,14 @@
       color: #fff;
       font-size: 12px;
       text-align: center;
+    }
+    /* Desktop polish: same single-column mobile layout, just roomier and set
+       off from the page so the column reads as the app rather than as stray
+       content floating in the middle of a large screen. */
+    @media (min-width: 576px) {
+      #app        { max-width: 560px; box-shadow: 0 14px 44px rgba(15, 23, 42, 0.2); }
+      .bottom-nav { max-width: 560px; }
+      .sheet-box  { max-width: 560px; }
     }
   </style>
 </head>

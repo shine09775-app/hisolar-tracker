@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#16a34a">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -41,8 +41,7 @@
     .btn-primary:hover { background-color: var(--hs-primary-d); border-color: var(--hs-primary-d); }
     .text-primary { color: var(--hs-primary) !important; }
 
-    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #f1f5f9; }
-    @media (min-width: 576px) { #app { box-shadow: 0 0 40px rgba(0,0,0,.15); } }
+    #app { max-width: 480px; margin: 0 auto; min-height: 100dvh; background: #f1f5f9; }
 
     /* Navbar */
     .hs-navbar {
@@ -297,6 +296,14 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
     }
     #appLoading .txt { font-size: 13px; color: #64748b; }
+    /* Desktop polish: same single-column mobile layout, just roomier and set
+       off from the page so the column reads as the app rather than as stray
+       content floating in the middle of a large screen. */
+    @media (min-width: 576px) {
+      body   { background: #dde5ee; }
+      #app   { max-width: 560px; box-shadow: 0 14px 44px rgba(15,23,42,.18); }
+      .sheet { max-width: 560px; }
+    }
   </style>
 </head>
 <body>
