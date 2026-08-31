@@ -3,5 +3,6 @@ FUSIONSOLAR,FusionSolar,HUAWEI,plant,yes,xlsx (2 sheets),Plant Name,active,ต�
 SOLARMAN,Solarman,DEYE,plant,yes,xlsx,ID (numeric),active,white-label รองรับหลายแบรนด์ ปัจจุบันใช้กับ Deye
 DEYECLOUD,Deye Cloud,DEYE,device,yes,xlsx,SN,active,ระดับ device/inverter ไม่ใช่ระดับ plant
 SOLISCLOUD,SolisCloud,SOLIS,plant,yes,xls,Plant ID (hex),active,หัวตารางซ้อน ต้องข้าม 5 แถวแรก
-FSOLAR,Fsolar,FELICITY,plant,no,(image only),TBD,pending,ยังมีแต่ screenshot ต้อง export ดิบเพิ่ม
-SHINEPHONE,ShinePhone,GROWATT,plant,no,(image only),TBD,pending,ยังมีแต่ screenshot ต้อง export ดิบเพิ่ม
+FSOLAR,Fsolar,FELICITY,plant,no,(image only),Plant Name,active,export ไม่ได้ ถอดจาก screenshot ด้วยมือ 5 ไซต์ -> fsolar_seed.csv
+SHINEPHONE,ShinePhone,GROWATT,plant,no,(image only),Plant Name,active,export ไม่ได้ ถอดจาก screenshot ด้วยมือ 2 ไซต์ -> growatt_seed.csv (การ์ด dashboard ไม่บอก kWp รายไซต์ ต้องกรอกสเปกเอง)
+ENERGYLIB,EnergyLIB,ENERGYLIB,plant,no,(image only),Number (JSxxxxxxx),active,export ไม่ได้ ถอดจาก screenshot ด้วยมือ 1 ไซต์ -> energylib_seed.csv (หน้าแอปให้ SN/DTU ID/พิกัดครบ ใช้ Number เป็นคีย์แทนชื่อไซต์)

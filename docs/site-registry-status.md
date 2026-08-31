@@ -11,7 +11,7 @@
 
 ### Sprint 1 — Data Foundation
 - `supabase/site-registry.sql` — ตาราง `hi_solar_sites` + dimension
-  `hi_solar_inverter_brands` (5) / `hi_solar_platforms` (6) + คอลัมน์ `site_id`
+  `hi_solar_inverter_brands` (6) / `hi_solar_platforms` (7) + คอลัมน์ `site_id`
   ใน `hi_solar_jobs` และ `hi_solar_permits` + RLS
 - `supabase/site-registry-rollback.sql` — rollback ทั้งชุด
 - `scripts/import-site-registry.mjs` — upsert idempotent บน
@@ -122,3 +122,19 @@ node scripts/import-site-registry.mjs --commit
 
 `sites_seed.csv` สร้างจาก `Solar_Site_DATA/master_registry.xlsx` ซึ่งรวมมาจาก
 ไฟล์ export ของแต่ละค่ายใน `Solar_Site_DATA/`
+
+### ค่ายที่ export ไม่ได้ (ถอดจาก screenshot ด้วยมือ)
+
+Fsolar / ShinePhone / EnergyLIB ไม่มีปุ่ม export จึงแยกเป็น seed ของตัวเอง
+โหลดทีละไฟล์ด้วย `--file` (upsert คีย์เดิม รันซ้ำได้):
+
+```bash
+node scripts/import-site-registry.mjs --file Solar_Site_DATA/_reference/fsolar_seed.csv
+node scripts/import-site-registry.mjs --file Solar_Site_DATA/_reference/growatt_seed.csv
+node scripts/import-site-registry.mjs --file Solar_Site_DATA/_reference/energylib_seed.csv
+```
+
+EnergyLIB มีไซต์เดียว (`จ.เจริญการเกษตร` 6 kWp เชียงใหม่) แต่หน้า Device
+Information ในแอปให้ข้อมูลครบกว่าค่ายอื่น — มีทั้ง `Number` (คีย์ที่นิ่งกว่าชื่อไซต์),
+SN, DTU ID และพิกัด **ที่สลับลำดับเป็น long/lat** (`98.997317/18.805270`)
+ระวังตอนถอดเพิ่ม เชียงใหม่ต้องได้ lat ≈ 18.8 / long ≈ 99.0

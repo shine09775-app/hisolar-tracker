@@ -188,6 +188,7 @@
     .b-SOLIS    { background: #dcfce7; color: #15803d; }
     .b-FELICITY { background: #fef3c7; color: #a16207; }
     .b-GROWATT  { background: #ede9fe; color: #6d28d9; }
+    .b-ENERGYLIB{ background: #ccfbf1; color: #0f766e; }
     .b-none     { background: #f1f5f9; color: #64748b; }
     .status-pill { font-size: 10.5px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; color: #64748b; }
     .dot { width: 7px; height: 7px; border-radius: 50%; background: #cbd5e1; }
@@ -435,12 +436,12 @@ const CLEAN_SOON_DAYS = 30;
 
 const BRAND_LABEL = {
   HUAWEI: 'Huawei', DEYE: 'Deye', SOLIS: 'Solis',
-  FELICITY: 'Felicity', GROWATT: 'Growatt',
+  FELICITY: 'Felicity', GROWATT: 'Growatt', ENERGYLIB: 'EnergyLIB',
 };
 // สีเดียวกับ badge ยี่ห้อบนการ์ด เพื่อให้กราฟอ่านคู่กับรายการได้
 const BRAND_COLOR = {
   HUAWEI: '#dc2626', DEYE: '#2563eb', SOLIS: '#16a34a',
-  FELICITY: '#ca8a04', GROWATT: '#7c3aed', none: '#94a3b8',
+  FELICITY: '#ca8a04', GROWATT: '#7c3aed', ENERGYLIB: '#0d9488', none: '#94a3b8',
 };
 const WARRANTY_META = {
   active:  { label: 'ในประกัน',      color: '#16a34a' },
@@ -457,6 +458,7 @@ const SERVICE_META = {
 const PLATFORM_LABEL = {
   FUSIONSOLAR: 'FusionSolar', SOLARMAN: 'Solarman', DEYECLOUD: 'Deye Cloud',
   SOLISCLOUD: 'SolisCloud', FSOLAR: 'Fsolar', SHINEPHONE: 'ShinePhone',
+  ENERGYLIB: 'EnergyLIB',
 };
 // Job sheets from the planner, reused as the per-site service tags.
 const JOB_TAG = {
