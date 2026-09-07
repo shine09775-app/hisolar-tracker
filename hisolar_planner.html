@@ -152,17 +152,19 @@
     .permit-summary-card.active { border-color: #2563eb; background: #eff6ff; box-shadow: inset 0 0 0 1px #2563eb; }
     .permit-summary-card .value { display: block; font-size: 20px; font-weight: 700; line-height: 1.05; color: #0f172a; }
     .permit-summary-card .name { display: flex; align-items: center; gap: 4px; min-width: 0; margin-top: 5px; font-size: 10px; color: #64748b; white-space: nowrap; }
-    .permit-summary-card .dot, .permit-bar-segment, .permit-phase-fill { background: var(--permit-color); }
+    .permit-summary-card .dot, .permit-bar-segment { background: var(--permit-color); }
     .permit-summary-card .dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
     .permit-status-bar { height: 9px; display: flex; overflow: hidden; margin-top: 8px; border-radius: 999px; background: #e2e8f0; }
     .permit-bar-segment { min-width: 0; height: 100%; transition: width .2s ease; }
-    .permit-phase-list { display: grid; gap: 4px; }
-    .permit-phase-row { width: 100%; border: 0; border-radius: 9px; background: transparent; display: grid; grid-template-columns: minmax(100px,1fr) minmax(90px,1.2fr) 24px; gap: 8px; align-items: center; padding: 6px; color: #334155; font-size: 11px; text-align: left; }
-    .permit-phase-row:hover { background: #f8fafc; }
-    .permit-phase-row.active { background: #eef2ff; color: #3730a3; font-weight: 600; }
-    .permit-phase-track { height: 7px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
-    .permit-phase-fill { height: 100%; border-radius: inherit; background: #6366f1; }
-    .permit-phase-count { text-align: right; font-weight: 600; }
+    .permit-phase-list { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; }
+    .permit-phase-row { position: relative; width: 100%; min-width: 0; min-height: 72px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 7px 3px; color: #64748b; text-align: center; }
+    .permit-phase-row.has-work { border-color: #c7d2fe; background: #eef2ff; color: #3730a3; }
+    .permit-phase-row:hover { border-color: #a5b4fc; }
+    .permit-phase-row.active { border-color: #4f46e5; background: #e0e7ff; color: #312e81; box-shadow: inset 0 0 0 1px #4f46e5; }
+    .permit-phase-name { max-width: 100%; min-height: 24px; display: flex; align-items: center; justify-content: center; font-size: 9px; line-height: 1.25; overflow-wrap: anywhere; }
+    .permit-phase-count { font-size: 19px; line-height: 1; font-weight: 700; color: #94a3b8; }
+    .permit-phase-row.has-work .permit-phase-count { color: #4338ca; }
+    .permit-phase-alert { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: #f97316; box-shadow: 0 0 0 2px #fff; }
     .permit-age-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; }
     .permit-age-chip { min-width: 0; border: 1px solid #e2e8f0; border-radius: 9px; background: #fff; padding: 7px 3px; text-align: center; color: #475569; }
     .permit-age-chip.active { border-color: var(--age-color); box-shadow: inset 0 0 0 1px var(--age-color); background: #fffaf0; }
@@ -2784,11 +2786,12 @@ function renderPermitOverview(rows) {
     const percent = summary.total ? ((summary.statusCounts[s.label] || 0) / summary.total) * 100 : 0;
     return `<span class="permit-bar-segment" style="--permit-color:${PERMIT_STATUS_COLORS[s.label]};width:${percent}%" title="${escapeHtml(PERMIT_STATUS_SHORT_LABELS[s.label])} ${summary.statusCounts[s.label] || 0}"></span>`;
   }).join('');
-  const maxPhase = Math.max(1, ...Object.values(summary.phaseCounts));
   const phaseRows = PERMIT_PHASES.map(p => {
     const count = summary.phaseCounts[p.label] || 0;
-    const width = (count / maxPhase) * 100;
-    return `<button class="permit-phase-row${permitOverviewFilter.phase===p.label?' active':''}" onclick="setPermitPhaseFilter('${p.label}')" aria-pressed="${permitOverviewFilter.phase===p.label}"><span>${escapeHtml(p.label)}</span><span class="permit-phase-track"><span class="permit-phase-fill" style="width:${width}%"></span></span><span class="permit-phase-count">${count}</span></button>`;
+    const staleCount = rows.filter(r => r.phase === p.label && !['Done','Reject'].includes(r.status) && ['31-60','61+'].includes(permitAgeBucket(r))).length;
+    const classes = `${count ? ' has-work' : ''}${permitOverviewFilter.phase===p.label?' active':''}`;
+    const alert = staleCount ? `<span class="permit-phase-alert" title="ค้างเกิน 30 วัน ${staleCount} งาน" aria-label="ค้างเกิน 30 วัน ${staleCount} งาน"></span>` : '';
+    return `<button class="permit-phase-row${classes}" onclick="setPermitPhaseFilter('${p.label}')" aria-pressed="${permitOverviewFilter.phase===p.label}" title="${escapeHtml(p.label)} ${count} งาน">${alert}<span class="permit-phase-name">${escapeHtml(p.label)}</span><span class="permit-phase-count">${count}</span></button>`;
   }).join('');
   const ageRows = PERMIT_AGE_OPTIONS.map(a => `<button class="permit-age-chip${permitOverviewFilter.aging===a.key?' active':''}" style="--age-color:${a.color}" onclick="setPermitAgeFilter('${a.key}')" aria-pressed="${permitOverviewFilter.aging===a.key}"><strong>${summary.agingCounts[a.key] || 0}</strong><span>${a.label}</span></button>`).join('');
   const filtersActive = filters.permit !== 'all' || permitOverviewFilter.phase || permitOverviewFilter.aging;

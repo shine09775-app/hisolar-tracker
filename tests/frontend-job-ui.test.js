@@ -197,6 +197,16 @@ test('permit overview is mounted below search/date filters and exposes accessibl
   assert.doesNotMatch(source, /ขออนุญาติ/);
 });
 
+test('permit phases use a compact four-column box grid instead of empty progress tracks', () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'hisolar_planner.html'), 'utf8');
+  assert.match(source, /\.permit-phase-list\s*\{[^}]*grid-template-columns:\s*repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(source, /class="permit-phase-name"/);
+  assert.match(source, /class="permit-phase-count"/);
+  assert.match(source, /permit-phase-alert/);
+  assert.doesNotMatch(source, /permit-phase-track/);
+  assert.doesNotMatch(source, /permit-phase-fill/);
+});
+
 function loadInlineTeamOptions() {
   const source = fs.readFileSync(path.join(__dirname, '..', 'hisolar_planner.html'), 'utf8');
   const startToken = 'const TEAM_OPTIONS = [';
