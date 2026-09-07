@@ -11,6 +11,9 @@ const {
   getCommentAuthorName,
   getCommentAuthorPicture,
   getCommentOrganizationLabel,
+  getPermitAgeDays,
+  getPermitAgeBucket,
+  calculatePermitOverview,
 } = require('../job-ui-helpers');
 
 test('sanitizeMapsUrl rejects javascript and non-https URLs', () => {
@@ -147,6 +150,51 @@ test('legacy comments keep old author name and fallback avatar', () => {
   assert.equal(getCommentAuthorPicture(legacy), '');
   assert.equal(getCommentOrganizationLabel(legacy), '');
   assert.equal(escapeHtml('<script>alert(1)</script>'), '&lt;script&gt;alert(1)&lt;/script&gt;');
+});
+
+test('permit aging uses the last update and groups long-running open work', () => {
+  const now = new Date('2026-09-07T12:00:00.000Z');
+  assert.equal(getPermitAgeDays({ updated_at:'2026-09-01T12:00:00.000Z', created_at:'2026-01-01T00:00:00.000Z' }, now), 6);
+  assert.equal(getPermitAgeBucket({ updated_at:'2026-08-01T12:00:00.000Z' }, now), '31-60');
+  assert.equal(getPermitAgeBucket({ created_at:'2026-06-01T00:00:00.000Z' }, now), '61+');
+  assert.equal(getPermitAgeBucket({}, now), 'unknown');
+});
+
+test('permit overview counts status, phase, and aging without treating closed work as backlog', () => {
+  const now = new Date('2026-09-07T12:00:00.000Z');
+  const overview = calculatePermitOverview([
+    { status:'Waiting', phase:'เตรียมเอกสาร', updated_at:'2026-09-04T12:00:00.000Z' },
+    { status:'In Progress', phase:'ยื่นเอกสาร', updated_at:'2026-08-01T12:00:00.000Z' },
+    { status:'Need Fix', phase:'รับคำแนะนำ/แก้ไข', updated_at:'2026-06-01T12:00:00.000Z' },
+    { status:'Done', phase:'ออกเอกสารขนานไฟฟ้า', updated_at:'2026-01-01T12:00:00.000Z' },
+    { status:'Reject', phase:'ส่งเอกสาร', updated_at:'2026-01-01T12:00:00.000Z' },
+  ], {
+    statuses:['Waiting','In Progress','Need Fix','Done','Reject'],
+    phases:['เตรียมเอกสาร','ส่งเอกสาร','รับคำแนะนำ/แก้ไข','ยื่นเอกสาร','ออกเอกสารขนานไฟฟ้า'],
+    now,
+  });
+
+  assert.equal(overview.total, 5);
+  assert.equal(overview.active, 3);
+  assert.equal(overview.stale, 2);
+  assert.equal(overview.statusCounts['Need Fix'], 1);
+  assert.equal(overview.phaseCounts['ยื่นเอกสาร'], 1);
+  assert.equal(overview.agingCounts['0-7'], 1);
+  assert.equal(overview.agingCounts['31-60'], 1);
+  assert.equal(overview.agingCounts['61+'], 1);
+});
+
+test('permit overview is mounted below search/date filters and exposes accessible controls', () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'hisolar_planner.html'), 'utf8');
+  const filterHost = source.indexOf('<div id="filterExtraHost-permit"></div>');
+  const overviewHost = source.indexOf('<div id="permitOverviewHost"></div>');
+  const listHost = source.indexOf('<div id="list-permit"></div>');
+
+  assert.ok(filterHost >= 0 && overviewHost > filterHost && listHost > overviewHost);
+  assert.match(source, /aria-label="ภาพรวมงานขออนุญาต"/);
+  assert.match(source, /aria-expanded="\$\{permitOverviewOpen\}"/);
+  assert.match(source, /localStorage\.setItem\('hiSolarPermitOverviewOpen'/);
+  assert.doesNotMatch(source, /ขออนุญาติ/);
 });
 
 function loadInlineTeamOptions() {

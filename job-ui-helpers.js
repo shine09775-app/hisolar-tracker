@@ -134,6 +134,51 @@
     return ORGANIZATION_LABELS[key] || '';
   }
 
+  function getPermitAgeDays(permit, now = new Date()) {
+    const raw = permit?.updated_at || permit?.created_at;
+    const timestamp = raw ? new Date(raw) : null;
+    if (!timestamp || Number.isNaN(timestamp.getTime())) return null;
+    return Math.max(0, Math.floor((now.getTime() - timestamp.getTime()) / 86400000));
+  }
+
+  function getPermitAgeBucket(permit, now = new Date()) {
+    const days = getPermitAgeDays(permit, now);
+    if (days == null) return 'unknown';
+    if (days <= 7) return '0-7';
+    if (days <= 30) return '8-30';
+    if (days <= 60) return '31-60';
+    return '61+';
+  }
+
+  function calculatePermitOverview(permits, { statuses = [], phases = [], now = new Date() } = {}) {
+    const rows = Array.isArray(permits) ? permits : [];
+    const statusCounts = Object.fromEntries(statuses.map(status => [status, 0]));
+    const phaseCounts = Object.fromEntries(phases.map(phase => [phase, 0]));
+    const agingCounts = { '0-7': 0, '8-30': 0, '31-60': 0, '61+': 0, unknown: 0 };
+    const closedStatuses = new Set(['Done', 'Reject']);
+
+    rows.forEach(permit => {
+      const status = permit?.status || statuses[0] || 'Waiting';
+      const phase = permit?.phase || phases[0] || '';
+      statusCounts[status] = (statusCounts[status] || 0) + 1;
+      if (phase) phaseCounts[phase] = (phaseCounts[phase] || 0) + 1;
+      if (!closedStatuses.has(status)) {
+        const bucket = getPermitAgeBucket(permit, now);
+        agingCounts[bucket] = (agingCounts[bucket] || 0) + 1;
+      }
+    });
+
+    const active = rows.filter(permit => !closedStatuses.has(permit?.status)).length;
+    return {
+      total: rows.length,
+      active,
+      stale: agingCounts['31-60'] + agingCounts['61+'],
+      statusCounts,
+      phaseCounts,
+      agingCounts,
+    };
+  }
+
   return {
     escapeHtml,
     normalizePhoneValue,
@@ -142,5 +187,8 @@
     getCommentAuthorName,
     getCommentAuthorPicture,
     getCommentOrganizationLabel,
+    getPermitAgeDays,
+    getPermitAgeBucket,
+    calculatePermitOverview,
   };
 });
