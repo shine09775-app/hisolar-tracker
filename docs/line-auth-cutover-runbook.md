@@ -115,7 +115,6 @@
 ### Step 3 — 💻 ยืนยัน integrations ที่ใช้ service-role ยังทำงาน (ไม่โดน RLS)
 - [ ] Apps Script sync (`hi-solar-apps-script.js`) — sync ชีต → Supabase ได้
 - [ ] Calendar sync (`api/webhook/sync-calendar.js`) — service_role ✅
-- [ ] LINE webhook (`api/webhook/line-jdk-group.js`) — service_role ✅
 - [ ] **Daily reminder** — trigger `workflow_dispatch` ของ `daily-reminder-hisolar.yml` ด้วยมือ 1 ครั้ง → ต้องได้ข้อมูลงาน/permit จริง (พิสูจน์ว่า service-role key ทำงาน)
 
 ### Step 4 — 💻 ยืนยัน anon ถูกปิดจริง
@@ -137,7 +136,7 @@ curl "$SUPABASE_URL/rest/v1/hi_solar_jobs?select=id&limit=1" \
 ## งานเก็บตกที่ควรทำคู่ cutover
 
 - [x] 🗄️ ปิดช่องโหว่ `line_group_daily_replies` — **รวมอยู่ใน `site-registry-cutover.sql` แล้ว**
-  หลังรัน ให้ตรวจว่า `line-jdk-group.js` (service-role) ยังเขียน dedup ได้ตามปกติ
+  (webhook `line-jdk-group.js` ที่เขียนตารางนี้ถูกลบออกแล้วเมื่อ 2026-09 — ตารางนี้ไม่มีโค้ดใช้งานอีก)
 
 ## เรื่อง branch: ไม่ต้อง merge สองสาย — `feat/site-registry-pr` คือสายรวมอยู่แล้ว
 

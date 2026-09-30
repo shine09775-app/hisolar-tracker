@@ -35,7 +35,7 @@ Evidence checked:
 - `JDK.html:1844-1864` checks `VIEWER_USERS` in the browser and inserts comments with that local name.
 - `JDK.html:1946-1952` initializes Supabase and loads data when the saved local name is accepted.
 - `supabase/schema.sql:215-219` enables RLS, but `supabase/schema.sql:221-324` creates public `anon` read/insert/update policies for jobs, comments, permits, and permit logs.
-- `api/webhook/line-events.js` and `api/webhook/line-jdk-group.js` are LINE Messaging API webhooks, not LINE Login OAuth callbacks.
+- `api/webhook/line-events.js` is a LINE Messaging API webhook, not a LINE Login OAuth callback. (`api/webhook/line-jdk-group.js` existed when this was written and was removed in 2026-09.)
 - `package.json` currently has only `@supabase/supabase-js`; LINE Login callback implementation will need JWT and cookie utilities or small local helpers.
 
 Security implication: any user who has the public Supabase key and table names can bypass the UI and use current `anon` policies. The migration must move authorization into server-verified LINE identity plus Supabase RLS.
@@ -412,8 +412,6 @@ Existing env vars to keep:
 - `GOOGLE_PRIVATE_KEY`
 - `GOOGLE_CALENDAR_ID`
 - `LINE_CHANNEL_SECRET` for existing capture webhook, if still used
-- `LINE_JDK_CHANNEL_SECRET` for existing Messaging API webhook
-- `LINE_JDK_CHANNEL_ACCESS_TOKEN` for existing Messaging API reply webhook
 
 New env vars:
 
