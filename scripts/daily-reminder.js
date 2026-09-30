@@ -13,8 +13,7 @@
  *
  * GitHub Secrets ที่ต้องตั้ง:
  *   SUPABASE_URL                — https://xxxx.supabase.co
- *   SUPABASE_SERVICE_ROLE_KEY   — service_role key (แนะนำ; จำเป็นหลัง cutover ที่ลบ anon policies)
- *   SUPABASE_ANON_KEY           — anon public key (fallback; ใช้ได้เฉพาะก่อน cutover)
+ *   SUPABASE_SERVICE_ROLE_KEY   — service_role key (จำเป็น; หลัง cutover anon key อ่านข้อมูลไม่ได้แล้ว)
  *   LINE_CHANNEL_TOKEN          — Long-lived Channel Access Token
  *   LINE_GROUP_ID               — Group ID ของกลุ่ม LINE
  *
@@ -26,10 +25,9 @@
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const SUPABASE_URL   = process.env.SUPABASE_URL;
-// Prefer service_role (bypasses RLS) so the reminder keeps working after the
-// LINE-auth cutover removes the legacy anon read policies. Falls back to the
-// anon key while both keys are available (pre-cutover).
-const SUPABASE_KEY   = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+// service_role bypasses RLS, which the reminder needs now that the LINE-auth
+// cutover has removed the legacy anon read policies.
+const SUPABASE_KEY   = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const LINE_TOKEN     = process.env.LINE_CHANNEL_TOKEN;
 const LINE_GROUP_ID  = process.env.LINE_GROUP_ID;
 const DATE_OVERRIDE  = process.env.DATE_OVERRIDE || '';   // YYYY-MM-DD
@@ -371,9 +369,9 @@ async function sendTelegram(chatId, token, text) {
 async function main() {
   const missing = ['SUPABASE_URL', 'LINE_CHANNEL_TOKEN', 'LINE_GROUP_ID']
     .filter(k => !process.env[k]);
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_ANON_KEY) {
-    missing.push('SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY');
-  }
+  // After the cutover the anon key reads zero rows without an error, which
+  // would post a false "no jobs today" to the group. Fail loudly instead.
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) missing.push('SUPABASE_SERVICE_ROLE_KEY');
   if (missing.length) throw new Error(`Missing env vars: ${missing.join(', ')}`);
 
   const today = getTodayBangkok();

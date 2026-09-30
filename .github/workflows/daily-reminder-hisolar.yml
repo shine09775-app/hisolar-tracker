@@ -29,6 +29,7 @@ jobs:
       - name: Run daily reminder
         env:
           SUPABASE_URL:        ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ANON_KEY:   ${{ secrets.SUPABASE_ANON_KEY }}
           LINE_CHANNEL_TOKEN:  ${{ secrets.LINE_CHANNEL_TOKEN }}
           LINE_GROUP_ID:       ${{ secrets.LINE_GROUP_ID_HISOLAR }}
