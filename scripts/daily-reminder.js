@@ -74,6 +74,37 @@ function formatTimeShort(timeStr) {
 
 // ── Supabase Fetch ────────────────────────────────────────────────────────────
 
+// Prints only non-secret facts about the key/URL so a 401 can be diagnosed from
+// the Actions log without ever writing the key itself.
+function describeSupabaseCredentials() {
+  const key = SUPABASE_KEY || '';
+  const info = {
+    urlHost: (() => { try { return new URL(SUPABASE_URL).host; } catch { return 'INVALID_URL'; } })(),
+    keyLength: key.length,
+    keyKind: key.startsWith('sb_secret_') ? 'sb_secret (new format)'
+      : key.startsWith('sb_publishable_') ? 'sb_publishable (NOT a secret key)'
+      : key.split('.').length === 3 ? 'jwt' : 'unknown',
+    hasWhitespaceOrQuote: /[\s"'`]/.test(key),
+  };
+  if (info.keyKind === 'jwt') {
+    try {
+      const payload = JSON.parse(Buffer.from(key.split('.')[1], 'base64url').toString('utf8'));
+      info.jwtRole = payload.role;
+      info.jwtRef = payload.ref;
+      info.jwtExpires = payload.exp ? new Date(payload.exp * 1000).toISOString() : null;
+    } catch {
+      info.jwtPayload = 'unreadable';
+    }
+  }
+  return JSON.stringify(info);
+}
+
+async function supabaseError(label, res) {
+  const body = await res.text();
+  if (res.status === 401) console.error(`Supabase credentials (debug): ${describeSupabaseCredentials()}`);
+  return new Error(`${label}: ${res.status} ${body}`);
+}
+
 async function fetchJobs() {
   const url = `${SUPABASE_URL}/rest/v1/hi_solar_jobs`
     + `?select=id,sheet_key,customer_name,title,detail,phone,job_date,job_time,appointment_date,technician,maps_url,status,raw_data`
@@ -86,7 +117,7 @@ async function fetchJobs() {
     },
   });
 
-  if (!res.ok) throw new Error(`Supabase fetch failed: ${res.status} ${await res.text()}`);
+  if (!res.ok) throw await supabaseError('Supabase fetch failed', res);
 
   return res.json();
 }
@@ -105,7 +136,7 @@ async function fetchActivePermits() {
     },
   });
 
-  if (!res.ok) throw new Error(`Supabase fetch permits failed: ${res.status} ${await res.text()}`);
+  if (!res.ok) throw await supabaseError('Supabase fetch permits failed', res);
 
   return res.json();
 }
