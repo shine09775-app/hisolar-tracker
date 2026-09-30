@@ -34,7 +34,8 @@ insert into public.hi_solar_inverter_brands (brand_code, brand_name, manufacture
   ('DEYE',     'Deye',          'Ningbo Deye Inverter Technology',  'China', 'OEM ให้หลายแบรนด์'),
   ('SOLIS',    'Solis',         'Ginlong Technologies',             'China', 'แบรนด์ Solis = Ginlong'),
   ('FELICITY', 'Felicity Solar','Felicity Solar',                   'China', null),
-  ('GROWATT',  'Growatt',       'Growatt New Energy',               'China', null)
+  ('GROWATT',  'Growatt',       'Growatt New Energy',               'China', null),
+  ('ENERGYLIB','EnergyLIB',     'EnergyLIB (Suzhou) New Energy Technology', 'China', 'แบรนด์เดียวกับแอป EnergyLIB')
 on conflict (brand_code) do update
   set brand_name = excluded.brand_name,
       manufacturer = excluded.manufacturer,
@@ -62,8 +63,9 @@ insert into public.hi_solar_platforms
   ('SOLARMAN',   'Solarman',   'DEYE',    'plant',  'active',  'xlsx',           'ID (numeric)',  'white-label; ปัจจุบันใช้กับ Deye'),
   ('DEYECLOUD',  'Deye Cloud', 'DEYE',    'device', 'active',  'xlsx',           'SN',            'ระดับ device/inverter'),
   ('SOLISCLOUD', 'SolisCloud', 'SOLIS',   'plant',  'active',  'xls',            'Plant ID (hex)','header ซ้อน 5 แถว'),
-  ('FSOLAR',     'Fsolar',     'FELICITY','plant',  'pending', null,             null,            'ยังมีแต่ screenshot'),
-  ('SHINEPHONE', 'ShinePhone', 'GROWATT', 'plant',  'pending', null,             null,            'ยังมีแต่ screenshot')
+  ('FSOLAR',     'Fsolar',     'FELICITY','plant',  'active',  '(image only)',   'Plant Name',    'export ไม่ได้ ถอดจาก screenshot ด้วยมือ'),
+  ('SHINEPHONE', 'ShinePhone', 'GROWATT', 'plant',  'active',  '(image only)',   'Plant Name',    'export ไม่ได้ ถอดจาก screenshot ด้วยมือ'),
+  ('ENERGYLIB',  'EnergyLIB',  'ENERGYLIB','plant', 'active',  '(image only)',   'Number (JSxxxxxxx)','export ไม่ได้ ถอดจาก screenshot ด้วยมือ · 1 ไซต์')
 on conflict (platform_code) do update
   set application_name = excluded.application_name,
       brand_code = excluded.brand_code,
