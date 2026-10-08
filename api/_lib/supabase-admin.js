@@ -278,6 +278,84 @@ async function revokeAuthSessionByHash(sessionTokenHash) {
 }
 
 // ---------------------------------------------------------------------------
+// LINE Login attempts (auth_login_flows)
+// ---------------------------------------------------------------------------
+// The flow cookie stays in the browser that started the login, but on iPhone
+// the LINE app often finishes the login in another browser. These rows let the
+// callback finish anywhere and let the home-screen app collect the result.
+
+async function saveLoginFlow({ stateHash, app, returnTo, nonce, codeVerifier, handoffHash, expiresAt }) {
+  const supabase = getSupabaseAdminClient();
+  // Best-effort sweep so the table never grows past a day of attempts.
+  await supabase
+    .from('auth_login_flows')
+    .delete()
+    .lt('expires_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+  const { error } = await supabase.from('auth_login_flows').insert({
+    state_hash: stateHash,
+    app,
+    return_to: returnTo || null,
+    nonce,
+    code_verifier: codeVerifier,
+    handoff_hash: handoffHash || null,
+    expires_at: expiresAt,
+  });
+  if (error) throw createHttpError(500, 'Failed to save login attempt', error.message);
+}
+
+// Marks the attempt used and returns it, or null when it is unknown, expired or
+// already used. The update is the claim, so two callbacks cannot share a row.
+async function claimLoginFlow(stateHash) {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('auth_login_flows')
+    .update({ used_at: new Date().toISOString() })
+    .eq('state_hash', stateHash)
+    .is('used_at', null)
+    .gt('expires_at', new Date().toISOString())
+    .select('*');
+  if (error) throw createHttpError(500, 'Failed to load login attempt', error.message);
+  return (data && data[0]) || null;
+}
+
+async function completeLoginFlow(stateHash, { userId, outcome, expiresAt }) {
+  const supabase = getSupabaseAdminClient();
+  const { error } = await supabase
+    .from('auth_login_flows')
+    .update({ completed_user_id: userId, completed_outcome: outcome, expires_at: expiresAt })
+    .eq('state_hash', stateHash);
+  if (error) throw createHttpError(500, 'Failed to complete login attempt', error.message);
+}
+
+async function getLoginFlowByHandoff(handoffHash) {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('auth_login_flows')
+    .select('*')
+    .eq('handoff_hash', handoffHash)
+    .gt('expires_at', new Date().toISOString())
+    .maybeSingle();
+  if (error && error.code !== 'PGRST116') {
+    throw createHttpError(500, 'Failed to load login attempt', error.message);
+  }
+  return data || null;
+}
+
+// Deletes a finished attempt and reports whether this caller was the one that
+// removed it, so a handoff can only be collected once.
+async function takeCompletedLoginFlow(stateHash) {
+  const supabase = getSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from('auth_login_flows')
+    .delete()
+    .eq('state_hash', stateHash)
+    .not('completed_user_id', 'is', null)
+    .select('state_hash');
+  if (error) throw createHttpError(500, 'Failed to collect login attempt', error.message);
+  return Boolean(data && data.length);
+}
+
+// ---------------------------------------------------------------------------
 // Site registry (used by the Deye Cloud sync)
 // ---------------------------------------------------------------------------
 // hi_solar_sites has no anon insert/update policy on purpose, so the sync runs
@@ -319,11 +397,14 @@ async function updateSite(siteId, patch) {
 
 module.exports = {
   SYNC_SITE_COLUMNS,
+  claimLoginFlow,
+  completeLoginFlow,
   createAuthSession,
   ensureJdkAutoApprovedMembership,
   ensurePendingAccessRequest,
   getAppUserById,
   getAuthSessionByHash,
+  getLoginFlowByHandoff,
   getMembershipForUserApp,
   getRequestIpHash,
   getSupabaseAdminClient,
@@ -332,6 +413,8 @@ module.exports = {
   listMembershipsForUser,
   listSitesForSync,
   revokeAuthSessionByHash,
+  saveLoginFlow,
+  takeCompletedLoginFlow,
   touchAuthSession,
   updateSite,
   upsertAppUserProfile,

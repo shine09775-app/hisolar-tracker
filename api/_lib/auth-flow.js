@@ -1,8 +1,12 @@
 const { getAuthCookieSecret, getCookieNames } = require('./config');
 const { appendSetCookie, parseCookies, serializeCookie } = require('./cookies');
-const { createPkcePair, randomBase64Url, signValue, verifySignedValue } = require('./security');
+const { createPkcePair, randomBase64Url, sha256Hex, signValue, verifySignedValue } = require('./security');
 
 const FLOW_MAX_AGE_SECONDS = 10 * 60;
+// How long a finished login waits for the home-screen app to collect it.
+const HANDOFF_CLAIM_SECONDS = 15 * 60;
+// The home-screen app sends base64url(SHA-256(secret)): 43 characters.
+const HANDOFF_HASH_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 
 function createFlowState({ app, returnTo }) {
   const state = randomBase64Url(32);
@@ -69,10 +73,23 @@ function clearFlowCookie(res) {
   );
 }
 
+function hashLoginState(state) {
+  return sha256Hex(state);
+}
+
+function normalizeHandoffHash(value) {
+  const text = String(value || '').trim();
+  return HANDOFF_HASH_PATTERN.test(text) ? text : null;
+}
+
 module.exports = {
+  FLOW_MAX_AGE_SECONDS,
+  HANDOFF_CLAIM_SECONDS,
   clearFlowCookie,
   createFlowState,
   decodeFlowCookieValue,
+  hashLoginState,
+  normalizeHandoffHash,
   readFlowStateFromRequest,
   setFlowCookie,
 };

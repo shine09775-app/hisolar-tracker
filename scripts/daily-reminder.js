@@ -334,7 +334,7 @@ function buildMessage(groups, permits, today) {
   const parts = [];
   if (jobCount)    parts.push(`${jobCount} งาน`);
   if (permitCount) parts.push(`ขออนุญาติ ${permitCount} งาน`);
-  lines.push(`รวม ${parts.join(' | ')} — Hi Solar Tracker: https://hi-solar-tracker.vercel.app`);
+  lines.push(`รวม ${parts.join(' | ')} — Hi Solar Tracker: https://hisolar-tracker.vercel.app/?openExternalBrowser=1`);
   return lines.join('\n');
 }
 

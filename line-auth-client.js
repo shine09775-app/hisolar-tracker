@@ -488,11 +488,128 @@
     }
   }
 
-  function startLineLogin(app, returnTo) {
-    window.location.href = buildApiUrl('/api/auth/line/start', {
-      app,
-      return_to: returnTo,
+  // --- Home-screen app handoff ----------------------------------------------
+  // An iPhone home-screen app keeps its own cookies, apart from Safari and the
+  // LINE in-app browser, and the LINE app usually finishes the login in one of
+  // those. So the home-screen app opens LINE Login in a separate window, keeps a
+  // random secret to itself (only its hash goes into the start URL) and polls
+  // /api/auth/line/handoff until the login finishes elsewhere, then receives
+  // its own session.
+  const HANDOFF_POLL_MS = 2000;
+  const HANDOFF_TIMEOUT_MS = 15 * 60 * 1000;
+  const handoffSecrets = [];
+  let preparedHandoff = null;
+  let handoffPollTimerId = null;
+  let handoffPolling = false;
+  let handoffStartedAtMs = 0;
+
+  function isStandaloneApp() {
+    return window.navigator?.standalone === true
+      || Boolean(typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches);
+  }
+
+  function toBase64Url(bytes) {
+    let binary = '';
+    bytes.forEach(byte => {
+      binary += String.fromCharCode(byte);
     });
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  // Prepared ahead of the tap: window.open has to run inside the click itself,
+  // and hashing is async.
+  async function prepareHandoff() {
+    if (!window.crypto?.subtle || !window.crypto.getRandomValues) return;
+    const secret = toBase64Url(window.crypto.getRandomValues(new Uint8Array(32)));
+    const digest = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
+    preparedHandoff = { secret, hash: toBase64Url(new Uint8Array(digest)) };
+  }
+
+  async function pollHandoffOnce() {
+    if (handoffPolling || !handoffSecrets.length) return;
+    if (Date.now() - handoffStartedAtMs > HANDOFF_TIMEOUT_MS) {
+      stopHandoffPolling();
+      return;
+    }
+    handoffPolling = true;
+    try {
+      for (const secret of handoffSecrets) {
+        const result = await requestJson('/api/auth/line/handoff', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ secret }),
+        });
+        if ((result.status === 'approved' || result.status === 'pending') && result.redirect) {
+          stopHandoffPolling();
+          window.location.replace(result.redirect);
+          return;
+        }
+      }
+    } catch (error) {
+      if (error.status === 403) {
+        stopHandoffPolling();
+        window.location.replace('/index.html?reason=access_denied');
+        return;
+      }
+      // Network blips: keep polling.
+    } finally {
+      handoffPolling = false;
+    }
+    scheduleHandoffPoll();
+  }
+
+  function scheduleHandoffPoll() {
+    if (handoffPollTimerId) clearTimeout(handoffPollTimerId);
+    if (!handoffSecrets.length || document.visibilityState === 'hidden') return;
+    handoffPollTimerId = setTimeout(() => {
+      handoffPollTimerId = null;
+      void pollHandoffOnce();
+    }, HANDOFF_POLL_MS);
+  }
+
+  function stopHandoffPolling() {
+    handoffSecrets.length = 0;
+    if (handoffPollTimerId) {
+      clearTimeout(handoffPollTimerId);
+      handoffPollTimerId = null;
+    }
+  }
+
+  // Coming back from LINE/Safari: check straight away instead of waiting.
+  function resumeHandoffPolling() {
+    if (handoffSecrets.length && document.visibilityState !== 'hidden') {
+      void pollHandoffOnce();
+    }
+  }
+
+  if (isStandaloneApp()) {
+    void prepareHandoff().catch(() => {});
+    document.addEventListener('visibilitychange', resumeHandoffPolling);
+    window.addEventListener('focus', resumeHandoffPolling);
+    window.addEventListener('pageshow', resumeHandoffPolling);
+  }
+
+  // Returns true when LINE Login opened in a separate window and this page is
+  // now waiting for it (home-screen app); false when this page navigated away.
+  function startLineLogin(app, returnTo) {
+    const params = { app, return_to: returnTo };
+    const handoff = isStandaloneApp() ? preparedHandoff : null;
+    if (handoff) {
+      preparedHandoff = null;
+      const openedWindow = window.open(
+        buildApiUrl('/api/auth/line/start', { ...params, handoff: handoff.hash }),
+        '_blank'
+      );
+      if (openedWindow) {
+        handoffSecrets.push(handoff.secret);
+        handoffStartedAtMs = Date.now();
+        scheduleHandoffPoll();
+        void prepareHandoff().catch(() => {});
+        return true;
+      }
+    }
+    window.location.href = buildApiUrl('/api/auth/line/start', params);
+    return false;
   }
 
   async function logout(redirectTo) {

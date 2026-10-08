@@ -209,7 +209,17 @@
     }
 
     function loginAction() {
-      window.HiSolarAuth.startLineLogin('hisolar', '/home.html');
+      const waitingForHandoff = window.HiSolarAuth.startLineLogin('hisolar', '/home.html');
+      if (!waitingForHandoff) return;
+      renderState({
+        icon: 'bi bi-box-arrow-up-right',
+        title: 'กำลังรอเข้าสู่ระบบด้วย LINE',
+        text: 'ยืนยันตัวตนกับ LINE ให้เสร็จ แล้วกลับมาที่แอปนี้ ระบบจะเข้าให้อัตโนมัติ',
+        meta: 'ถ้าหน้า LINE ไม่เปิดขึ้นมา กดปุ่มด้านล่างอีกครั้ง',
+        actions: [
+          { id: 'line-login-again', label: 'เปิด LINE Login อีกครั้ง', className: 'btn-line', onClick: loginAction },
+        ],
+      });
     }
 
     async function bootstrap() {

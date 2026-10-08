@@ -593,3 +593,30 @@ Preferred emergency action:
 Verdict: fix-then-ship.
 
 The target architecture is appropriate, but the cutover must not be treated as complete until public `anon` policies are removed and verified. Before that point, LINE Login improves identity UX but does not secure Supabase data because direct browser access can still bypass frontend guards.
+
+## Cross-browser login and home-screen handoff (2026-10-08)
+
+Problem: on iPhone the LINE app often reopens the callback in a different
+browser (LINE in-app browser, Safari, or outside the home-screen app). The
+flow cookie stayed behind, so the callback said
+"Login attempt is missing or expired".
+
+- `api/auth/line/start` still sets the signed flow cookie, and also stores the
+  attempt in `public.auth_login_flows` (keyed by `sha256(state)`, service role
+  only, migration `supabase/line-auth-login-flows.sql`).
+- `api/auth/line/callback` uses the cookie when it matches, otherwise the stored
+  row. The row is claimed (`used_at`) on first use, so a callback URL cannot be
+  replayed. Errors are Thai HTML pages with a "เข้าสู่ระบบอีกครั้ง" button.
+- Home-screen app (iOS standalone): `line-auth-client.js` opens LINE Login in a
+  separate window with `handoff=<base64url(sha256(secret))>`, keeps the secret,
+  and polls `POST /api/auth/line/handoff`. Once the callback finishes elsewhere,
+  the poll re-checks membership and issues the home-screen app its own session.
+  A finished handoff waits 15 minutes and can be collected once.
+- Session default is now 180 days, sliding (`AUTH_SESSION_MAX_AGE_SECONDS`
+  overrides it). Every request re-checks membership, so revoking is immediate.
+- Links sent into LINE chats should end with `?openExternalBrowser=1` so they
+  open in Safari, where the session cookie lives.
+
+Known trade-off: finishing a login in a browser without the flow cookie gives
+up the cookie's login-CSRF binding. Impact is limited to an approved member
+signing someone else into the member's own account.

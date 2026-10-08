@@ -35,9 +35,13 @@ function getCookieNames() {
   };
 }
 
+// 180 days, sliding. Safe to keep long: every request re-checks the
+// membership, so revoking someone locks them out at once.
+const DEFAULT_SESSION_MAX_AGE_SECONDS = 180 * 24 * 60 * 60;
+
 function getSessionMaxAgeSeconds() {
-  const raw = Number.parseInt(process.env.AUTH_SESSION_MAX_AGE_SECONDS || '604800', 10);
-  return Number.isFinite(raw) && raw > 0 ? raw : 604800;
+  const raw = Number.parseInt(process.env.AUTH_SESSION_MAX_AGE_SECONDS || '', 10);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_SESSION_MAX_AGE_SECONDS;
 }
 
 function getAuthCookieSecret() {
